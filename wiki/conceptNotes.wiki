@@ -4,7 +4,7 @@
 Destroy all opponent cities using Nukes or Landers while defending yours with your Flak Cannon.
 
 = Controls =
-Trackball + 3 buttons.  All weapons always point toward cursor.  Each button corresponds to a button.
+Trackball + 3 buttons.  All weapons always point toward cursor.  Each button corresponds to a Weapon.
 
 = Playing Field =
 Each player owns a “planet” with 4 cities and 3 weapons (Nuke, Flak Cannon, and Lander).  Every projectile object in the game is affected by the gravity of the two planets.  The existence of gravity should make for more difficult aiming than simple straight lines.  Also, it’s necessary for lunar-lander style gameplay.  The gravity of the two planets cannot be identical to one another, or aiming would be too easy.  (The hit location would always be very close to the same as what a straight line would have done.)  The center of gravity and strength of gravity should be randomized per game, but care must be taken not to cause an unfair field.  The Lagrange point should always be near the middle.
