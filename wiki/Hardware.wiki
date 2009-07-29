@@ -15,7 +15,7 @@ http://www.mameroom.com/ProductDetail.asp?ID=UACOCKTAILKIT3
 We are planning using the X-Arcade "Build Your Own Arcade" board.  It is a board that has lots of pin headers for switches and other arcade controls.  It has PS2 and USB connections so Windows can see our custom designed controls as a regular USB game controller and/or keyboard.
 http://www.xgaming.com/arcade_parts.shtml
 
- = Computer and Monitor =
+= Computer and Monitor =
 
 We will try to acquire a second-hand, slightly older computer and 19" CRT monitor
 
