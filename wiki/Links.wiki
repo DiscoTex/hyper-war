@@ -1,7 +1,7 @@
 #summary Usefull sites.
 == SDK's ==
-[http://connect.creativelabs.com/openal/default.aspx OpenAL] SDK
+ #[http://connect.creativelabs.com/openal/default.aspx OpenAL] SDK
 
 == Gaming ==
 
-[http://www.xgaming.com/index.shtml Xgaming:] The Ultimate Gaming Experience
+ #[http://www.xgaming.com/index.shtml Xgaming:] The Ultimate Gaming Experience
