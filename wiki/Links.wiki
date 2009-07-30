@@ -1,0 +1,3 @@
+#summary Usefull site.
+
+[http://connect.creativelabs.com/openal/default.aspx OpenAL] 
