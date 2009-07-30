@@ -7,15 +7,15 @@
 #include <windows.h>											// Header File For Windows
 #include <gl\gl.h>												// Header File For The OpenGL32 Library
 #include <gl\glu.h>												// Header File For The GLu32 Library
-#include <gl\glaux.h>											// Header File For The GLaux Library
+
 #include "glBase.h"												// Header File For NeHeGL
-#include "GameObjects.h"
+#include "CAudioRenderer.h"
+#include "CEffects.h"
 
 using namespace std;
 
 #pragma comment( lib, "opengl32.lib" )							// Search For OpenGL32.lib While Linking
-#pragma comment( lib, "glu32.lib" )								// Search For GLu32.lib While Linking
-//#pragma comment( lib, "glaux.lib" )								// Search For GLaux.lib While Linking
+#pragma comment( lib, "glu32.lib" )								// Search For GLu32.lib While Linkings
 
 #ifndef CDS_FULLSCREEN											// CDS_FULLSCREEN Is Not Defined By Some
 #define CDS_FULLSCREEN 4										// Compilers. By Defining It This Way,
@@ -35,7 +35,14 @@ public:
 private:
 	GL_Window*	g_window;
 	Keys*		g_keys;
-
-	vector< CGameObject* > gameObjects;
-	vector< sGravityWell* > gravityWells;
+	bool		initialized;
+	
+	//All of the CGameObjects in the game, e.g. rockets, planets, debris
+	vector< CGameObject* >		gameObjects;
+	//All of the gravity wells, which effect trajectory of CGameObjects
+	vector< sGravityWell* >		gravityWells;
+	//Renderer for global effects such as the starfield background
+	CEffects					globalEffects;
+	//Audio Renderer
+	CAudioRenderer				audioRenderer;
 };
