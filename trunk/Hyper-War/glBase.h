@@ -40,8 +40,6 @@
 #include <math.h>
 #include <vector>
 
-const double DEG2RAD = 3.14159/180;
-
 typedef struct {									// Structure For Keyboard Stuff
 	BOOL keyDown [256];								// Holds TRUE / FALSE For Each Key
 } Keys;												// Keys

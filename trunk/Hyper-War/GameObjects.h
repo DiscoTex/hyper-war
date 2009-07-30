@@ -13,9 +13,10 @@
 #pragma comment( lib, "opengl32.lib" )							// Search For OpenGL32.lib While Linking
 #pragma comment( lib, "glu32.lib" )								// Search For GLu32.lib While Linking
 
-using namespace std;
-
+const double DEG2RAD = 3.14159/180;
 #define MAX_GRAVITY_FORCE 10
+
+using namespace std;
 
 enum{
 	TYPE_GENERIC,
