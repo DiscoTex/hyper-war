@@ -17,7 +17,8 @@ main()
 	
 	UINT nDevices,i;
 	PRAWINPUTDEVICELIST pRawInputDeviceList;
-
+	RID_DEVICE_INFO devinfomouse = { sizeof devinfomouse, }; 
+	UINT sz = sizeof devinfomouse; 
 	// 1st call to GetRawInputDeviceList: Pass NULL to get the size of the list.
 	//function enumerates the raw input devices attached to the system
 	if (GetRawInputDeviceList(NULL, &nDevices, sizeof(RAWINPUTDEVICELIST)) != 0) return 0; 
@@ -48,7 +49,10 @@ main()
 							printf( "KEYBOARD\n");
 							break;
 						case RIM_TYPEMOUSE:
-							printf( "MOUSE\n");
+				            if ((int)GetRawInputDeviceInfo(pRawInputDeviceList[i].hDevice, RIDI_DEVICEINFO, &devinfomouse, &sz) < 0) { 
+						    return -1; 
+							} 
+							printf("(MOUSE) ID %i, [%i]#Buttons, Sample Rate[%i]:\n", devinfomouse.mouse.dwId, devinfomouse.mouse.dwNumberOfButtons, devinfomouse.mouse.dwSampleRate);
 							break;
 						default:
 							break;
