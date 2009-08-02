@@ -15,7 +15,7 @@ Aug 2009
 main()
 {
 	
-	UINT nDevices;
+	UINT nDevices,i;
 	PRAWINPUTDEVICELIST pRawInputDeviceList;
 
 	// 1st call to GetRawInputDeviceList: Pass NULL to get the size of the list.
@@ -24,10 +24,46 @@ main()
 	printf("Number of raw input devices: %i\n\n", nDevices);
 	// todo list them out
 
+	// get memory for the list 
+	if ((pRawInputDeviceList = malloc(sizeof(RAWINPUTDEVICELIST) * nDevices)) == NULL) {
+	//we had a error what to do.
+	
+	}else{
+		// let get our list of hardware... 
+		if (GetRawInputDeviceList(pRawInputDeviceList, &nDevices, sizeof(RAWINPUTDEVICELIST)) == -1) {
+		//we had a error what to do.
+		
+		
+		}else
+		{
+			// do the job...
+			for ( i = 0; i < nDevices; ++i)
+			{
+				printf( "Device %i:", i);
+				switch(pRawInputDeviceList[i].dwType){
+						case RIM_TYPEHID:
+							printf( "HID\n");
+							break;
+						case RIM_TYPEKEYBOARD:
+							printf( "KEYBOARD\n");
+							break;
+						case RIM_TYPEMOUSE:
+							printf( "MOUSE\n");
+							break;
+						default:
+							break;
+				}
+
+			
+		}
+			// after the job, free the RAWINPUTDEVICELIST
+		}
+	}
+
+	free(pRawInputDeviceList);
+
 	printf("Press any key...");
 	getch();
 
 	return 1;
 }
-
-
