@@ -22,20 +22,20 @@ void CEffects::DrawStarfield()
 	/*
 	glPushMatrix();
 
-	//glTranslated(translation[0], translation[1], translation[2]);
-	//glRotated(rotation[0], 1, 0, 0);
-	//glRotated(rotation[1], 0, 1, 0);
-	//glRotated(rotation[2], 0, 0, 1);
-	//glScaled(scale[0], scale[1], scale[2]);
+	//glTranslatef(translation[0], translation[1], translation[2]);
+	//glRotatef(rotation[0], 1, 0, 0);
+	//glRotatef(rotation[1], 0, 1, 0);
+	//glRotatef(rotation[2], 0, 0, 1);
+	//glScalef(scale[0], scale[1], scale[2]);
 
-	double color[3] = {1, 1, 1};
-	glTranslated(0, 0, -1);
+	float color[3] = {1, 1, 1};
+	glTranslatef(0, 0, -1);
 	
 	glBegin (GL_QUADS);								
-		glColor3d (color[0], color[1], color[2]);	glVertex3d( -1.0f, 1.0f, 0.0f);
-		glColor3d (color[0], color[1], color[2]);	glVertex3d(1.0f, 1.0f, 0.0f);
-		glColor3d (color[0], color[1], color[2]);	glVertex3d( 1.0f,-1.0f, 0.0f);
-		glColor3d (color[0], color[1], color[2]);	glVertex3d( -1.0f,-1.0f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glColor3f( -1.0f, 1.0f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glColor3f(1.0f, 1.0f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glColor3f( 1.0f,-1.0f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glColor3f( -1.0f,-1.0f, 0.0f);
 	glEnd ();	
 
 	glBegin(GL_LINE_LOOP);

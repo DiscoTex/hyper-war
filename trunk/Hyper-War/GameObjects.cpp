@@ -36,17 +36,17 @@ void CGameObject::Draw()
 {
 	glPushMatrix();
 
-	glTranslated(translation[0], translation[1], translation[2]);
-	glRotated(rotation[0], 1, 0, 0);
-	glRotated(rotation[1], 0, 1, 0);
-	glRotated(rotation[2], 0, 0, 1);
-	glScaled(scale[0], scale[1], scale[2]);
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
 	
 	glBegin (GL_QUADS);								
-		glColor3d (color[0], color[1], color[2]);	glVertex3d( -1.0f, 1.0f, 0.0f);
-		glColor3d (color[0], color[1], color[2]);	glVertex3d(1.0f, 1.0f, 0.0f);
-		glColor3d (color[0], color[1], color[2]);	glVertex3d( 1.0f,-1.0f, 0.0f);
-		glColor3d (color[0], color[1], color[2]);	glVertex3d( -1.0f,-1.0f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -1.0f, 1.0f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f(1.0f, 1.0f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 1.0f,-1.0f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -1.0f,-1.0f, 0.0f);
 	glEnd ();	
 
 	glBegin(GL_LINE_LOOP);
@@ -59,99 +59,75 @@ void CGameObject::Draw()
 	glPopMatrix();
 }
 
-void CGameObject::SetScale(double x, double y, double z)
+void CGameObject::SetScale(float x, float y, float z)
 {
 	scale[0] = x;
 	scale[1] = y;
 	scale[2] = z;
 }
 
-void CGameObject::SetRotation(double x, double y, double z)
+void CGameObject::SetRotation(float x, float y, float z)
 {
 	rotation[0] = x;
 	rotation[1] = y;
 	rotation[2] = z;
 }
 
-void CGameObject::SetTranslation(double x, double y, double z)
+void CGameObject::SetTranslation(float x, float y, float z)
 {
 	translation[0] = x;
 	translation[1] = y;
 	translation[2] = z;
 }
 
-void CGameObject::SetColor(double r, double g, double b)
+void CGameObject::SetColor(float r, float g, float b)
 {
 	color[0] = r;
 	color[1] = g;
 	color[2] = b;
 }
 
-void CGameObject::SetMotionVector(double x, double y, double z)
+void CGameObject::SetMotionVector(float x, float y, float z)
 {
 	motionVector[0] = x;
 	motionVector[1] = y;
 	motionVector[2] = z;
 }
 
-void CGameObject::SetAngularVelocity(double x, double y, double z)
+void CGameObject::SetAngularVelocity(float x, float y, float z)
 {
 	angularVelocity[0] = x;
 	angularVelocity[1] = y;
 	angularVelocity[2] = z;
 }
 
-double* CGameObject::GetScale(double &x, double &y, double &z)
+float* CGameObject::GetScale()
 {
-	x = scale[0];
-	y = scale[1];
-	z = scale[2];
-
 	return scale;
 }
 
-double* CGameObject::GetRotation(double &x, double &y, double &z)
+float* CGameObject::GetRotation()
 {
-	x = rotation[0];
-	y = rotation[1];
-	z = rotation[2];
-
 	return rotation;
 }
 
-double* CGameObject::GetTranslation(double &x, double &y, double &z)
+float* CGameObject::GetTranslation()
 {
-	x = translation[0];
-	y = translation[1];
-	z = translation[2];
-
 	return translation;
 }
 
-double* CGameObject::GetColor(double &r, double &g, double &b)
+float* CGameObject::GetColor()
 {
-	r = color[0];
-	g = color[1];
-	b = color[2];
-
 	return color;
 }
 
-double* CGameObject::GetMotionVector(double &x, double &y, double &z)
+float* CGameObject::GetMotionVector()
 {
-	x = motionVector[0];
-	y = motionVector[1];
-	z = motionVector[2];
-
 	return motionVector;
 }
 
-double* CGameObject::GetAngularVelocity(double &x, double &y, double &z)
+float* CGameObject::GetAngularVelocity()
 {
-	x = angularVelocity[0];
-	y = angularVelocity[1];
-	z = angularVelocity[2];
-
 	return angularVelocity;
 }
 
@@ -191,9 +167,9 @@ void CGameObject::ProcessMotion(DWORD milliseconds)
 
 void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 {
-	double vectorToGravity[3];
-	double forceVector[3];
-	double distance;
+	float vectorToGravity[3];
+	float forceVector[3];
+	float distance;
 
 	for(unsigned int i=0; i<gWells.size(); i++)
 	{
@@ -239,9 +215,8 @@ void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 //Return the index of collided object
 int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseconds)
 {
-	double relVelVector[3];
-	double relPosVector[3];
-	double x, y, z;	
+	float relVelVector[3];
+	float relPosVector[3];	
 
 	for(unsigned int k=0; k<collisionSpheres.size(); k++)
 	{
@@ -271,10 +246,10 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 					relPosVector[2] = gObjects[i]->GetCollisionSpheres()[j]->globalPosition[2] - collisionSpheres[k]->globalPosition[2];
 
 					//Minimal distance
-					double r = collisionSpheres[k]->radius * scale[0] + gObjects[i]->GetCollisionSpheres()[j]->radius * gObjects[i]->GetScale(x, y, z)[0];
+					float r = collisionSpheres[k]->radius * scale[0] + gObjects[i]->GetCollisionSpheres()[j]->radius * gObjects[i]->GetScale()[0];
 
 					//dP^2-r^2
-					double pp = relPosVector[0] * relPosVector[0] + relPosVector[1] * relPosVector[1] + relPosVector[2] * relPosVector[2] - r*r;
+					float pp = relPosVector[0] * relPosVector[0] + relPosVector[1] * relPosVector[1] + relPosVector[2] * relPosVector[2] - r*r;
 
 					//(1)Check if the spheres are already intersecting
 					if ( pp < 0 ) 
@@ -282,12 +257,12 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 /*
 					//Now check to see if the spheres will intersect within 1/60th of a second
 					//dP*dV
-					double pv = relPosVector[0] * relVelVector[0] + relPosVector[1] * relVelVector[1] + relPosVector[2] * relVelVector[2];
+					float pv = relPosVector[0] * relVelVector[0] + relPosVector[1] * relVelVector[1] + relPosVector[2] * relVelVector[2];
 					//(2)Check if the spheres are moving away from each other
 					if ( pv < 0 ) 
 					{
 						//dV^2
-						double vv = relVelVector[0] * relVelVector[0] + relVelVector[1] * relVelVector[1] + relVelVector[2] * relVelVector[2];
+						float vv = relVelVector[0] * relVelVector[0] + relVelVector[1] * relVelVector[1] + relVelVector[2] * relVelVector[2];
 
 						//(3)Check if the spheres can intersect within 1 frame
 						if ( (pv + vv) <= 0 && (vv + 2 * pv + pp) >= 0 )
@@ -297,13 +272,13 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 						else
 						{
 							//Discriminant/4
-							double D    = pv * pv - pp * vv; 
+							float D    = pv * pv - pp * vv; 
 							if ( D > 0 )
 								return -1;
 
 							// tmin = -dP*dV/dV*2 
 							//the time when the distance between the spheres is minimal
-							//double tmin = -pv/vv;
+							//float tmin = -pv/vv;
 
 							//Discriminant/(4*dV^2) = -(dp^2-r^2+dP*dV*tmin)
 							//if( pp + pv * tmin > 0 )
@@ -347,31 +322,31 @@ void CPlanet::Draw()
 {
 	glPushMatrix();
 	
-	glTranslated(translation[0], translation[1], translation[2]);
-	glRotated(rotation[0], 1, 0, 0);
-	glRotated(rotation[1], 0, 1, 0);
-	glRotated(rotation[2], 0, 0, 1);
-	glScaled(scale[0], scale[1], scale[2]);
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
 
 	float radius = 1;
 	glBegin(GL_TRIANGLES);
-		for (int i=0; i<360; i++)
+		for (int i=0; i<360; i+=4)
 		{
-			float degInRad = (float)(i*DEG2RAD);
-			glColor3d(color[0], color[1], color[2]);  glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
+			float degInRad = i*DEG2RAD;
+			glColor3f(color[0], color[1], color[2]);  glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
 
-			degInRad = (float)((i+1)*DEG2RAD);
-			glColor3d(color[0], color[1], color[2]);  glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
+			degInRad = (i+4)*DEG2RAD;
+			glColor3f(color[0], color[1], color[2]);  glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
 
-			glColor3d(color[0], color[1], color[2]);  glVertex3f(0, 0, 0);
+			glColor3f(color[0], color[1], color[2]);  glVertex3f(0, 0, 0);
 		}
 	glEnd();
 
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_LINE_LOOP);
-		for (int i=0; i<360; i++)
+		for (int i=0; i<360; i+=4)
 		{
-			float degInRad = (float)(i*DEG2RAD);
+			float degInRad = i*DEG2RAD;
 			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
 		}
 	glEnd();
@@ -399,7 +374,7 @@ CNuke::CNuke()
 	cSphere->translation[0] = 0;
 	cSphere->translation[1] = .25;
 	cSphere->translation[2] = 0;
-	cSphere->radius = .2;
+	cSphere->radius = .2f;
 	cSphere->globalPosition[0] = 0;
 	cSphere->globalPosition[1] = 0;
 	cSphere->globalPosition[2] = 0;
@@ -407,7 +382,7 @@ CNuke::CNuke()
 
 	cSphere = new sCollisionSphere;
 	cSphere->translation[0] = 0;
-	cSphere->translation[1] = -.15;
+	cSphere->translation[1] = -.15f;
 	cSphere->translation[2] = 0;
 	cSphere->radius = .25;
 	cSphere->globalPosition[0] = 0;
@@ -419,178 +394,179 @@ CNuke::CNuke()
 
 void CNuke::Draw()
 {
-	double offset = 0;
-	double radius;
+	float offset = 0;
+	float radius;
 
 	glPushMatrix();
 	
-	glTranslated(translation[0], translation[1], translation[2]);
-	glRotated(rotation[0], 1, 0, 0);
-	glRotated(rotation[1], 0, 1, 0);
-	glRotated(rotation[2] - 90, 0, 0, 1);
-	glScaled(scale[0], scale[1], scale[2]);
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2] - 90, 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
 
-	glColor3d(color[0], color[1], color[2]);  
+	glColor3f(color[0], color[1], color[2]);  
 
 	//Draw one half of Nuke body
 	radius = 1;
-	offset = -cos(-30.0*DEG2RAD);
+	offset = -cos(-30.0f*DEG2RAD);
 
 	glBegin(GL_TRIANGLES);
-	for (int i=-20; i<30; i++)
+	for (int i=-20; i<30; i+=5)
 	{
-		float degInRad = (float)(i*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius + offset, sin(degInRad)*radius, -.001);
+		float degInRad = i*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius + offset, sin(degInRad)*radius, -.001f);
 
-		degInRad = (float)((i+1)*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001);
+		degInRad = (i+5)*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
-		glVertex3d(0, 0, -.001);
+		glVertex3f(0, 0, -.001f);
 	}
 	glEnd();
 
 	//Draw the other half of Nuke body
-	offset = -cos(150.0*DEG2RAD);
+	offset = -cos(150.0f*DEG2RAD);
 	glBegin(GL_TRIANGLES);
-	for (int i=150; i<200; i++)
+	for (int i=150; i<200; i+=5)
 	{
-		float degInRad = (float)(i*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001);
+		float degInRad = i*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
-		degInRad = (float)((i+1)*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001);
+		degInRad = (i+5)*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
-		glVertex3d(0, 0, -.001);
+		glVertex3f(0, 0, -.001f);
 	}
 	glEnd();
 
 	//Fill in bottom triangle
 	glBegin(GL_TRIANGLES);
-		glVertex3d(0,0,0);
-		glVertex3d(cos(200 * DEG2RAD)*radius - cos(150.0*DEG2RAD), sin(200 * DEG2RAD)*radius, -.001);
-		glVertex3d(cos(-20 * DEG2RAD)*radius - cos(-30.0*DEG2RAD), sin(-20 * DEG2RAD)*radius, -.001);
+		glVertex3f(0,0,0);
+		glVertex3f(cos(200 * DEG2RAD)*radius - cos(150.0f*DEG2RAD), sin(200 * DEG2RAD)*radius, -.001f);
+		glVertex3f(cos(-20 * DEG2RAD)*radius - cos(-30.0f*DEG2RAD), sin(-20 * DEG2RAD)*radius, -.001f);
 	glEnd();
 
 	//Make one fin
 	offset = sin(200 * DEG2RAD);
 	glBegin(GL_TRIANGLES);
-	radius = .28;
-	for (int i=120; i<180; i++)
+	radius = .28f;
+	for (int i=120; i<180; i+=4)
 	{
-		float degInRad = (float)(i*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01);
+		float degInRad = i*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
 
-		degInRad = (float)((i+1)*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01);
+		degInRad = (i+4)*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
 
-		glVertex3d(0, offset/2, -.01);
+		glVertex3f(0, offset/2, -.01f);
 	}
 	glEnd();
 
 	glBegin(GL_TRIANGLES);
 	//Make another fin
-	for (int i=120; i<180; i++)
+	for (int i=120; i<180; i+=4)
 	{
-		float degInRad = (float)(i*DEG2RAD);
-		glVertex3d(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01);
+		float degInRad = i*DEG2RAD;
+		glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
 
-		degInRad = (float)((i+1)*DEG2RAD);
-		glVertex3d(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01);
+		degInRad = (i+4)*DEG2RAD;
+		glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
 
-		glVertex3d(0, offset/2, -.01);
+		glVertex3f(0, offset/2, -.01f);
 	}
 	glEnd();
 
 
 	//**** Create outlines ****/
 
-	glColor3d(1.0, 1.0, 1.0);
+	glColor3f(1.0, 1.0, 1.0);
 
 	//Draw one half of Nuke body
 	radius = 1;
-	offset = -cos(-30.0*DEG2RAD);
+	offset = -cos(-30.0f*DEG2RAD);
 
 	glBegin(GL_LINES);
-	for (int i=-20; i<30; i++)
+	for (int i=-20; i<30; i+=5)
 	{
-		float degInRad = (float)(i*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001);
+		float degInRad = i*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
-		degInRad = (float)((i+1)*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001);
+		degInRad = (i+5)*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
-		//glVertex3d(0, 0, 0);
+		//glVertex3f(0, 0, 0);
 	}
 	glEnd();
 
 	//Draw the other half of Nuke body
-	offset = -cos(150.0*DEG2RAD);
+	offset = -cos(150.0f*DEG2RAD);
 	glBegin(GL_LINES);
-	for (int i=150; i<200; i++)
+	for (int i=150; i<200; i+=5)
 	{
-		float degInRad = (float)(i*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001);
+		float degInRad = i*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
-		degInRad = (float)((i+1)*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001);
+		degInRad = (i+5)*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
-		//glVertex3d(0, 0, 0);
+		//glVertex3f(0, 0, 0);
 	}
 	glEnd();
 
 	
 	//Fill in bottom triangle
 	glBegin(GL_LINES);
-		//glVertex3d(0,0,0);
-		glVertex3d(cos(200 * DEG2RAD)*radius - cos(150.0*DEG2RAD), sin(200 * DEG2RAD)*radius, -.00001);
-		glVertex3d(cos(-20 * DEG2RAD)*radius - cos(-30.0*DEG2RAD), sin(-20 * DEG2RAD)*radius, -.00001);
+		//glVertex3f(0,0,0);
+		glVertex3f(cos(200 * DEG2RAD)*radius - cos(150.0f*DEG2RAD), sin(200 * DEG2RAD)*radius, -.00001f);
+		glVertex3f(cos(-20 * DEG2RAD)*radius - cos(-30.0f*DEG2RAD), sin(-20 * DEG2RAD)*radius, -.00001f);
 	glEnd();
 
 	//Make one fin
 	offset = sin(200 * DEG2RAD);
 	glBegin(GL_LINES);
-	radius = .28;
-	for (int i=120; i<180; i++)
+	radius = .28f;
+	for (int i=120; i<180; i+=4)
 	{
-		float degInRad = (float)(i*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001);
+		float degInRad = i*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
 
-		degInRad = (float)((i+1)*DEG2RAD);
-		glVertex3d(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001);
+		degInRad = (i+4)*DEG2RAD;
+		glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
 
-		//glVertex3d(0, offset/2, 0);
+		//glVertex3f(0, offset/2, 0);
 	}
 	glEnd();
 
 	glBegin(GL_LINES);
-		glVertex3d(0, offset/2, -0.005);
-		glVertex3d(cos(179*DEG2RAD)*radius,sin(179*DEG2RAD)*radius + offset, -0.005);
+		glVertex3f(0, offset/2, -0.005f);
+		glVertex3f(cos(179*DEG2RAD)*radius,sin(179*DEG2RAD)*radius + offset, -0.005f);
 	glEnd();
 
 	glBegin(GL_LINES);
 	//Make another fin
-	for (int i=120; i<180; i++)
+	for (int i=120; i<180; i+=4)
 	{
-		float degInRad = (float)(i*DEG2RAD);
-		glVertex3d(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001);
+		float degInRad = i*DEG2RAD;
+		glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
 
-		degInRad = (float)((i+1)*DEG2RAD);
-		glVertex3d(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001);
+		degInRad = (i+4)*DEG2RAD;
+		glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
 
-		//glVertex3d(0, offset/2, 0);
+		//glVertex3f(0, offset/2, 0);
 	}
 	glEnd();
 
 	glBegin(GL_LINES);
-		glVertex3d(0, offset/2, -0.005);
-		glVertex3d(-cos(179*DEG2RAD)*radius,sin(179*DEG2RAD)*radius + offset, -0.005);
+		glVertex3f(0, offset/2, -0.005f);
+		glVertex3f(-cos(179*DEG2RAD)*radius,sin(179*DEG2RAD)*radius + offset, -0.005f);
 	glEnd();
 
 	glPopMatrix();
 
-	/*
+	
 	glPushMatrix();
 
+	/*
 	//Draw collision spheres for debug
 	for(unsigned int i=0; i<collisionSpheres.size(); i++)
 	{
@@ -599,14 +575,15 @@ void CNuke::Draw()
 		glBegin(GL_LINE_LOOP);
 			for (int j=0; j<360; j++)
 			{
-				float degInRad = (float)(j*DEG2RAD);
-				glVertex3d(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0] ,sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
+				float degInRad = j*DEG2RAD;
+				glVertex3f(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0] ,sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
 			}
 		glEnd();
 	}
 
 	glPopMatrix();
 	*/
+	
 }
 
 void CNuke::ProcessMotion(DWORD milliseconds)
