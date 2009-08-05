@@ -44,17 +44,17 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 
 		//Create a green planet
 		CPlanet *planet = new CPlanet();
-		planet->SetColor(0.0, 0.05, 0.0);
+		planet->SetColor(0.0f, 0.05f, 0.0f);
 		planet->SetTranslation(-12, 0, 0);
 		planet->SetScale(10, 10, 10);
-		//gameObjects.push_back(planet);
+		gameObjects.push_back(planet);
 
 		//Create a blue planet
 		planet = new CPlanet();
-		planet->SetColor(0.0, 0.0, 0.05);
+		planet->SetColor(0.0f, 0.0f, 0.05f);
 		planet->SetTranslation(12, 0, 0);
 		planet->SetScale(10, 10, 10);
-		//gameObjects.push_back(planet);
+		gameObjects.push_back(planet);
 
 		//Create a gravity well for the green planet
 		sGravityWell *gw = new sGravityWell;
@@ -74,33 +74,40 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 
 		gw = new sGravityWell;
 		gw->mass = 2;
-		gw->translation[0] = -.1;
-		gw->translation[1] = -.4;
+		gw->translation[0] = -.1f;
+		gw->translation[1] = -.4f;
 		gw->translation[2] = 0;
 		gravityWells.push_back(gw);
 
 		CNuke *nuke;
 
+		nuke = new CNuke();
+		nuke->SetColor(0.0, 1.0, 0.0);
+		nuke->SetScale(.4f, .4f, .4f);
+		nuke->SetTranslation(1,0,0);
+		nuke->SetMotionVector(0, 0, 0);
+		gameObjects.push_back(nuke);
+		
 		//Create some blue Nukes
-		for(int i=1; i<2; i++)
+		for(int i=1; i<10; i++)
 		{
 			nuke = new CNuke();
 			nuke->SetColor(0.0, 0.0, 1.0);
-			nuke->SetScale(.1, .1, .1);
-			nuke->SetTranslation(1, -1.82 + i/8.0, -.00);
-			nuke->SetMotionVector(0, -1, 0);
+			nuke->SetScale(.1f, .1f, .1f);
+			nuke->SetTranslation(i/8.0f, 1.5f, -.00f);
+			nuke->SetMotionVector(0, 0, 0);
 			gameObjects.push_back(nuke);
 		}
 
 		//Create some red Nukes
-		for(int i=1; i<2; i++)
+		for(int i=1; i<10; i++)
 		{
 			nuke = new CNuke();
 			nuke->SetColor(1.0, 0.0, 0.0);
-			nuke->SetScale(.1, .1, .1);
-			nuke->SetTranslation(-1.5 + i/8.0, -1.75, -.00);
-			nuke->SetMotionVector(0, 1, 0);
-			//gameObjects.push_back(nuke);
+			nuke->SetScale(.1f, .1f, .1f);
+			nuke->SetTranslation(i/8.0f, -1.5f, -.00f);
+			nuke->SetMotionVector(0, 0, 0);
+			gameObjects.push_back(nuke);
 		}
 	}
 

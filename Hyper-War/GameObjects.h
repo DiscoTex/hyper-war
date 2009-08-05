@@ -13,7 +13,7 @@
 #pragma comment( lib, "opengl32.lib" )							// Search For OpenGL32.lib While Linking
 #pragma comment( lib, "glu32.lib" )								// Search For GLu32.lib While Linking
 
-const double DEG2RAD = 3.14159/180;
+const float DEG2RAD = 3.1415f/180;
 #define MAX_GRAVITY_FORCE 10
 
 using namespace std;
@@ -27,16 +27,15 @@ enum{
 
 struct sGravityWell
 {
-	double translation[3];
-	double mass;
+	float translation[3];
+	float mass;
 };
 
 struct sCollisionSphere
 {
-	double radius;
-	double translation[3];
-	double globalPosition[3];
-
+	float radius;
+	float translation[3];
+	float globalPosition[3];
 };
 
 
@@ -48,23 +47,22 @@ public:
 
 	virtual void Draw();
 
-	void SetScale(double x, double y, double z);
-	void SetRotation(double x, double y, double z);
-	void SetTranslation(double x, double y, double z);
-	void SetColor(double r, double g, double b);
-	void SetMotionVector(double x, double y, double z);
-	void SetAngularVelocity(double x, double y, double z);
+	void SetScale(float x, float y, float z);
+	void SetRotation(float x, float y, float z);
+	void SetTranslation(float x, float y, float z);
+	void SetColor(float r, float g, float b);
+	void SetMotionVector(float x, float y, float z);
+	void SetAngularVelocity(float x, float y, float z);
 
-	double* GetScale(double& x, double& y, double& z);
-	double* GetRotation(double &x, double &y,double &z);
-	double* GetTranslation(double &x, double &y, double &z);
-	double* GetColor(double &r, double &g, double &b);
-	double* GetMotionVector(double &x, double &y, double &z);
-	double* GetAngularVelocity(double &x, double &y, double &z);
+	float* GetScale();
+	float* GetRotation();
+	float* GetTranslation();
+	float* GetColor();
+	float* GetMotionVector();
+	float* GetAngularVelocity();
 
 	vector < sCollisionSphere * > GetCollisionSpheres() { return collisionSpheres;}
-	double*	GetMotionVector() {return motionVector;}
-	double* GetPosition() {return translation;}
+	float* GetPosition() {return translation;}
 
 	virtual void ProcessMotion(DWORD milliseconds);
 	virtual void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
@@ -72,13 +70,13 @@ public:
 	virtual int	 GetType();
 
 protected:
-	double motionVector[3];
-	double angularVelocity[3];
+	float motionVector[3];
+	float angularVelocity[3];
 
-	double scale[3];
-	double rotation[3];
-	double translation[3];
-	double color[3];
+	float scale[3];
+	float rotation[3];
+	float translation[3];
+	float color[3];
 
 	vector < sCollisionSphere* > collisionSpheres;
 };
