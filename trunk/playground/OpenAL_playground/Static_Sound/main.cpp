@@ -76,7 +76,7 @@ ALboolean LoadALData()
 	//alutLoadWAVFile("FancyPants.wav", &format, &data, &size, &freq, &loop);
 
 	/* Create an AL buffer from the given sound file. */
-	Buffer = alutCreateBufferFromFile ("FancyPants.wav");
+	Buffer = alutCreateBufferFromFile ("hyperwars.wav");
 
 	// not need see the above func read right into the buffer save a step.
     //alBufferData(Buffer, format, data, size, freq);
