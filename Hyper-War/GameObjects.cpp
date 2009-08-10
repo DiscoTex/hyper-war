@@ -148,8 +148,8 @@ void CGameObject::ProcessMotion(DWORD milliseconds)
 	for(unsigned int i = 0; i < collisionSpheres.size(); i++)
 	{
 		//First, rotate the sphere
-		collisionSpheres[i]->globalPosition[0] = cos(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[0] + sin(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[1];
-		collisionSpheres[i]->globalPosition[1] = -sin(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[0] + cos(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[0] = cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[1] = -sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
 		collisionSpheres[i]->globalPosition[2] = 0;
 
 		//Scale by the object's scale
@@ -213,7 +213,7 @@ void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 }
 
 //Return the index of collided object
-int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseconds)
+int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseconds, unsigned int checkAfterIndex)
 {
 	float relVelVector[3];
 	float relPosVector[3];	
@@ -221,7 +221,7 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 	for(unsigned int k=0; k<collisionSpheres.size(); k++)
 	{
 		//Check for intersection with all other objects in the game
-		for(unsigned int i=0; i<gObjects.size(); i++)
+		for(unsigned int i=checkAfterIndex; i<gObjects.size(); i++)
 		{
 			for(unsigned int j=0; j<gObjects[i]->GetCollisionSpheres().size(); j++)
 			{
@@ -371,8 +371,8 @@ CNuke::CNuke()
 {
 	//Create collision spheres
 	sCollisionSphere* cSphere = new sCollisionSphere;
-	cSphere->translation[0] = 0;
-	cSphere->translation[1] = .25;
+	cSphere->translation[0] = .25;
+	cSphere->translation[1] = 0;
 	cSphere->translation[2] = 0;
 	cSphere->radius = .2f;
 	cSphere->globalPosition[0] = 0;
@@ -381,9 +381,9 @@ CNuke::CNuke()
 	collisionSpheres.push_back(cSphere);
 
 	cSphere = new sCollisionSphere;
-	cSphere->translation[0] = 0;
-	cSphere->translation[1] = -.15f;
-	cSphere->translation[2] = 0;
+	cSphere->translation[0] = -.15f;
+	cSphere->translation[1] = 0.0f;
+	cSphere->translation[2] = 0.0f;
 	cSphere->radius = .25;
 	cSphere->globalPosition[0] = 0;
 	cSphere->globalPosition[1] = 0;
@@ -563,10 +563,9 @@ void CNuke::Draw()
 
 	glPopMatrix();
 
-	
+	/*
 	glPushMatrix();
 
-	/*
 	//Draw collision spheres for debug
 	for(unsigned int i=0; i<collisionSpheres.size(); i++)
 	{
@@ -610,8 +609,10 @@ void CNuke::ProcessMotion(DWORD milliseconds)
 	for(unsigned int i = 0; i < collisionSpheres.size(); i++)
 	{
 		//First, rotate the sphere
-		collisionSpheres[i]->globalPosition[0] = cos(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[0] + sin(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[1];
-		collisionSpheres[i]->globalPosition[1] = -sin(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[0] + cos(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		//collisionSpheres[i]->globalPosition[0] = cos(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[0] + sin(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[0] = cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		//collisionSpheres[i]->globalPosition[1] = -sin(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[0] + cos(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[1] = -sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
 		collisionSpheres[i]->globalPosition[2] = 0;
 
 		//Scale by the object's scale
@@ -629,4 +630,228 @@ void CNuke::ProcessMotion(DWORD milliseconds)
 int CNuke::GetType()
 {
 	return TYPE_NUKE;
+}
+
+CDebris::CDebris()
+{
+	//Pick a random debris type
+	debType = rand() / 32768.0 * 4;
+
+	sCollisionSphere* cSphere;
+
+	switch(debType)
+	{
+	case DEBRIS_TYPE_0:
+		cSphere  = new sCollisionSphere;
+		cSphere->translation[0] = -.19f;
+		cSphere->translation[1] = 0;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+
+		cSphere = new sCollisionSphere;
+		cSphere->translation[0] = 0;
+		cSphere->translation[1] = .19f;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+
+		cSphere  = new sCollisionSphere;
+		cSphere->translation[0] = -.06f;
+		cSphere->translation[1] = 0;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+
+		cSphere = new sCollisionSphere;
+		cSphere->translation[0] = 0;
+		cSphere->translation[1] = .06f;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+		break;
+	case DEBRIS_TYPE_1:
+		cSphere = new sCollisionSphere;
+		cSphere->translation[0] = 0;
+		cSphere->translation[1] = .19f;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+
+		cSphere  = new sCollisionSphere;
+		cSphere->translation[0] = -.06f;
+		cSphere->translation[1] = 0;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+
+		cSphere = new sCollisionSphere;
+		cSphere->translation[0] = 0;
+		cSphere->translation[1] = .06f;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+		break;
+	case DEBRIS_TYPE_2:
+		cSphere  = new sCollisionSphere;
+		cSphere->translation[0] = -.19f;
+		cSphere->translation[1] = 0;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+
+		cSphere  = new sCollisionSphere;
+		cSphere->translation[0] = -.06f;
+		cSphere->translation[1] = 0;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+
+		cSphere = new sCollisionSphere;
+		cSphere->translation[0] = 0;
+		cSphere->translation[1] = .06f;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+		break;
+	case DEBRIS_TYPE_3:
+		cSphere  = new sCollisionSphere;
+		cSphere->translation[0] = -.06f;
+		cSphere->translation[1] = 0;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+
+		cSphere = new sCollisionSphere;
+		cSphere->translation[0] = 0;
+		cSphere->translation[1] = .06f;
+		cSphere->translation[2] = 0;
+		cSphere->radius = .05f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+		break;
+	}	
+
+	color[0] = 1;
+	color[1] = 0;
+	color[2] = 0;
+}
+
+CDebris::~CDebris()
+{
+}
+
+int CDebris::GetType()
+{
+	return TYPE_DEBRIS;
+}
+
+void CDebris::Draw()
+{
+	glPushMatrix();
+	
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	
+	//Cycle colors
+	color[1] = color[1] - .1f;
+	if(color[1] < 0)
+		color[1] += 1.0f;
+	glColor3f(color[0], color[1], color[2]);
+
+	switch(debType)
+	{
+	case DEBRIS_TYPE_0:
+		//L-shaped debris
+		glBegin(GL_LINE_STRIP);
+			glVertex3f(-.25f, 0, 0);
+			glVertex3f(0,0,0);
+			glVertex3f(0,.25f,0);
+		glEnd();
+		break;
+	case DEBRIS_TYPE_1:
+		glBegin(GL_LINE_STRIP);
+			glVertex3f(-.1f, 0, 0);
+			glVertex3f(0,0,0);
+			glVertex3f(0,.25f,0);
+		glEnd();
+		break;
+	case DEBRIS_TYPE_2:
+		glBegin(GL_LINE_STRIP);
+			glVertex3f(-.25f, 0, 0);
+			glVertex3f(0,0,0);
+			glVertex3f(0,.1f,0);
+		glEnd();
+		break;
+	case DEBRIS_TYPE_3:
+		glBegin(GL_LINE_STRIP);
+			glVertex3f(-.1f, 0, 0);
+			glVertex3f(0,0,0);
+			glVertex3f(0,.1f,0);
+		glEnd();
+		break;
+	default:
+		break;
+	}
+
+	glPopMatrix();
+
+	/*
+	glPushMatrix();
+
+	//Draw collision spheres for debug
+	float radius;
+	for(unsigned int i=0; i<collisionSpheres.size(); i++)
+	{
+		radius = collisionSpheres[i]->radius * scale[1];
+		glColor3f(1, 1, 0);
+		glBegin(GL_LINE_LOOP);
+			for (int j=0; j<360; j++)
+			{
+				float degInRad = j*DEG2RAD;
+				glVertex3f(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0] ,sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
+			}
+		glEnd();
+	}
+
+	glPopMatrix();
+	*/
 }

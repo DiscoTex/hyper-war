@@ -9,6 +9,10 @@
 CAudioRenderer::CAudioRenderer()
 {
 	timeSinceAudioRender = 999999;
+
+	// Initialize OpenAL and clear the error bit.
+	alutInit(NULL, 0);
+	alGetError();
 }
 
 CAudioRenderer::~CAudioRenderer()
