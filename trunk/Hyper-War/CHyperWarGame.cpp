@@ -86,7 +86,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		nuke->SetScale(.4f, .4f, .4f);
 		nuke->SetTranslation(1,0,0);
 		nuke->SetMotionVector(0, 0, 0);
-		gameObjects.push_back(nuke);
+		//gameObjects.push_back(nuke);
 		
 		//Create some blue Nukes
 		for(int i=1; i<10; i++)
@@ -108,6 +108,17 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 			nuke->SetTranslation(i/8.0f, -1.5f, -.00f);
 			nuke->SetMotionVector(0, 0, 0);
 			gameObjects.push_back(nuke);
+		}
+
+		//Create some debris
+		for(int i=1; i<10; i++)
+		{
+			CDebris *debris = new CDebris();
+			debris->SetScale(.1f, .1f, .1f);
+			debris->SetTranslation(i/8.0f, -0.0f, -.00f);
+			debris->SetAngularVelocity(0, 0, 100 * i);
+			debris->SetMotionVector(0, 0, 0);
+			gameObjects.push_back(debris);
 		}
 	}
 
@@ -144,7 +155,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		gameObjects[i]->ProcessMotion(milliseconds);
 		//Check for collisions with all other objects in the game
 		//returns -1 for no collision, otherwise returns the index of the collided object
-		objIndex = 	gameObjects[i]->CheckCollision(gameObjects, milliseconds);
+		objIndex = 	gameObjects[i]->CheckCollision(gameObjects, milliseconds, i);
 		//If a collision occurred, handle it
 		if(objIndex != -1)
 		{
@@ -152,18 +163,21 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			//You must delete them last first to maintain integrity of the indexes
 			if(i > objIndex)
 			{
-				if(gameObjects[i]->GetType() == TYPE_NUKE)
+				if(gameObjects[i]->GetType() != TYPE_PLANET)
 					gameObjects.erase(gameObjects.begin() + i);
-				if(gameObjects[objIndex]->GetType() == TYPE_NUKE)
+				if(gameObjects[objIndex]->GetType() != TYPE_PLANET)
 					gameObjects.erase(gameObjects.begin() + objIndex);
 			}
 			else
 			{
-				if(gameObjects[objIndex]->GetType() == TYPE_NUKE)
+				if(gameObjects[objIndex]->GetType() != TYPE_PLANET)
 					gameObjects.erase(gameObjects.begin() + objIndex);
-				if(gameObjects[i]->GetType() == TYPE_NUKE)
+				if(gameObjects[i]->GetType() != TYPE_PLANET)
 					gameObjects.erase(gameObjects.begin() + i);
 			}
+
+			//Now generate new debris for each rocket destroyed
+
 		}
 	}
 

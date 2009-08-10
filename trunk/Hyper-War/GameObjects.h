@@ -25,6 +25,12 @@ enum{
 	TYPE_DEBRIS
 };
 
+enum{
+	DEBRIS_TYPE_0,
+	DEBRIS_TYPE_1,
+	DEBRIS_TYPE_2,
+	DEBRIS_TYPE_3
+};
 struct sGravityWell
 {
 	float translation[3];
@@ -66,7 +72,7 @@ public:
 
 	virtual void ProcessMotion(DWORD milliseconds);
 	virtual void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
-	virtual int  CheckCollision(vector< CGameObject* > gObjects, DWORD milliseconds);
+	virtual int  CheckCollision(vector< CGameObject* > gObjects, DWORD milliseconds, unsigned int checkAfterIndex);
 	virtual int	 GetType();
 
 protected:
@@ -106,4 +112,17 @@ public:
 
 	void Draw();
 private:
+};
+
+class CDebris : public CGameObject
+{
+public:
+	CDebris();
+	~CDebris();
+
+	int GetType();
+
+	void Draw();
+private:
+	int debType;
 };

@@ -8,6 +8,10 @@
 #include "glBase.h"
 #include "GameObjects.h"
 
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alut.h>
+
 using namespace std;
 
 #define AUDIO_RENDER_FREQ_MS  67  //67 == 15 times per seconds
