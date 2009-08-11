@@ -284,6 +284,7 @@ LRESULT CALLBACK WindowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if ((wParam >= 0) && (wParam <= 255))						// Is Key (wParam) In A Valid Range?
 			{
 				window->keys->keyDown [wParam] = TRUE;					// Set The Selected Key (wParam) To True
+				hyperWarGame.ProcessKeyInput();
 				return 0;												// Return
 			}
 		break;															// Break
@@ -292,9 +293,14 @@ LRESULT CALLBACK WindowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if ((wParam >= 0) && (wParam <= 255))						// Is Key (wParam) In A Valid Range?
 			{
 				window->keys->keyDown [wParam] = FALSE;					// Set The Selected Key (wParam) To False
+				hyperWarGame.ProcessKeyInput();
 				return 0;												// Return
 			}
 		break;															// Break
+
+		case WM_INPUT:
+			hyperWarGame.ProcessRawInput();
+		break;
 
 		case WM_TOGGLEFULLSCREEN:										// Toggle FullScreen Mode On/Off
 			g_createFullScreen = (g_createFullScreen == TRUE) ? FALSE : TRUE;
