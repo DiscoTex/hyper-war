@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CRawInput.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameObjects.cpp"
 				>
 			</File>
@@ -210,6 +214,10 @@
 			</File>
 			<File
 				RelativePath=".\CHyperWarGame.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CRawInput.h"
 				>
 			</File>
 			<File

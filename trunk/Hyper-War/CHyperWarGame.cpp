@@ -116,7 +116,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 			CDebris *debris = new CDebris();
 			debris->SetScale(.1f, .1f, .1f);
 			debris->SetTranslation(i/8.0f, -0.0f, -.00f);
-			debris->SetAngularVelocity(0, 0, 100 * i);
+			debris->SetAngularVelocity(0, 0, 100.0f * i);
 			debris->SetMotionVector(0, 0, 0);
 			gameObjects.push_back(debris);
 		}
@@ -128,6 +128,14 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 }
 
 void CHyperWarGame::Deinitialize (void)										// Any User DeInitialization Goes Here
+{
+}
+
+void CHyperWarGame::ProcessRawInput(/*some parameters*/)
+{
+}
+
+void CHyperWarGame::ProcessKeyInput(/*some parameters*/)
 {
 }
 

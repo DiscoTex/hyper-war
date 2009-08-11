@@ -11,6 +11,7 @@
 #include "glBase.h"												// Header File For NeHeGL
 #include "CAudioRenderer.h"
 #include "CEffects.h"
+#include "CRawInput.h"
 
 using namespace std;
 
@@ -29,6 +30,8 @@ public:
 
 	BOOL Initialize(GL_Window* window, Keys* keys);		// Any GL Init Code & User Initialiazation Goes Here
 	void Deinitialize();								// Any User DeInitialization Goes Here
+	void ProcessRawInput(/*some parameters*/);			// Process new raw input structure
+	void ProcessKeyInput(/*some parameters*/);			// Process keyboard input
 	void Update (DWORD milliseconds);					// Perform Motion Updates Here
 	void Draw();										// Draw the current frame
 
@@ -45,4 +48,6 @@ private:
 	CEffects					globalEffects;
 	//Audio Renderer
 	CAudioRenderer				audioRenderer;
+	//Raw Input Reader
+	CRawInput					rawInput;
 };
