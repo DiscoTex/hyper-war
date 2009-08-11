@@ -74,6 +74,7 @@ public:
 	virtual void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
 	virtual int  CheckCollision(vector< CGameObject* > gObjects, DWORD milliseconds, unsigned int checkAfterIndex);
 	virtual int	 GetType();
+	virtual bool CanDestroy();
 
 protected:
 	float motionVector[3];
@@ -96,6 +97,7 @@ public:
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
 	int  CheckCollision(vector< CGameObject* > gObjects) {return -1;}
 	int	 GetType();
+	bool CanDestroy();
 
 	void Draw();
 private:
@@ -120,9 +122,13 @@ public:
 	CDebris();
 	~CDebris();
 
+	void ProcessMotion(DWORD milliseconds);
 	int GetType();
+	bool CanDestroy();
 
 	void Draw();
+
 private:
 	int debType;
+	int immunityMS;
 };
