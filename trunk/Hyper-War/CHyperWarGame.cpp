@@ -73,7 +73,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		gravityWells.push_back(gw);
 
 		gw = new sGravityWell;
-		gw->mass = 2;
+		gw->mass = .02;
 		gw->translation[0] = -.1f;
 		gw->translation[1] = -.4f;
 		gw->translation[2] = 0;
@@ -81,44 +81,26 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 
 		CNuke *nuke;
 
-		nuke = new CNuke();
-		nuke->SetColor(0.0, 1.0, 0.0);
-		nuke->SetScale(.4f, .4f, .4f);
-		nuke->SetTranslation(1,0,0);
-		nuke->SetMotionVector(0, 0, 0);
-		//gameObjects.push_back(nuke);
-		
 		//Create some blue Nukes
-		for(int i=1; i<10; i++)
+		for(int i=1; i<6; i++)
 		{
 			nuke = new CNuke();
 			nuke->SetColor(0.0, 0.0, 1.0);
 			nuke->SetScale(.1f, .1f, .1f);
-			nuke->SetTranslation(i/8.0f, 1.5f, -.00f);
-			nuke->SetMotionVector(0, 0, 0);
+			nuke->SetTranslation(-1 + i/5.0f, 1.5f, -.00f);
+			nuke->SetMotionVector(0, -.5, 0);
 			gameObjects.push_back(nuke);
 		}
 
 		//Create some red Nukes
-		for(int i=1; i<10; i++)
+		for(int i=1; i<6; i++)
 		{
 			nuke = new CNuke();
 			nuke->SetColor(1.0, 0.0, 0.0);
 			nuke->SetScale(.1f, .1f, .1f);
-			nuke->SetTranslation(i/8.0f, -1.5f, -.00f);
-			nuke->SetMotionVector(0, 0, 0);
+			nuke->SetTranslation(-.5 + i/5.0f, -1.5f, -.00f);
+			nuke->SetMotionVector(0, 1.5, 0);
 			gameObjects.push_back(nuke);
-		}
-
-		//Create some debris
-		for(int i=1; i<10; i++)
-		{
-			CDebris *debris = new CDebris();
-			debris->SetScale(.1f, .1f, .1f);
-			debris->SetTranslation(i/8.0f, -0.0f, -.00f);
-			debris->SetAngularVelocity(0, 0, 100.0f * i);
-			debris->SetMotionVector(0, 0, 0);
-			gameObjects.push_back(debris);
 		}
 	}
 
@@ -143,6 +125,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 {
 	unsigned int objIndex = -1;
 	unsigned int i=0;
+	CDebris *debris;
 
 	if (g_keys->keyDown [VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
 	{
@@ -171,21 +154,94 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			//You must delete them last first to maintain integrity of the indexes
 			if(i > objIndex)
 			{
-				if(gameObjects[i]->GetType() != TYPE_PLANET)
+				if(gameObjects[i]->CanDestroy())
+				{
+					if(gameObjects[i]->GetType() != TYPE_DEBRIS)
+					{
+						for(int k=0; k<10; k++)
+						{
+							debris = new CDebris();
+							debris->SetMotionVector(
+								float(gameObjects[i]->GetMotionVector()[0] + (rand()%100-50)/100.0), 
+								float(gameObjects[i]->GetMotionVector()[1]+ (rand()%100-50)/100.0), 
+								0);
+							debris->SetTranslation(
+								float(gameObjects[i]->GetTranslation()[0]),
+								float(gameObjects[i]->GetTranslation()[1]),
+								float(gameObjects[i]->GetTranslation()[2]));
+							debris->SetScale(.1f, .1f, .1f);
+							gameObjects.push_back(debris);
+						}
+					}
 					gameObjects.erase(gameObjects.begin() + i);
-				if(gameObjects[objIndex]->GetType() != TYPE_PLANET)
+				}
+				if(gameObjects[objIndex]->CanDestroy())
+				{
+					if(gameObjects[objIndex]->GetType() != TYPE_DEBRIS)
+					{
+						for(int k=0; k<10; k++)
+						{
+							debris = new CDebris();
+							debris->SetMotionVector(
+								float(gameObjects[objIndex]->GetMotionVector()[0] + (rand()%100-50)/100.0), 
+								float(gameObjects[objIndex]->GetMotionVector()[1]+ (rand()%100-50)/100.0), 
+								0);
+							debris->SetTranslation(
+								float(gameObjects[objIndex]->GetTranslation()[0]),
+								float(gameObjects[objIndex]->GetTranslation()[1]),
+								float(gameObjects[objIndex]->GetTranslation()[2]));
+							debris->SetScale(.1f, .1f, .1f);
+							gameObjects.push_back(debris);
+						}
+					}
 					gameObjects.erase(gameObjects.begin() + objIndex);
+				}
 			}
 			else
 			{
-				if(gameObjects[objIndex]->GetType() != TYPE_PLANET)
+				if(gameObjects[objIndex]->CanDestroy())
+				{
+					if(gameObjects[objIndex]->GetType() != TYPE_DEBRIS)
+					{
+						for(int k=0; k<10; k++)
+						{
+							debris = new CDebris();
+							debris->SetMotionVector(
+								float(gameObjects[objIndex]->GetMotionVector()[0] + (rand()%100-50)/100.0),
+								float(gameObjects[objIndex]->GetMotionVector()[1] + (rand()%100-50)/100.0),
+								0);
+							debris->SetTranslation(
+								float(gameObjects[objIndex]->GetTranslation()[0]),
+								float(gameObjects[objIndex]->GetTranslation()[1]),
+								float(gameObjects[objIndex]->GetTranslation()[2]));
+							debris->SetScale(.1f, .1f, .1f);
+							gameObjects.push_back(debris);
+						}
+					}
 					gameObjects.erase(gameObjects.begin() + objIndex);
-				if(gameObjects[i]->GetType() != TYPE_PLANET)
+				}
+				if(gameObjects[i]->CanDestroy())
+				{
+					if(gameObjects[i]->GetType() != TYPE_DEBRIS)
+					{
+						for(int k=0; k<10; k++)
+						{
+							debris = new CDebris();
+							debris->SetMotionVector(
+								float(gameObjects[i]->GetMotionVector()[0] + (rand()%100-50)/100.0), 
+								float(gameObjects[i]->GetMotionVector()[1] + (rand()%100-50)/100.0), 
+								0);
+							debris->SetTranslation(
+								float(gameObjects[i]->GetTranslation()[0]),
+								float(gameObjects[i]->GetTranslation()[1]),
+								float(gameObjects[i]->GetTranslation()[2]));
+							debris->SetScale(.1f, .1f, .1f);
+							gameObjects.push_back(debris);
+						}
+					}
 					gameObjects.erase(gameObjects.begin() + i);
+				}
 			}
-
-			//Now generate new debris for each rocket destroyed
-
 		}
 	}
 

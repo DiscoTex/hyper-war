@@ -163,6 +163,19 @@ void CGameObject::ProcessMotion(DWORD milliseconds)
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
 
+	if(GetType() !=  TYPE_PLANET)
+	{
+		if(translation[1] > 1.75)
+			translation[1] = -1.75;
+		else if(translation[1] < -1.75)
+			translation[1] = 1.75;
+
+		if(translation[0] > 2.75)
+			translation[0] = -2.75;
+		else if(translation[0] < -2.75)
+			translation[0] = 2.75;
+	}
+
 }
 
 void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
@@ -299,6 +312,11 @@ int CGameObject::GetType()
 	return TYPE_GENERIC;
 }
 
+bool CGameObject::CanDestroy()
+{
+	return true;
+}
+
 
 //CPlanet
 
@@ -362,6 +380,11 @@ void CPlanet::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 int CPlanet::GetType()
 {
 	return TYPE_PLANET;
+}
+
+bool CPlanet::CanDestroy()
+{
+	return false;
 }
 
 
@@ -587,16 +610,6 @@ void CNuke::Draw()
 
 void CNuke::ProcessMotion(DWORD milliseconds)
 {
-	if(translation[1] > 1.75)
-		translation[1] = -1.75;
-	else if(translation[1] < -1.75)
-		translation[1] = 1.75;
-
-	if(translation[0] > 2.75)
-		translation[0] = -2.75;
-	else if(translation[0] < -2.75)
-		translation[0] = 2.75;
-
 	//Add motion based on motion vector and elapsed time
 	translation[0] += milliseconds * motionVector[0] / 1000;
 	translation[1] += milliseconds * motionVector[1] / 1000;
@@ -625,6 +638,16 @@ void CNuke::ProcessMotion(DWORD milliseconds)
 		collisionSpheres[i]->globalPosition[1] += translation[1];
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
+
+	if(translation[1] > 1.75)
+		translation[1] = -1.75;
+	else if(translation[1] < -1.75)
+		translation[1] = 1.75;
+
+	if(translation[0] > 2.75)
+		translation[0] = -2.75;
+	else if(translation[0] < -2.75)
+		translation[0] = 2.75;
 }
 
 int CNuke::GetType()
@@ -635,9 +658,11 @@ int CNuke::GetType()
 CDebris::CDebris()
 {
 	//Pick a random debris type
-	debType = rand() / 32768.0 * 4;
+	debType = rand() * 4 / 32768;
 
 	sCollisionSphere* cSphere;
+
+	immunityMS = 90;
 
 	switch(debType)
 	{
@@ -770,6 +795,12 @@ CDebris::CDebris()
 	color[0] = 1;
 	color[1] = 0;
 	color[2] = 0;
+
+	angularVelocity[0] = float(rand() % 500);
+	angularVelocity[1] = float(rand() % 500);
+	angularVelocity[2] = float(rand() % 500);
+
+	rotation[2] = float(rand() % 500);
 }
 
 CDebris::~CDebris()
@@ -802,28 +833,28 @@ void CDebris::Draw()
 	case DEBRIS_TYPE_0:
 		//L-shaped debris
 		glBegin(GL_LINE_STRIP);
-			glVertex3f(-.25f, 0, 0);
+			glVertex3f(-.25f, 0, -.25f);
 			glVertex3f(0,0,0);
 			glVertex3f(0,.25f,0);
 		glEnd();
 		break;
 	case DEBRIS_TYPE_1:
 		glBegin(GL_LINE_STRIP);
-			glVertex3f(-.1f, 0, 0);
+			glVertex3f(-.1f, 0, .25f);
 			glVertex3f(0,0,0);
 			glVertex3f(0,.25f,0);
 		glEnd();
 		break;
 	case DEBRIS_TYPE_2:
 		glBegin(GL_LINE_STRIP);
-			glVertex3f(-.25f, 0, 0);
+			glVertex3f(-.25f, 0, .25f);
 			glVertex3f(0,0,0);
 			glVertex3f(0,.1f,0);
 		glEnd();
 		break;
 	case DEBRIS_TYPE_3:
 		glBegin(GL_LINE_STRIP);
-			glVertex3f(-.1f, 0, 0);
+			glVertex3f(-.1f, 0, -.1f);
 			glVertex3f(0,0,0);
 			glVertex3f(0,.1f,0);
 		glEnd();
@@ -854,4 +885,56 @@ void CDebris::Draw()
 
 	glPopMatrix();
 	*/
+}
+
+void CDebris::ProcessMotion(DWORD milliseconds)
+{
+	//Add motion based on motion vector and elapsed time
+	translation[0] += milliseconds * motionVector[0] / 1000;
+	translation[1] += milliseconds * motionVector[1] / 1000;
+	translation[2] += milliseconds * motionVector[2] / 1000;
+
+	//Rotate based on angular velocity and elapse time
+	rotation[0] += milliseconds * angularVelocity[0] / 1000;
+	rotation[1] += milliseconds * angularVelocity[1] / 1000;
+	rotation[2] += milliseconds * angularVelocity[2] / 1000;
+
+	//Update collision sphere locations
+	for(unsigned int i = 0; i < collisionSpheres.size(); i++)
+	{
+		//First, rotate the sphere
+		//collisionSpheres[i]->globalPosition[0] = cos(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[0] + sin(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[0] = cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		//collisionSpheres[i]->globalPosition[1] = -sin(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[0] + cos(-(rotation[2]-90) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[1] = -sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[2] = 0;
+
+		//Scale by the object's scale
+		collisionSpheres[i]->globalPosition[0] *= scale[0];
+		collisionSpheres[i]->globalPosition[1] *= scale[1];
+		collisionSpheres[i]->globalPosition[2] *= scale[2];
+
+		//Translate by the object's translation
+		collisionSpheres[i]->globalPosition[0] += translation[0];
+		collisionSpheres[i]->globalPosition[1] += translation[1];
+		collisionSpheres[i]->globalPosition[2] += translation[2];
+	}
+
+	if(translation[1] > 1.75)
+		translation[1] = -1.75;
+	else if(translation[1] < -1.75)
+		translation[1] = 1.75;
+
+	if(translation[0] > 2.75)
+		translation[0] = -2.75;
+	else if(translation[0] < -2.75)
+		translation[0] = 2.75;
+
+	if(immunityMS > 0)
+		immunityMS -= milliseconds;
+}
+
+bool CDebris::CanDestroy()
+{
+	return !(immunityMS > 0);
 }
