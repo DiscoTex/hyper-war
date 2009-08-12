@@ -16,6 +16,8 @@
 const float DEG2RAD = 3.1415f/180;
 #define MAX_GRAVITY_FORCE 10
 
+//#define COLLISION_DEBUG 1
+
 using namespace std;
 
 enum{
@@ -74,7 +76,7 @@ public:
 	virtual void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
 	virtual int  CheckCollision(vector< CGameObject* > gObjects, DWORD milliseconds, unsigned int checkAfterIndex);
 	virtual int	 GetType();
-	virtual bool CanDestroy();
+	virtual bool CanDestroy(int destroyerType);
 
 protected:
 	float motionVector[3];
@@ -97,7 +99,7 @@ public:
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
 	int  CheckCollision(vector< CGameObject* > gObjects) {return -1;}
 	int	 GetType();
-	bool CanDestroy();
+	bool CanDestroy(int destroyerType);
 
 	void Draw();
 private:
@@ -124,11 +126,25 @@ public:
 
 	void ProcessMotion(DWORD milliseconds);
 	int GetType();
-	bool CanDestroy();
+	bool CanDestroy(int destroyerType);
 
 	void Draw();
 
 private:
 	int debType;
-	int immunityMS;
+};
+
+class CMissileBase : public CGameObject
+{
+public:
+	CMissileBase();
+	~CMissileBase();
+
+	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
+	bool CanDestroy(int destroyerType);
+
+	void Draw();
+
+private:
+
 };
