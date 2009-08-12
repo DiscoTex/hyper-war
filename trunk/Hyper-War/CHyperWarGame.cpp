@@ -44,14 +44,14 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 
 		//Create a green planet
 		CPlanet *planet = new CPlanet();
-		planet->SetColor(0.0f, 0.05f, 0.0f);
+		planet->SetColor(0.0f, 0.1f, 0.0f);
 		planet->SetTranslation(-12, 0, 0);
 		planet->SetScale(10, 10, 10);
 		gameObjects.push_back(planet);
 
 		//Create a blue planet
 		planet = new CPlanet();
-		planet->SetColor(0.0f, 0.0f, 0.05f);
+		planet->SetColor(0.0f, 0.0f, 0.1f);
 		planet->SetTranslation(12, 0, 0);
 		planet->SetScale(10, 10, 10);
 		gameObjects.push_back(planet);
@@ -73,7 +73,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		gravityWells.push_back(gw);
 
 		gw = new sGravityWell;
-		gw->mass = .02;
+		gw->mass = .02f;
 		gw->translation[0] = -.1f;
 		gw->translation[1] = -.4f;
 		gw->translation[2] = 0;
@@ -82,7 +82,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		CNuke *nuke;
 
 		//Create some blue Nukes
-		for(int i=1; i<6; i++)
+		for(int i=1; i<10; i++)
 		{
 			nuke = new CNuke();
 			nuke->SetColor(0.0, 0.0, 1.0);
@@ -93,15 +93,44 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		}
 
 		//Create some red Nukes
-		for(int i=1; i<6; i++)
+		for(int i=1; i<10; i++)
 		{
 			nuke = new CNuke();
 			nuke->SetColor(1.0, 0.0, 0.0);
 			nuke->SetScale(.1f, .1f, .1f);
-			nuke->SetTranslation(-.5 + i/5.0f, -1.5f, -.00f);
+			nuke->SetTranslation(-.5f + i/5.0f, -1.5f, -.00f);
 			nuke->SetMotionVector(0, 1.5, 0);
 			gameObjects.push_back(nuke);
 		}
+
+		//Create a missle bases
+		CMissileBase *mb = new CMissileBase;
+		mb->SetColor(0, .8f, 0);
+		mb->SetScale(.1f, .1f, .1f);
+		mb->SetRotation(0, 0, -84);
+		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01, 10 * sin(6*DEG2RAD), -.001);
+		gameObjects.push_back(mb);
+
+		mb = new CMissileBase;
+		mb->SetColor(0, .8f, 0);
+		mb->SetScale(.1f, .1f, .1f);
+		mb->SetRotation(0, 0, -96);
+		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01, 10 * sin(-6*DEG2RAD), -.001);
+		gameObjects.push_back(mb);
+
+		mb = new CMissileBase;
+		mb->SetColor(0, 0, .8f);
+		mb->SetScale(.1f, .1f, .1f);
+		mb->SetRotation(0, 0, 96);
+		mb->SetTranslation(10 * cos(186*DEG2RAD) + 12.01, 10 * sin(186*DEG2RAD), -.001);
+		gameObjects.push_back(mb);
+
+		mb = new CMissileBase;
+		mb->SetColor(0, 0, .8f);
+		mb->SetScale(.1f, .1f, .1f);
+		mb->SetRotation(0, 0, 84);
+		mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01, 10 * sin(174*DEG2RAD), -.001);
+		gameObjects.push_back(mb);
 	}
 
 	initialized = true;
@@ -125,6 +154,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 {
 	unsigned int objIndex = -1;
 	unsigned int i=0;
+	int iType, objIndexType;
 	CDebris *debris;
 
 	if (g_keys->keyDown [VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
@@ -150,15 +180,19 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		//If a collision occurred, handle it
 		if(objIndex != -1)
 		{
+			//Store types
+			iType = gameObjects[i]->GetType();
+			objIndexType = gameObjects[objIndex]->GetType();
+			
 			//Explode objects i and objIndex if they are the appropriate type of object
 			//You must delete them last first to maintain integrity of the indexes
 			if(i > objIndex)
 			{
-				if(gameObjects[i]->CanDestroy())
+				if(gameObjects[i]->CanDestroy(objIndexType))
 				{
-					if(gameObjects[i]->GetType() != TYPE_DEBRIS)
+					if(iType != TYPE_DEBRIS)
 					{
-						for(int k=0; k<10; k++)
+						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
 							debris = new CDebris();
 							debris->SetMotionVector(
@@ -175,11 +209,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 					}
 					gameObjects.erase(gameObjects.begin() + i);
 				}
-				if(gameObjects[objIndex]->CanDestroy())
+				if(gameObjects[objIndex]->CanDestroy(iType))
 				{
-					if(gameObjects[objIndex]->GetType() != TYPE_DEBRIS)
+					if(objIndexType != TYPE_DEBRIS)
 					{
-						for(int k=0; k<10; k++)
+						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
 							debris = new CDebris();
 							debris->SetMotionVector(
@@ -199,11 +233,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			}
 			else
 			{
-				if(gameObjects[objIndex]->CanDestroy())
+				if(gameObjects[objIndex]->CanDestroy(iType))
 				{
-					if(gameObjects[objIndex]->GetType() != TYPE_DEBRIS)
+					if(objIndexType != TYPE_DEBRIS)
 					{
-						for(int k=0; k<10; k++)
+						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
 							debris = new CDebris();
 							debris->SetMotionVector(
@@ -220,11 +254,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 					}
 					gameObjects.erase(gameObjects.begin() + objIndex);
 				}
-				if(gameObjects[i]->CanDestroy())
+				if(gameObjects[i]->CanDestroy(objIndexType))
 				{
-					if(gameObjects[i]->GetType() != TYPE_DEBRIS)
+					if(iType != TYPE_DEBRIS)
 					{
-						for(int k=0; k<10; k++)
+						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
 							debris = new CDebris();
 							debris->SetMotionVector(

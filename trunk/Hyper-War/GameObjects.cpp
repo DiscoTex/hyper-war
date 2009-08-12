@@ -229,13 +229,17 @@ void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseconds, unsigned int checkAfterIndex)
 {
 	float relVelVector[3];
-	float relPosVector[3];	
+	float relPosVector[3];
 
 	for(unsigned int k=0; k<collisionSpheres.size(); k++)
 	{
 		//Check for intersection with all other objects in the game
 		for(unsigned int i=checkAfterIndex; i<gObjects.size(); i++)
 		{
+			//Here's a hack to skip some things that can't collide
+			if(this->GetType() == TYPE_DEBRIS && gObjects[i]->GetType() == TYPE_DEBRIS)
+				continue;
+
 			for(unsigned int j=0; j<gObjects[i]->GetCollisionSpheres().size(); j++)
 			{
 				if(gObjects[i] != this)
@@ -312,7 +316,7 @@ int CGameObject::GetType()
 	return TYPE_GENERIC;
 }
 
-bool CGameObject::CanDestroy()
+bool CGameObject::CanDestroy(int destroyerType)
 {
 	return true;
 }
@@ -382,7 +386,7 @@ int CPlanet::GetType()
 	return TYPE_PLANET;
 }
 
-bool CPlanet::CanDestroy()
+bool CPlanet::CanDestroy(int destroyerType)
 {
 	return false;
 }
@@ -586,7 +590,7 @@ void CNuke::Draw()
 
 	glPopMatrix();
 
-	/*
+#ifdef COLLISION_DEBUG
 	glPushMatrix();
 
 	//Draw collision spheres for debug
@@ -604,7 +608,7 @@ void CNuke::Draw()
 	}
 
 	glPopMatrix();
-	*/
+#endif
 	
 }
 
@@ -661,8 +665,6 @@ CDebris::CDebris()
 	debType = rand() * 4 / 32768;
 
 	sCollisionSphere* cSphere;
-
-	immunityMS = 90;
 
 	switch(debType)
 	{
@@ -865,7 +867,7 @@ void CDebris::Draw()
 
 	glPopMatrix();
 
-	/*
+#ifdef COLLISION_DEBUG
 	glPushMatrix();
 
 	//Draw collision spheres for debug
@@ -884,7 +886,7 @@ void CDebris::Draw()
 	}
 
 	glPopMatrix();
-	*/
+#endif
 }
 
 void CDebris::ProcessMotion(DWORD milliseconds)
@@ -929,12 +931,143 @@ void CDebris::ProcessMotion(DWORD milliseconds)
 		translation[0] = -2.75;
 	else if(translation[0] < -2.75)
 		translation[0] = 2.75;
-
-	if(immunityMS > 0)
-		immunityMS -= milliseconds;
 }
 
-bool CDebris::CanDestroy()
+bool CDebris::CanDestroy(int destroyerType)
 {
-	return !(immunityMS > 0);
+	if(destroyerType == TYPE_DEBRIS)
+		return false;
+	else
+		return true;	
+}
+
+CMissileBase::CMissileBase()
+{
+	sCollisionSphere *cSphere;
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = .25;
+	cSphere->translation[1] = .25;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .25f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = .75f;
+	cSphere->translation[1] = .25;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .25f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+}
+
+CMissileBase::~CMissileBase()
+{
+}
+
+void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
+{
+}
+
+bool CMissileBase::CanDestroy(int destroyerType)
+{
+	return false;
+}
+
+void CMissileBase::Draw()
+{
+	float x, y, z=0;
+
+	glPushMatrix();
+	
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	glColor3f(color[0], color[1], color[2]);
+
+	glBegin(GL_QUADS);
+		glVertex3f(0, 0, 0);
+		glVertex3f(1,0,0);
+		glVertex3f(1,.5f,0);
+		glVertex3f(0,.5f,0);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(0, 0, 0);
+		glVertex3f(1,0,0);
+		glVertex3f(1,.5f,0);
+		glVertex3f(0,.5f,0);
+	glEnd();
+
+	glBegin(GL_LINE_STRIP);
+		glVertex3f(-.2f, 0, 0);
+		glVertex3f(-.2f, 1.5f, 0);
+		glVertex3f(0, 1.5f, 0);
+		glVertex3f(0, 0, 0);
+
+		for(int i=0; i<8; i++)
+		{
+			if(i % 2)
+				x = -.2f;
+			else
+				x = 0;
+
+			y = i * .2f;
+
+			glVertex3f(x, y, 0);
+		}
+	glEnd();
+
+	glBegin(GL_LINE_STRIP);
+		for(int i=0; i<8; i++)
+		{
+			if(i % 2)
+				x = 0;
+			else
+				x = -.2f;
+
+			y = i * .2f;
+
+			glVertex3f(x, y, 0);
+		}
+	glEnd();
+
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(0, 0, 0);
+		glVertex3f(1,0,0);
+		glVertex3f(1,.5f,0);
+		glVertex3f(0,.5f,0);
+	glEnd();
+
+	glPopMatrix();
+
+
+#ifdef COLLISION_DEBUG
+	glPushMatrix();
+
+	//Draw collision spheres for debug
+	float radius;
+	for(unsigned int i=0; i<collisionSpheres.size(); i++)
+	{
+		radius = collisionSpheres[i]->radius * scale[1];
+		glColor3f(1, 1, 0);
+		glBegin(GL_LINE_LOOP);
+			for (int j=0; j<360; j++)
+			{
+				float degInRad = j*DEG2RAD;
+				glVertex3f(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0] ,sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
+			}
+		glEnd();
+	}
+
+	glPopMatrix();
+#endif
 }
