@@ -103,6 +103,13 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 			gameObjects.push_back(nuke);
 		}
 
+		nuke = new CNuke();
+		nuke->SetColor(1.0, 0.0, 0.0);
+		nuke->SetScale(.1f, .1f, .1f);
+		nuke->SetTranslation(1, 0, 0);
+		nuke->SetMotionVector(-1, 0, 0);
+		//gameObjects.push_back(nuke);
+
 		//Create a missle bases
 		CMissileBase *mb = new CMissileBase;
 		mb->SetColor(0, .8f, 0);
@@ -176,6 +183,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		gameObjects[i]->ProcessMotion(milliseconds);
 		//Check for collisions with all other objects in the game
 		//returns -1 for no collision, otherwise returns the index of the collided object
+		iType = gameObjects[i]->GetType();
 		objIndex = 	gameObjects[i]->CheckCollision(gameObjects, milliseconds, i);
 		//If a collision occurred, handle it
 		if(objIndex != -1)
