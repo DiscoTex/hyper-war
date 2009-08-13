@@ -220,7 +220,7 @@ void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 
 		//Add force vector to this object's motionVector
 		motionVector[0] += forceVector[0] * milliseconds / 1000;
-		motionVector[1] += forceVector[1] * milliseconds / 1000;
+		//motionVector[1] += forceVector[1] * milliseconds / 1000;
 		motionVector[2] += forceVector[2] * milliseconds / 1000;
 	}
 }
@@ -947,10 +947,10 @@ void CDebris::ProcessMotion(DWORD milliseconds)
 	else if(translation[1] < -1.75)
 		translation[1] = 1.75;
 
-	if(translation[0] > 2.75)
-		translation[0] = -2.75;
-	else if(translation[0] < -2.75)
-		translation[0] = 2.75;
+	if(translation[0] > 14)
+		translation[0] = -14;
+	else if(translation[0] < -14)
+		translation[0] = 14;
 }
 
 bool CDebris::CanDestroy(int destroyerType)
@@ -984,6 +984,8 @@ CMissileBase::CMissileBase()
 	cSphere->globalPosition[1] = 0;
 	cSphere->globalPosition[2] = 0;
 	collisionSpheres.push_back(cSphere);
+
+	loaded = true;
 }
 
 CMissileBase::~CMissileBase()
@@ -996,12 +998,18 @@ void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gW
 
 bool CMissileBase::CanDestroy(int destroyerType)
 {
-	return false;
+	if(destroyerType != TYPE_NUKE)
+		return false;
+	else
+		return true;
 }
 
 void CMissileBase::Draw()
 {
 	float x, y, z=0;
+	float offset = 0;
+	float radius;
+	float missileRotation = 0;
 
 	glPushMatrix();
 	
@@ -1066,6 +1074,179 @@ void CMissileBase::Draw()
 		glVertex3f(1,.5f,0);
 		glVertex3f(0,.5f,0);
 	glEnd();
+
+	if(loaded)
+	{
+		//Draw a missile on the launch pad
+		//The missile gets its own coordinate system
+		glPushMatrix();
+
+		glTranslatef(.5, 1, 0);
+
+		//Rotate to point toward the cursor
+		//Right now, they point to (0,0), but we'll replace (0,0) with cursor coordinates
+		missileRotation = atan2(0 - translation[1] , 0 - translation[0]) / DEG2RAD;
+		glRotatef(missileRotation - rotation[2] - 90, 0, 0, 1);
+
+		glColor3f(color[0], color[1], color[2]);  
+
+		//Draw one half of Nuke body
+		radius = 1;
+		offset = -cos(-30.0f*DEG2RAD);
+
+		glBegin(GL_TRIANGLES);
+		for (int i=-20; i<30; i+=5)
+		{
+			float degInRad = i*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + offset, sin(degInRad)*radius, -.001f);
+
+			degInRad = (i+5)*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
+
+			glVertex3f(0, 0, -.001f);
+		}
+		glEnd();
+
+		//Draw the other half of Nuke body
+		offset = -cos(150.0f*DEG2RAD);
+		glBegin(GL_TRIANGLES);
+		for (int i=150; i<200; i+=5)
+		{
+			float degInRad = i*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
+
+			degInRad = (i+5)*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
+
+			glVertex3f(0, 0, -.001f);
+		}
+		glEnd();
+
+		//Fill in bottom triangle
+		glBegin(GL_TRIANGLES);
+			glVertex3f(0,0,0);
+			glVertex3f(cos(200 * DEG2RAD)*radius - cos(150.0f*DEG2RAD), sin(200 * DEG2RAD)*radius, -.001f);
+			glVertex3f(cos(-20 * DEG2RAD)*radius - cos(-30.0f*DEG2RAD), sin(-20 * DEG2RAD)*radius, -.001f);
+		glEnd();
+
+		//Make one fin
+		offset = sin(200 * DEG2RAD);
+		glBegin(GL_TRIANGLES);
+		radius = .28f;
+		for (int i=120; i<180; i+=4)
+		{
+			float degInRad = i*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
+
+			degInRad = (i+4)*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
+
+			glVertex3f(0, offset/2, -.01f);
+		}
+		glEnd();
+
+		glBegin(GL_TRIANGLES);
+		//Make another fin
+		for (int i=120; i<180; i+=4)
+		{
+			float degInRad = i*DEG2RAD;
+			glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
+
+			degInRad = (i+4)*DEG2RAD;
+			glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
+
+			glVertex3f(0, offset/2, -.01f);
+		}
+		glEnd();
+
+
+		//**** Create outlines ***
+
+		glColor3f(1.0, 1.0, 1.0);
+
+		//Draw one half of Nuke body
+		radius = 1;
+		offset = -cos(-30.0f*DEG2RAD);
+
+		glBegin(GL_LINES);
+		for (int i=-20; i<30; i+=5)
+		{
+			float degInRad = i*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
+
+			degInRad = (i+5)*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
+
+			//glVertex3f(0, 0, 0);
+		}
+		glEnd();
+
+		//Draw the other half of Nuke body
+		offset = -cos(150.0f*DEG2RAD);
+		glBegin(GL_LINES);
+		for (int i=150; i<200; i+=5)
+		{
+			float degInRad = i*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
+
+			degInRad = (i+5)*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
+
+			//glVertex3f(0, 0, 0);
+		}
+		glEnd();
+
+		
+		//Fill in bottom triangle
+		glBegin(GL_LINES);
+			//glVertex3f(0,0,0);
+			glVertex3f(cos(200 * DEG2RAD)*radius - cos(150.0f*DEG2RAD), sin(200 * DEG2RAD)*radius, -.00001f);
+			glVertex3f(cos(-20 * DEG2RAD)*radius - cos(-30.0f*DEG2RAD), sin(-20 * DEG2RAD)*radius, -.00001f);
+		glEnd();
+
+		//Make one fin
+		offset = sin(200 * DEG2RAD);
+		glBegin(GL_LINES);
+		radius = .28f;
+		for (int i=120; i<180; i+=4)
+		{
+			float degInRad = i*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
+
+			degInRad = (i+4)*DEG2RAD;
+			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
+
+			//glVertex3f(0, offset/2, 0);
+		}
+		glEnd();
+
+		glBegin(GL_LINES);
+			glVertex3f(0, offset/2, -0.005f);
+			glVertex3f(cos(179*DEG2RAD)*radius,sin(179*DEG2RAD)*radius + offset, -0.005f);
+		glEnd();
+
+		glBegin(GL_LINES);
+		//Make another fin
+		for (int i=120; i<180; i+=4)
+		{
+			float degInRad = i*DEG2RAD;
+			glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
+
+			degInRad = (i+4)*DEG2RAD;
+			glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
+
+			//glVertex3f(0, offset/2, 0);
+		}
+		glEnd();
+
+		glBegin(GL_LINES);
+			glVertex3f(0, offset/2, -0.005f);
+			glVertex3f(-cos(179*DEG2RAD)*radius,sin(179*DEG2RAD)*radius + offset, -0.005f);
+		glEnd();
+		
+		glPopMatrix();
+
+	}	
 
 	glPopMatrix();
 
