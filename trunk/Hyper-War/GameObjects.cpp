@@ -230,15 +230,35 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 {
 	float relVelVector[3];
 	float relPosVector[3];
+	int thisType, otherType;
 
 	for(unsigned int k=0; k<collisionSpheres.size(); k++)
 	{
 		//Check for intersection with all other objects in the game
 		for(unsigned int i=checkAfterIndex; i<gObjects.size(); i++)
 		{
-			//Here's a hack to skip some things that can't collide
-			if(this->GetType() == TYPE_DEBRIS && gObjects[i]->GetType() == TYPE_DEBRIS)
-				continue;
+			thisType = GetType();
+			otherType = gObjects[i]->GetType();
+			if(thisType == TYPE_PLANET && otherType == TYPE_DEBRIS)
+				i=i;
+
+			//Decide here whether or not two types of objects can collide at all.
+			//Remember we can only detect one collision per object at a time
+			switch(thisType)
+			{
+			case TYPE_DEBRIS:
+				if(otherType == TYPE_DEBRIS)
+					continue;
+				break;
+			case TYPE_PLANET:
+				if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE)
+					continue;
+				break;
+			case TYPE_MISSILEBASE:
+				if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE)
+					continue;
+				break;
+			}
 
 			for(unsigned int j=0; j<gObjects[i]->GetCollisionSpheres().size(); j++)
 			{
@@ -1070,4 +1090,9 @@ void CMissileBase::Draw()
 
 	glPopMatrix();
 #endif
+}
+
+int CMissileBase::GetType()
+{
+	return TYPE_MISSILEBASE;
 }

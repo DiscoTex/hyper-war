@@ -24,7 +24,8 @@ enum{
 	TYPE_GENERIC,
 	TYPE_PLANET,
 	TYPE_NUKE,
-	TYPE_DEBRIS
+	TYPE_DEBRIS,
+	TYPE_MISSILEBASE
 };
 
 enum{
@@ -142,6 +143,7 @@ public:
 
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
 	bool CanDestroy(int destroyerType);
+	int	 GetType();
 
 	void Draw();
 
