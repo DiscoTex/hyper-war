@@ -58,16 +58,16 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 
 		//Create a gravity well for the green planet
 		sGravityWell *gw = new sGravityWell;
-		gw->mass = 10;
-		gw->translation[0] = -12;
+		gw->mass = 40000;
+		gw->translation[0] = -70;
 		gw->translation[1] = 0;
 		gw->translation[2] = 0;
 		gravityWells.push_back(gw);
 
 		//Gravity well for blue
 		gw = new sGravityWell;
-		gw->mass = 10;
-		gw->translation[0] = 12;
+		gw->mass = 40000;
+		gw->translation[0] = 70;
 		gw->translation[1] = 0;
 		gw->translation[2] = 0;
 		gravityWells.push_back(gw);
@@ -77,38 +77,31 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		gw->translation[0] = -.1f;
 		gw->translation[1] = -.4f;
 		gw->translation[2] = 0;
-		gravityWells.push_back(gw);
+		//gravityWells.push_back(gw);
 
 		CNuke *nuke;
 
 		//Create some blue Nukes
-		for(int i=1; i<10; i++)
+		for(int i=1; i<14; i++)
 		{
 			nuke = new CNuke();
 			nuke->SetColor(0.0, 0.0, 1.0);
 			nuke->SetScale(.1f, .1f, .1f);
-			nuke->SetTranslation(-1 + i/5.0f, 1.5f, -.00f);
-			nuke->SetMotionVector(0, -.5, 0);
+			nuke->SetTranslation(1.75, i/5.0f - 1.5f, -.00f);
+			nuke->SetMotionVector(-.08 * i - 1, -.5, 0);
 			gameObjects.push_back(nuke);
 		}
 
-		//Create some red Nukes
-		for(int i=1; i<10; i++)
+		//Create some green Nukes
+		for(int i=1; i<14; i++)
 		{
 			nuke = new CNuke();
-			nuke->SetColor(1.0, 0.0, 0.0);
+			nuke->SetColor(0.0, 1.0, 0.0);
 			nuke->SetScale(.1f, .1f, .1f);
-			nuke->SetTranslation(-.5f + i/5.0f, -1.5f, -.00f);
-			nuke->SetMotionVector(0, 1.5, 0);
+			nuke->SetTranslation(-1.75f, i/5.0f -1.5f, -.00f);
+			nuke->SetMotionVector(.1 * i + 1, .5, 0);
 			gameObjects.push_back(nuke);
 		}
-
-		nuke = new CNuke();
-		nuke->SetColor(1.0, 0.0, 0.0);
-		nuke->SetScale(.1f, .1f, .1f);
-		nuke->SetTranslation(1, 0, 0);
-		nuke->SetMotionVector(-1, 0, 0);
-		//gameObjects.push_back(nuke);
 
 		//Create a missle bases
 		CMissileBase *mb = new CMissileBase;

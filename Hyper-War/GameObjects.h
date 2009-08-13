@@ -148,5 +148,6 @@ public:
 	void Draw();
 
 private:
+	bool loaded;
 
 };
