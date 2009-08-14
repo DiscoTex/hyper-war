@@ -33,16 +33,10 @@ void CEffects::DrawStarfield()
 	//glRotated(45, 0, 1, 0);
 	//glRotated(rotation[2], 0, 0, 1);
 	//glScaled(scale[0], scale[1], scale[2]);
-	glScaled(.1,.1,.1);
+	glScaled(.05,.05,.05);
 	double color[3] = {1, 1, 1};
 	glTranslated(0, 0, -1);
-	
-	//glBegin (GL_POLYGON);								
-	//	glColor3d (color[0], color[1], color[2]);	glVertex3d( -1.0f, 1.0f, 0.0f);
-	//	glColor3d (color[0], color[1], color[2]);	glVertex3d(1.0f, 1.0f, 0.0f);
-	//	glColor3d (color[0], color[1], color[2]);	glVertex3d( 1.0f,-1.0f, 0.0f);
-	//	glColor3d (color[0], color[1], color[2]);	glVertex3d( -1.0f,-1.0f, 0.0f);
-	//glEnd ();	
+
 	glBegin(GL_POLYGON);
 		glColor3d (color[0], color[1], color[2]);	glVertex3d( 0.25f, 0.25f, 0.0f);
 		glColor3d (color[0], color[1], color[2]);	glVertex3d( 1.0f, 0.0f, 0.0f);
@@ -79,16 +73,9 @@ void CEffects::DrawStarfield()
 	//glRotated(45, 0, 1, 0);
 	//glRotated(rotation[2], 0, 0, 1);
 	//glScaled(scale[0], scale[1], scale[2]);
-	glScaled(1,1,1);
+	glScaled(.02,.02,.02);
 	
-	glTranslated(0, 0, -1);
-	
-	//glBegin (GL_POLYGON);								
-	//	glColor3d (color[0], color[1], color[2]);	glVertex3d( -1.0f, 1.0f, 0.0f);
-	//	glColor3d (color[0], color[1], color[2]);	glVertex3d(1.0f, 1.0f, 0.0f);
-	//	glColor3d (color[0], color[1], color[2]);	glVertex3d( 1.0f,-1.0f, 0.0f);
-	//	glColor3d (color[0], color[1], color[2]);	glVertex3d( -1.0f,-1.0f, 0.0f);
-	//glEnd ();	
+	glTranslated(-3, -3, 0);
 	glBegin(GL_POLYGON);
 		glColor3d (color[0], color[1], color[2]);	glVertex3d( 0.25f, 0.25f, 0.0f);
 		glColor3d (color[0], color[1], color[2]);	glVertex3d( 1.0f, 0.0f, 0.0f);
