@@ -78,7 +78,7 @@ int CRawMouse::init_raw_mouse(void)
 		        /* Get the device name and use it to determine if it's the RDP Terminal Services virtual device. */
 
 			// 1st call to GetRawInputDeviceInfo: Pass NULL to get the size of the device name 
-		        if (/* GetRawInputDeviceInfo */ (*_GRIDIA)(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, NULL, &nSize) != 0) {
+		        if (GetRawInputDeviceInfo (pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, NULL, &nSize) != 0) {
 				fprintf(stderr, "ERROR: Unable to get size of raw input device name.\n");
 				return 0;
 			}
@@ -90,7 +90,7 @@ int CRawMouse::init_raw_mouse(void)
 			}
 
 			// 2nd call to GetRawInputDeviceInfo: Pass our pointer to get the device name
-			if ((int)/* GetRawInputDeviceInfo */ (*_GRIDIA)(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, psName, &nSize) < 0)  {
+			if ((int)GetRawInputDeviceInfo (pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, psName, &nSize) < 0)  {
 				fprintf(stderr, "ERROR: Unable to get raw input device name.\n");
 				return 0;
 			} 
