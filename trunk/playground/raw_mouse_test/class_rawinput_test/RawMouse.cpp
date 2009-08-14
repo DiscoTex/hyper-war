@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "RawMouse.h"
-#include "stdio.h"
+
 
 CRawMouse::CRawMouse(void)
 : nraw_mouse_count(0)
@@ -51,7 +51,7 @@ int CRawMouse::init_raw_mouse(void)
 	int i;
 	unsigned int nInputDevices;
 	int nSize;
-	RAWINPUTDEVICELIST *pRawInputDeviceList
+	PRAWINPUTDEVICELIST pRawInputDeviceList;
 
 	nraw_mouse_count = 0;
 	// 1st call to GetRawInputDeviceList: Pass NULL to get the number of devices.
@@ -106,7 +106,83 @@ int CRawMouse::init_raw_mouse(void)
 		}
 	}
 
+	if (include_sys_mouse)
+		nraw_mouse_count++;
+
+	// Allocate the array for the raw mice
+	if ((raw_mice = malloc(sizeof(RAW_MOUSE) * nraw_mouse_count)) == NULL)  {
+		fprintf(stderr, "ERROR: Unable to allocate memory for raw input mice.\n");
+		return 0;
+	}
 
 
+	// Define the sys mouse
+	if (include_sys_mouse) {
+		raw_mice[RAW_SYS_MOUSE].device_handle = 0;
+		raw_mice[RAW_SYS_MOUSE].x = 0;
+		raw_mice[RAW_SYS_MOUSE].y = 0;
+		raw_mice[RAW_SYS_MOUSE].z = 0;
+		raw_mice[RAW_SYS_MOUSE].is_absolute = 0;
+		raw_mice[RAW_SYS_MOUSE].is_virtual_desktop = 0;
+
+		currentmouse++;
+	}
+
+	// Loop through all devices and set the device handles and initialize the mouse values
+	for (i = 0; i < nInputDevices; i++) {
+		if (pRawInputDeviceList[i].dwType == RIM_TYPEMOUSE) {
+			// 1st call to GetRawInputDeviceInfo: Pass NULL to get the size of the device name 
+		        if ( GetRawInputDeviceInfo(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, NULL, &nSize) != 0)  {
+				fprintf(stderr, "ERROR: Unable to get size of raw input device name (2).\n");
+				return 0;
+			}
+			
+			// Allocate the array to hold the name
+			if ((psName = (char *)malloc(sizeof(TCHAR) * nSize)) == NULL) {
+				fprintf(stderr, "ERROR: Unable to allocate memory for raw input device name (2).\n");
+				return 0;
+			}
+		  
+			// 2nd call to GetRawInputDeviceInfo: Pass our pointer to get the device name
+			if ((int)GetRawInputDeviceInfo(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, psName, &nSize) < 0) {
+				fprintf(stderr, "ERROR: Unable to get raw input device name (2).\n");
+				return 0;
+			} 
+
+			// Add this mouse to the array if it's not an RDPMouse or if we wish to include the RDP mouse
+			if ((!is_rm_rdp_mouse(psName)) || include_rdp_mouse ) {
+				raw_mice[currentmouse].device_handle = pRawInputDeviceList[i].hDevice;
+				raw_mice[currentmouse].x = 0;
+				raw_mice[currentmouse].y = 0;
+				raw_mice[currentmouse].z = 0;
+				raw_mice[currentmouse].is_absolute = 0;
+				raw_mice[currentmouse].is_virtual_desktop = 0;
+
+				currentmouse++;
+			}
+		}
+	}
+    
+	// free the RAWINPUTDEVICELIST
+	free(pRawInputDeviceList);
+
+	for (i = 0; i < nraw_mouse_count; i++) {
+		for (j = 0; j < MAX_RAW_MOUSE_BUTTONS; j++) {
+			raw_mice[i].buttonpressed[j] = 0;
+
+			// Create the name for this button
+			sprintf(buffer, "Button %i", j);
+			raw_mice[i].button_name[j] = (char *)malloc(strlen(buffer) + 1);
+			sprintf(raw_mice[i].button_name[j], "%s", buffer);
+		}
+	}
+
+
+
+	return 0;
+}
+
+int CRawMouse::is_rm_rdp_mouse(char cDeviceString)
+{
 	return 0;
 }
