@@ -251,11 +251,18 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 					continue;
 				break;
 			case TYPE_PLANET:
-				if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE)
+				if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON)
 					continue;
 				break;
 			case TYPE_MISSILEBASE:
-				if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE)
+				if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
+					continue;
+			case TYPE_CITY:
+				if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
+					continue;
+				break;
+			case TYPE_FLAKCANNON:
+				if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
 					continue;
 				break;
 			}
@@ -369,18 +376,19 @@ void CPlanet::Draw()
 	glRotatef(rotation[1], 0, 1, 0);
 	glRotatef(rotation[2], 0, 0, 1);
 	glScalef(scale[0], scale[1], scale[2]);
+	glColor3f(color[0], color[1], color[2]);
 
 	float radius = 1;
 	glBegin(GL_TRIANGLES);
 		for (int i=0; i<360; i+=4)
 		{
 			float degInRad = i*DEG2RAD;
-			glColor3f(color[0], color[1], color[2]);  glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
+			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
 
 			degInRad = (i+4)*DEG2RAD;
-			glColor3f(color[0], color[1], color[2]);  glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
+			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
 
-			glColor3f(color[0], color[1], color[2]);  glVertex3f(0, 0, 0);
+			glVertex3f(0, 0, 0);
 		}
 	glEnd();
 
@@ -1027,13 +1035,6 @@ void CMissileBase::Draw()
 		glVertex3f(0,.5f,0);
 	glEnd();
 
-	glBegin(GL_LINE_LOOP);
-		glVertex3f(0, 0, 0);
-		glVertex3f(1,0,0);
-		glVertex3f(1,.5f,0);
-		glVertex3f(0,.5f,0);
-	glEnd();
-
 	glBegin(GL_LINE_STRIP);
 		glVertex3f(-.2f, 0, 0);
 		glVertex3f(-.2f, 1.5f, 0);
@@ -1255,7 +1256,6 @@ void CMissileBase::Draw()
 	glPushMatrix();
 
 	//Draw collision spheres for debug
-	float radius;
 	for(unsigned int i=0; i<collisionSpheres.size(); i++)
 	{
 		radius = collisionSpheres[i]->radius * scale[1];
@@ -1276,4 +1276,362 @@ void CMissileBase::Draw()
 int CMissileBase::GetType()
 {
 	return TYPE_MISSILEBASE;
+}
+
+
+CCity::CCity()
+{
+	sCollisionSphere *cSphere;
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = .9;
+	cSphere->translation[1] = .4;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .4f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = .9f;
+	cSphere->translation[1] = .7;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .4f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = .25;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .25f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = .45;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .25f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = .35;
+	cSphere->translation[1] = .25;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .25f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+}
+
+CCity::~CCity()
+{
+}
+
+void CCity::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
+{
+}
+
+bool CCity::CanDestroy(int destroyerType)
+{
+	if(destroyerType != TYPE_NUKE)
+		return false;
+	else
+		return true;
+}
+
+int	 CCity::GetType()
+{
+	return TYPE_CITY;
+}
+
+void CCity::Draw()
+{
+	glPushMatrix();
+	
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	glColor3f(color[0], color[1], color[2]);
+
+	glBegin(GL_QUADS);
+
+		glColor3f(color[0] *.6, color[1]*.6, color[2]*.6);
+		
+		glVertex3f(0, 0, -.01);
+		glVertex3f(1, 0, -.01);
+		glVertex3f(1, .5f, -.01);
+		glVertex3f(0, .5f, -.01);
+
+		glColor3f(color[0] *.8, color[1]*.8, color[2]*.8);
+
+		glVertex3f(-.25, 0, -.001);
+		glVertex3f(.25, 0, -.001);
+		glVertex3f(.25, .7f, -.001);
+		glVertex3f(-.25, .7f, -.001);
+
+		glColor3f(color[0], color[1], color[2]);
+		
+		glVertex3f(.5, 0, -.001);
+		glVertex3f(1.3, 0, -.001);
+		glVertex3f(1.3, 1.1 , -.001);
+		glVertex3f(.5, 1.1 , -.001);
+	glEnd();
+
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(0, 0, -.01);
+		glVertex3f(1, 0, -.01);
+		glVertex3f(1, .5f, -.01);
+		glVertex3f(0, .5f, -.01);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(-.25, 0, -.001);
+		glVertex3f(.25, 0, -.001);
+		glVertex3f(.25, .7f, -.001);
+		glVertex3f(-.25, .7f, -.001);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(.5, 0, -.001);
+		glVertex3f(1.3, 0, -.001);
+		glVertex3f(1.3, 1.1, -.001);
+		glVertex3f(.5, 1.1, -.001);
+	glEnd();
+
+	//Draw some windows
+	glColor3f(0, 0, 0);
+
+	glBegin(GL_QUADS);
+		
+		glVertex3f(.6, .2, 0);
+		glVertex3f(.8, .2, 0);
+		glVertex3f(.8, .4 ,0);
+		glVertex3f(.6, .4 ,0);
+
+		glVertex3f(1,   .2, 0);
+		glVertex3f(1.2, .2, 0);
+		glVertex3f(1.2, .4, 0);
+		glVertex3f(1,   .4, 0);
+
+		glVertex3f(.6, .5, 0);
+		glVertex3f(.8, .5, 0);
+		glVertex3f(.8, .7, 0);
+		glVertex3f(.6, .7, 0);
+
+		glVertex3f(1,   .5, 0);
+		glVertex3f(1.2, .5, 0);
+		glVertex3f(1.2, .7, 0);
+		glVertex3f(1,   .7, 0);
+
+		glVertex3f(.6, .8, 0);
+		glVertex3f(.8, .8, 0);
+		glVertex3f(.8, 1, 0);
+		glVertex3f(.6, 1, 0);
+
+		glVertex3f(1,   .8, 0);
+		glVertex3f(1.2, .8, 0);
+		glVertex3f(1.2, 1, 0);
+		glVertex3f(1,   1, 0);
+
+		glVertex3f(-.2, .1, 0);
+		glVertex3f(.2, .1, 0);
+		glVertex3f(.2, .2f, 0);
+		glVertex3f(-.2, .2f, 0);
+
+		glVertex3f(-.2, .3, 0);
+		glVertex3f(.2, .3, 0);
+		glVertex3f(.2, .4f, 0);
+		glVertex3f(-.2, .4f, 0);
+
+		glVertex3f(-.2, .5, 0);
+		glVertex3f(.2, .5, 0);
+		glVertex3f(.2, .6f, 0);
+		glVertex3f(-.2, .6f, 0);
+
+	glEnd();
+
+
+	glPopMatrix();
+
+
+#ifdef COLLISION_DEBUG
+	glPushMatrix();
+
+	//Draw collision spheres for debug
+	float radius;
+	for(unsigned int i=0; i<collisionSpheres.size(); i++)
+	{
+		radius = collisionSpheres[i]->radius * scale[1];
+		glColor3f(1, 1, 0);
+		glBegin(GL_LINE_LOOP);
+			for (int j=0; j<360; j++)
+			{
+				float degInRad = j*DEG2RAD;
+				glVertex3f(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0] ,sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
+			}
+		glEnd();
+	}
+
+	glPopMatrix();
+#endif
+
+}
+
+
+CFlakCannon::CFlakCannon()
+{
+	sCollisionSphere *cSphere;
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = .25;
+	cSphere->translation[1] = .25;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .25f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = -.25;
+	cSphere->translation[1] = .25;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .25f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+}
+
+CFlakCannon::~CFlakCannon()
+{
+}
+
+void CFlakCannon::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
+{
+}
+
+bool CFlakCannon::CanDestroy(int destroyerType)
+{
+	if(destroyerType != TYPE_NUKE)
+		return false;
+	else
+		return true;
+}
+
+int	CFlakCannon::GetType()
+{
+	return TYPE_FLAKCANNON;
+}
+
+void CFlakCannon::Draw()
+{
+	glPushMatrix();
+	
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	glColor3f(color[0], color[1], color[2]);
+
+	glBegin(GL_QUADS);
+		glVertex3f(-.5, .25, -.001);	
+		glVertex3f(-.5, 0, -.001);
+		glVertex3f(.5, 0, -.001);
+		glVertex3f(.5, .25, -.001);
+	glEnd();
+
+	glBegin(GL_TRIANGLES);
+		for (int i=0; i<180; i+=4)
+		{
+			float degInRad = i*DEG2RAD;
+			float radius = .4;
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius, -.001);
+
+			degInRad = (i+4)*DEG2RAD;
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius, -.001);
+
+			glVertex3f(0, 0, -.001);
+		}
+	glEnd();
+
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINE_STRIP);
+		glVertex3f(-.5, .25, -.001);	
+		glVertex3f(-.5, 0, -.001);
+		glVertex3f(.5, 0, -.001);
+		glVertex3f(.5, .25, -.001);
+		glVertex3f(-.5, .25, -.001);	
+	glEnd();
+
+	glBegin(GL_LINE_STRIP);
+		for (int i=0; i<180; i+=4)
+		{
+			float degInRad = i*DEG2RAD;
+			float radius = .4;
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius, -.00125);
+
+			degInRad = (i+4)*DEG2RAD;
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius, -.00125);
+		}
+	glEnd();
+
+	glColor3f(color[0], color[1], color[2]);
+
+	//Draw the cannon
+	glBegin(GL_QUADS);
+		glVertex3f(-.05f, 0, -.00125);
+		glVertex3f(.05f, 0, -.00125);
+		glVertex3f(.03f, .8f, -.00125);
+		glVertex3f(-.03f, .8f, -.00125);
+	glEnd();
+
+	//Draw the cannon
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINE_STRIP);
+		glVertex3f(-.05f, 0, -.00125);
+		glVertex3f(.05f, 0, -.00125);
+		glVertex3f(.03f, .8f, -.00125);
+		glVertex3f(-.03f, .8f, -.00125);
+		glVertex3f(-.05f, 0, -.00125);
+	glEnd();
+
+	glPopMatrix();
+
+
+#ifdef COLLISION_DEBUG
+	glPushMatrix();
+
+	//Draw collision spheres for debug
+	float radius;
+	for(unsigned int i=0; i<collisionSpheres.size(); i++)
+	{
+		radius = collisionSpheres[i]->radius * scale[1];
+		glColor3f(1, 1, 0);
+		glBegin(GL_LINE_LOOP);
+			for (int j=0; j<360; j++)
+			{
+				float degInRad = j*DEG2RAD;
+				glVertex3f(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0] ,sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
+			}
+		glEnd();
+	}
+
+	glPopMatrix();
+#endif
 }
