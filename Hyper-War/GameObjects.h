@@ -25,7 +25,9 @@ enum{
 	TYPE_PLANET,
 	TYPE_NUKE,
 	TYPE_DEBRIS,
-	TYPE_MISSILEBASE
+	TYPE_MISSILEBASE,
+	TYPE_CITY,
+	TYPE_FLAKCANNON
 };
 
 enum{
@@ -150,4 +152,34 @@ public:
 private:
 	bool loaded;
 
+};
+
+class CCity : public CGameObject
+{
+public:
+	CCity();
+	~CCity();
+
+	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
+	bool CanDestroy(int destroyerType);
+	int	 GetType();
+
+	void Draw();
+
+private:
+
+
+};
+
+class CFlakCannon : public CGameObject
+{
+public:
+	CFlakCannon();
+	~CFlakCannon();
+
+	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
+	bool CanDestroy(int destroyerType);
+	int	 GetType();
+
+	void Draw();
 };

@@ -131,6 +131,76 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetRotation(0, 0, 84);
 		mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01, 10 * sin(174*DEG2RAD), -.001);
 		gameObjects.push_back(mb);
+
+		CCity *city = new CCity();
+		city->SetColor(0, 0, .8f);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, 82);
+		city->SetTranslation(10 * cos(172*DEG2RAD) + 12.01, 10 * sin(172*DEG2RAD), -.001);
+		gameObjects.push_back(city);
+
+		city = new CCity();
+		city->SetColor(0, 0, .8f);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, 87);
+		city->SetTranslation(10 * cos(177*DEG2RAD) + 12.01, 10 * sin(177*DEG2RAD), -.001);
+		gameObjects.push_back(city);
+
+		city = new CCity();
+		city->SetColor(0, 0, .8f);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, 93);
+		city->SetTranslation(10 * cos(183*DEG2RAD) + 12.01, 10 * sin(183*DEG2RAD), -.001);
+		gameObjects.push_back(city);
+
+		city = new CCity();
+		city->SetColor(0, 0, .8f);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, 98);
+		city->SetTranslation(10 * cos(188*DEG2RAD) + 12.01, 10 * sin(188*DEG2RAD), -.001);
+		gameObjects.push_back(city);
+
+		city = new CCity();
+		city->SetColor(0, .8f, 0);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -98);
+		city->SetTranslation(10 * cos(-8*DEG2RAD) - 12.01, 10 * sin(-8*DEG2RAD), -.001);
+		gameObjects.push_back(city);
+
+		city = new CCity();
+		city->SetColor(0, .8f, 0);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -93);
+		city->SetTranslation(10 * cos(-3*DEG2RAD) - 12.01, 10 * sin(-3*DEG2RAD), -.001);
+		gameObjects.push_back(city);
+
+		city = new CCity();
+		city->SetColor(0, .8f, 0);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -87);
+		city->SetTranslation(10 * cos(3*DEG2RAD) - 12.01, 10 * sin(3*DEG2RAD), -.001);
+		gameObjects.push_back(city);
+
+		city = new CCity();
+		city->SetColor(0, .8f, 0);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -82);
+		city->SetTranslation(10 * cos(8*DEG2RAD) - 12.01, 10 * sin(8*DEG2RAD), -.001);
+		gameObjects.push_back(city);
+
+		CFlakCannon *cannon = new CFlakCannon();
+		cannon->SetColor(0, .8f, 0);
+		cannon->SetScale(.1f, .1f, .1f);
+		cannon->SetRotation(0, 0, -90);
+		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01, 10 * sin(0*DEG2RAD), -.001);
+		gameObjects.push_back(cannon);
+
+		cannon = new CFlakCannon();
+		cannon->SetColor(0, 0, .8f);
+		cannon->SetScale(.1f, .1f, .1f);
+		cannon->SetRotation(0, 0, 90);
+		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01, 10 * sin(180*DEG2RAD), -.001);
+		gameObjects.push_back(cannon);
 	}
 
 	initialized = true;
