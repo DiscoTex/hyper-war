@@ -57,10 +57,12 @@ public:
 	// Every time the WM_INPUT message is received, the lparam must be passed to this function to keep
 	// a running tally of every mouse move to maintain accurate results
 	bool process_raw_mouse(HANDLE device);
+	// init the raw mouses
+	int init_raw_mouse(void);
 private:
 	// number of raw mouse found
 	int nraw_mouse_count;
-public:
-	// init the raw mouses
-	int init_raw_mouse(void);
+
+private:
+	int is_rm_rdp_mouse(char cDeviceString);
 };
