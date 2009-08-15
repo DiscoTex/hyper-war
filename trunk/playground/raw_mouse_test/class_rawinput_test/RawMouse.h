@@ -56,7 +56,7 @@ public:
 	 int raw_mouse_count(void);
 	// Every time the WM_INPUT message is received, the lparam must be passed to this function to keep
 	// a running tally of every mouse move to maintain accurate results
-	bool process_raw_mouse(HANDLE device);
+	bool process_raw_mouse(HANDLE in_device_handle);
 private:
 	int excluded_sysmouse_devices_count;
 	// number of raw mouse found
@@ -81,4 +81,6 @@ private:
 	// This function registers to receive the WM_INPUT messages
 	bool register_raw_mouse(void);
 	bool bHasBeenInitialized;
+	// read raw input
+	bool read_raw_input(PRAWINPUT raw);
 };
