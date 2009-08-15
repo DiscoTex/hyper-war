@@ -16,6 +16,7 @@ CRawMouse::CRawMouse(void)
 
 CRawMouse::~CRawMouse(void)
 {
+	free(raw_mice);
 }
 
 // get the relative position of the mouse since the last time
@@ -67,9 +68,38 @@ int CRawMouse::raw_mouse_count(void)
 
 // Every time the WM_INPUT message is received, the lparam must be passed to this function to 
 //keep a running tally of every mouse move to maintain accurate results
-bool CRawMouse::process_raw_mouse(HANDLE device)
+bool CRawMouse::process_raw_mouse(HANDLE in_device_handle)
 {
-	return false;
+		// When the WM_INPUT message is received, the lparam must be passed to this function to keep a running tally of
+	//     every mouse moves to maintain accurate results for get_raw_mouse_?_delta().
+	// This function will take the HANDLE of the device and find the device in the raw_mice arrayand add the 
+	//      x and y mousemove values according to the information stored in the RAWINPUT structure.
+
+	LPBYTE lpb;
+	int dwSize;
+
+	if (GetRawInputData ((HRAWINPUT)in_device_handle, RID_INPUT, NULL, (PUINT)&dwSize, sizeof(RAWINPUTHEADER)) == -1) {
+		fprintf(stderr, "ERROR: Unable to add to get size of raw input header.\n");
+		return 0;
+	}
+
+	lpb = (LPBYTE)malloc(sizeof(LPBYTE) * dwSize);
+	if (lpb == NULL) {
+		fprintf(stderr, "ERROR: Unable to allocate memory for raw input header.\n");
+		return 0;
+	} 
+  
+	if (GetRawInputData((HRAWINPUT)in_device_handle, RID_INPUT, lpb,  (PUINT)&dwSize, sizeof(RAWINPUTHEADER)) != dwSize ) {
+		fprintf(stderr, "ERROR: Unable to add to get raw input header.\n");
+		return 0;
+	} 
+
+	read_raw_input((RAWINPUT*)lpb);
+
+	free(lpb); 
+
+	return 1;
+
 }
 
 // init the raw mouses
@@ -268,4 +298,94 @@ bool CRawMouse::register_raw_mouse(void)
 			return 0;
  
 	  return 1;
+}
+
+// read raw input
+bool CRawMouse::read_raw_input(PRAWINPUT raw)
+{
+		  // should be static when I get around to it
+
+	  int i;
+
+	  // mouse 0 is sysmouse, so if there is not sysmouse start loop @0
+	  i = 0;
+	  if (include_sys_mouse) i++; 
+
+	  for ( ; i < (nraw_mouse_count + excluded_sysmouse_devices_count); i++) {
+			if (raw_mice[i].device_handle == raw->header.hDevice)
+			{
+				// Update the values for the specified mouse
+				if (include_individual_mice) {
+					if (raw_mice[i].is_absolute) {
+						raw_mice[i].x = raw->data.mouse.lLastX;
+						raw_mice[i].y = raw->data.mouse.lLastY;
+					}
+					else { // relative
+						raw_mice[i].x += raw->data.mouse.lLastX;
+						raw_mice[i].y += raw->data.mouse.lLastY;
+					}
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_DOWN) raw_mice[i].buttonpressed[0] = 1;
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_UP)   raw_mice[i].buttonpressed[0] = 0;
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_DOWN) raw_mice[i].buttonpressed[1] = 1;
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_UP)   raw_mice[i].buttonpressed[1] = 0;
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_DOWN) raw_mice[i].buttonpressed[2] = 1;
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_UP)   raw_mice[i].buttonpressed[2] = 0;
+
+					if (raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE)          raw_mice[i].is_absolute = 1;
+					else if (raw->data.mouse.usFlags & MOUSE_MOVE_RELATIVE)     raw_mice[i].is_absolute = 0;
+					if (raw->data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP)        raw_mice[i].is_virtual_desktop = 1;
+					else                                                        raw_mice[i].is_virtual_desktop = 0;
+
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL) {      // If the current message has a mouse_wheel message
+						if ((SHORT)raw->data.mouse.usButtonData > 0) {
+							raw_mice[i].z++;
+						}
+						if ((SHORT)raw->data.mouse.usButtonData < 0) {
+							raw_mice[i].z--;
+						}
+					}
+				}
+
+				// Feed the values for every mouse into the system mouse
+				if (include_sys_mouse) { 
+					if (raw_mice[i].is_absolute) {
+						raw_mice[RAW_SYS_MOUSE].x = raw->data.mouse.lLastX;
+						raw_mice[RAW_SYS_MOUSE].y = raw->data.mouse.lLastY;
+					}
+					else { // relative
+						raw_mice[RAW_SYS_MOUSE].x += raw->data.mouse.lLastX;
+						raw_mice[RAW_SYS_MOUSE].y += raw->data.mouse.lLastY;
+					}
+			  
+					// This is innacurate:  If 2 mice have their buttons down and I lift up on one, this will register the
+					//   system mouse as being "up".  I checked out on my windows desktop, and Microsoft was just as
+					//   lazy as I'm going to be.  Drag an icon with the 2 left mouse buttons held down & let go of one.
+
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_DOWN) raw_mice[RAW_SYS_MOUSE].buttonpressed[0] = 1;
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_UP) raw_mice[RAW_SYS_MOUSE].buttonpressed[0] = 0;
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_DOWN) raw_mice[RAW_SYS_MOUSE].buttonpressed[1] = 1;
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_UP) raw_mice[RAW_SYS_MOUSE].buttonpressed[1] = 0;
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_DOWN) raw_mice[RAW_SYS_MOUSE].buttonpressed[2] = 1;
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_UP) raw_mice[RAW_SYS_MOUSE].buttonpressed[2] = 0;
+				  
+					// If an absolute mouse is triggered, sys mouse will be considered absolute till the end of time.
+					if (raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE)          raw_mice[RAW_SYS_MOUSE].is_absolute = 1;
+					// Same goes for virtual desktop
+					if (raw->data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP)        raw_mice[RAW_SYS_MOUSE].is_virtual_desktop = 1;
+
+					if (raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL) {      // If the current message has a mouse_wheel message
+						if ((SHORT)raw->data.mouse.usButtonData > 0) {
+							raw_mice[RAW_SYS_MOUSE].z++;
+						}
+						if ((SHORT)raw->data.mouse.usButtonData < 0) {
+							raw_mice[RAW_SYS_MOUSE].z--;
+						}
+					}
+
+				}
+			}
+	  }
+	  
+	  return 1;
+
 }

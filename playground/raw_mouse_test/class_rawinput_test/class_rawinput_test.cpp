@@ -3,14 +3,14 @@
 
 #include "stdafx.h"
 #include "class_rawinput_test.h"
-
+#include "RawMouse.h"
 #define MAX_LOADSTRING 100
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
-
+CRawMouse objMouse;
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
@@ -28,7 +28,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
  	// TODO: Place code here.
 	MSG msg;
 	HACCEL hAccelTable;
-
+	
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadString(hInstance, IDC_CLASS_RAWINPUT_TEST, szWindowClass, MAX_LOADSTRING);
@@ -41,7 +41,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	}
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLASS_RAWINPUT_TEST));
-
+	objMouse.init_raw_mouse(1,0,1);
 	// Main message loop:
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
@@ -51,7 +51,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			DispatchMessage(&msg);
 		}
 	}
-
+	objMouse.~CRawMouse();
 	return (int) msg.wParam;
 }
 
@@ -162,6 +162,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
+		break;
+	case WM_INPUT:
+		objMouse.process_raw_mouse((HRAWINPUT)lParam);
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
