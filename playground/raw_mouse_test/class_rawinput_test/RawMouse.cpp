@@ -389,3 +389,10 @@ bool CRawMouse::read_raw_input(PRAWINPUT raw)
 	  return 1;
 
 }
+
+// ask if buttons are pressed 
+bool CRawMouse::mouse_button_pressed(int mousenum, int buttonnum)
+{
+		if (mousenum >= nraw_mouse_count || buttonnum >= MAX_RAW_MOUSE_BUTTONS || raw_mice == NULL) return 0;
+	return (raw_mice[mousenum].buttonpressed[buttonnum]);
+}
