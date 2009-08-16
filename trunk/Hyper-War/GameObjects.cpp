@@ -131,7 +131,7 @@ float* CGameObject::GetAngularVelocity()
 	return angularVelocity;
 }
 
-void CGameObject::ProcessMotion(DWORD milliseconds, bool keys[])
+void CGameObject::ProcessMotion(DWORD milliseconds, Keys* keys)
 {
 	//Add motion based on motion vector and elapsed time
 	translation[0] += milliseconds * motionVector[0] / 1000;
@@ -445,12 +445,14 @@ CNuke::CNuke()
 	cSphere->globalPosition[2] = 0;
 	collisionSpheres.push_back(cSphere);
 
-	thrust = .006;
+	thrust = .3;
 
 	//Cycle colors
 	flameColor[0] = 1.0f;
-	flameColor[1] = 1.0f;
+	flameColor[1] = rand() / INT_MAX;
 	flameColor[2] = 0;
+
+	animVal = 0;
 }
 
 void CNuke::Draw()
@@ -633,108 +635,93 @@ void CNuke::Draw()
 		flameColor[1] += 1.0f;
 	glColor3f(flameColor[0], flameColor[1], flameColor[2]);
 
-	/*
-	int modNum = 2;
+	animVal++;
 
-	if(modNum < 1 || modNum > 25)
-		modNum = 25;
+	int flameSize = (thrust + .3) / .2;
 
-	if(rand()%modNum == 0)
+	if(animVal % 12 == 0)
 	{
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
 			
-			glVertex3f(-0.053740899562835693, -0.36192359447479248, -.00001f);
+			glVertex3f(-0.053740899562835693, -0.36192359447479248 * flameSize, -.00001f);
 			glVertex3f(-0.033740899562835693, -0.34192359447479248, -.00001f);
-			glVertex3f(-0.013740899562835693, -0.36192359447479248, -.00001f);
-			glVertex3f( 0.01740899562835693,  -0.34192359447479248, -.00001f);
-			glVertex3f( 0.03740899562835693,  -0.36192359447479248, -.00001f);
+			glVertex3f(-0.013740899562835693, -0.36192359447479248 * flameSize, -.00001f);
 			glVertex3f( 0.05740899562835693,  -0.34192359447479248, -.00001f);
 
 			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
 		glEnd();
 	}
 
-	if(rand()%modNum == 0)
+	else if(animVal % 12 == 2)
 	{	
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
 			
 			glVertex3f(-0.053740899562835693, -0.34192359447479248, -.00001f);
-			glVertex3f(-0.033740899562835693, -0.36192359447479248, -.00001f);
+			glVertex3f(-0.033740899562835693, -0.36192359447479248 * flameSize, -.00001f);
 			glVertex3f(-0.013740899562835693, -0.34192359447479248, -.00001f);
-			glVertex3f( 0.01740899562835693,  -0.36192359447479248, -.00001f);
-			glVertex3f( 0.03740899562835693,  -0.34192359447479248, -.00001f);
-			glVertex3f( 0.05740899562835693,  -0.36192359447479248, -.00001f);
+			glVertex3f( 0.05740899562835693,  -0.36192359447479248 * flameSize, -.00001f);
 
 			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
 		glEnd();
 	}
 
-	if(rand()%modNum == 0)
+	else if(animVal % 12 == 4)
 	{
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
 			
-			glVertex3f(-0.053740899562835693, -0.37192359447479248, -.00001f);
+			glVertex3f(-0.053740899562835693, -0.37192359447479248 * flameSize, -.00001f);
 			glVertex3f(-0.033740899562835693, -0.34192359447479248, -.00001f);
-			glVertex3f(-0.013740899562835693, -0.37192359447479248, -.00001f);
-			glVertex3f( 0.01740899562835693,  -0.34192359447479248, -.00001f);
-			glVertex3f( 0.03740899562835693,  -0.37192359447479248, -.00001f);
+			glVertex3f(-0.013740899562835693, -0.37192359447479248 * flameSize, -.00001f);
 			glVertex3f( 0.05740899562835693,  -0.34192359447479248, -.00001f);
 
 			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
 		glEnd();
 	}
 
-	if(rand()%modNum == 0)
+	if(animVal % 12 == 6)
 	{	
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
 			
 			glVertex3f(-0.053740899562835693, -0.34192359447479248, -.00001f);
-			glVertex3f(-0.033740899562835693, -0.38192359447479248, -.00001f);
+			glVertex3f(-0.033740899562835693, -0.38192359447479248 * flameSize, -.00001f);
 			glVertex3f(-0.013740899562835693, -0.34192359447479248, -.00001f);
-			glVertex3f( 0.01740899562835693,  -0.38192359447479248, -.00001f);
-			glVertex3f( 0.03740899562835693,  -0.34192359447479248, -.00001f);
-			glVertex3f( 0.05740899562835693,  -0.38192359447479248, -.00001f);
+			glVertex3f( 0.05740899562835693,  -0.38192359447479248 * flameSize, -.00001f);
 
 			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
 		glEnd();
 	}
 
-	if(rand()%modNum == 0)
+	if(animVal % 12 == 8)
 	{
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
 			
-			glVertex3f(-0.053740899562835693, -0.39192359447479248, -.00001f);
+			glVertex3f(-0.053740899562835693, -0.39192359447479248 * flameSize, -.00001f);
 			glVertex3f(-0.033740899562835693, -0.34192359447479248, -.00001f);
-			glVertex3f(-0.013740899562835693, -0.39192359447479248, -.00001f);
-			glVertex3f( 0.01740899562835693,  -0.34192359447479248, -.00001f);
-			glVertex3f( 0.03740899562835693,  -0.39192359447479248, -.00001f);
+			glVertex3f(-0.013740899562835693, -0.39192359447479248 * flameSize, -.00001f);
 			glVertex3f( 0.05740899562835693,  -0.34192359447479248, -.00001f);
 
 			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
 		glEnd();
 	}
 
-	if(rand()%modNum == 0)
+	if(animVal % 12 == 10)
 	{	
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
 			
 			glVertex3f(-0.053740899562835693, -0.34192359447479248, -.00001f);
-			glVertex3f(-0.033740899562835693, -0.39192359447479248, -.00001f);
+			glVertex3f(-0.033740899562835693, -0.39192359447479248 * flameSize, -.00001f);
 			glVertex3f(-0.013740899562835693, -0.34192359447479248, -.00001f);
-			glVertex3f( 0.01740899562835693,  -0.39192359447479248, -.00001f);
-			glVertex3f( 0.03740899562835693,  -0.34192359447479248, -.00001f);
-			glVertex3f( 0.05740899562835693,  -0.39192359447479248, -.00001f);
+			glVertex3f( 0.01740899562835693,  -0.39192359447479248 * flameSize, -.00001f);
 
 			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
 		glEnd();
 	}
-	*/
 
 	glPopMatrix();
 
@@ -760,14 +747,17 @@ void CNuke::Draw()
 	
 }
 
-void CNuke::ProcessMotion(DWORD milliseconds, bool keyDown[])
+void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 {
 	//Rotate to point to the direction of motion
 	rotation[2] = atan2(motionVector[1] , motionVector[0]) / DEG2RAD;
 
 	//update speed due to thrust
-	motionVector[0] += cos(rotation[2] * DEG2RAD) * thrust;
-	motionVector[1] += sin(rotation[2] * DEG2RAD) * thrust;
+	if(milliseconds > 0)
+	{
+		motionVector[0] += cos(rotation[2] * DEG2RAD) * (thrust / milliseconds);
+		motionVector[1] += sin(rotation[2] * DEG2RAD) * (thrust / milliseconds);
+	}
 
 	//Add motion based on motion vector and elapsed time
 	translation[0] += milliseconds * motionVector[0] / 1000;
@@ -1042,7 +1032,7 @@ void CDebris::Draw()
 #endif
 }
 
-void CDebris::ProcessMotion(DWORD milliseconds, bool keys[])
+void CDebris::ProcessMotion(DWORD milliseconds, Keys* keys)
 {
 	//Add motion based on motion vector and elapsed time
 	translation[0] += milliseconds * motionVector[0] / 1000;

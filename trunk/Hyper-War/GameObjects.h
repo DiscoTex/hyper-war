@@ -75,7 +75,7 @@ public:
 	vector < sCollisionSphere * > GetCollisionSpheres() { return collisionSpheres;}
 	float* GetPosition() {return translation;}
 
-	virtual void ProcessMotion(DWORD milliseconds, bool keys[]);
+	virtual void ProcessMotion(DWORD milliseconds, Keys* keys);
 	virtual void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
 	virtual int  CheckCollision(vector< CGameObject* > gObjects, DWORD milliseconds, unsigned int checkAfterIndex);
 	virtual int	 GetType();
@@ -114,12 +114,14 @@ public:
 	CNuke();
 	~CNuke() {}
 
-	void ProcessMotion(DWORD milliseconds, bool keys[]);
+	void ProcessMotion(DWORD milliseconds, Keys * keys);
 	int	 GetType();
+	void SetThrust(float newThrust) {thrust = newThrust;}
 
 	void Draw();
 private:
 	float thrust;
+	unsigned short   animVal;
 	float flameColor[3];
 };
 
@@ -129,7 +131,7 @@ public:
 	CDebris();
 	~CDebris();
 
-	void ProcessMotion(DWORD milliseconds, bool keys[]);
+	void ProcessMotion(DWORD milliseconds, Keys * keys);
 	int GetType();
 	bool CanDestroy(int destroyerType);
 

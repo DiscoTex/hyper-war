@@ -10,9 +10,6 @@
 CHyperWarGame::CHyperWarGame()
 {
 	initialized = false;
-
-	for(int i=0; i<256; i++)
-		keyDown[i] = false;
 }
 
 CHyperWarGame::~CHyperWarGame()
@@ -82,8 +79,9 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		gw->translation[2] = 0;
 		//gravityWells.push_back(gw);
 
-		CNuke *nuke;
+		//CNuke *nuke;
 
+		/*
 		//Create some blue Nukes
 		for(int i=1; i<4; i++)
 		{
@@ -91,7 +89,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 			nuke->SetColor(0.0, 0.0, 1.0);
 			nuke->SetScale(.1f, .1f, .1f);
 			nuke->SetTranslation(1.85f, i/1.3f - 2.5f, -.00f);
-			nuke->SetMotionVector(-0.00001, .0000, 0);
+			nuke->SetMotionVector(-0.0001, .0000, 0);
 			//nuke->SetMotionVector(.001, 0, 0);
 			gameObjects.push_back(nuke);
 		}
@@ -107,8 +105,9 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 			//nuke->SetMotionVector(0, 0, 0);
 			gameObjects.push_back(nuke);
 		}
+		*/
 
-		//Create a missle bases
+		//Create missle bases
 		CMissileBase *mb = new CMissileBase;
 		mb->SetColor(0, .8f, 0);
 		mb->SetScale(.1f, .1f, .1f);
@@ -206,6 +205,9 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, 90);
 		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
 		gameObjects.push_back(cannon);
+
+		lastLaunch = 0;
+		keydownTime = 0;
 	}
 
 	initialized = true;
@@ -223,7 +225,7 @@ void CHyperWarGame::ProcessRawInput(/*some parameters*/)
 
 void CHyperWarGame::ProcessKeyInput(DWORD wParam, bool state)
 {
-	keyDown[wParam] = state;
+
 }
 
 void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates Here
@@ -232,6 +234,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	unsigned int i=0;
 	int iType, objIndexType;
 	CDebris *debris;
+	CNuke *nuke;
 
 	if (g_keys->keyDown [VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
 	{
@@ -243,11 +246,37 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		ToggleFullscreen (g_window);							// Toggle Fullscreen Mode
 	}
 
+	lastLaunch += milliseconds;
+	if (g_keys->keyDown ['A'] == TRUE)						// Is F1 Being Pressed?
+	{
+		keydownTime += milliseconds;
+	}
+	else if(lastLaunch > 100 && keydownTime > 100)
+	{
+		nuke = new CNuke();
+		nuke->SetColor(0.0, 0.0, 1.0);
+		nuke->SetScale(.1f, .1f, .1f);
+		nuke->SetTranslation(1.85f, .5f, -.00f);
+		nuke->SetMotionVector(-0.1, .0000, 0);
+
+		float thrust = keydownTime / 5000.0;
+		if(thrust > 1)
+			thrust = 1;
+		else if(thrust < .1)
+			thrust = .1;
+
+		nuke->SetThrust(thrust);
+		gameObjects.push_back(nuke);
+
+		lastLaunch = 0;
+		keydownTime = 0;
+	}
+
 	//For every object in the game
 	for(unsigned int i=0; i<gameObjects.size(); i++)
 	{
 		//Process motion
-		gameObjects[i]->ProcessMotion(milliseconds, keyDown);
+		gameObjects[i]->ProcessMotion(milliseconds, g_keys);
 		//Process gravity
 		gameObjects[i]->ProcessGravity(milliseconds, gravityWells);
 		//Check for collisions with all other objects in the game
