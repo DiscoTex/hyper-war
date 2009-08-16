@@ -16,7 +16,7 @@ CRawMouse::CRawMouse(void)
 
 CRawMouse::~CRawMouse(void)
 {
-	free(raw_mice);
+	
 }
 
 // get the relative position of the mouse since the last time
@@ -395,4 +395,9 @@ bool CRawMouse::mouse_button_pressed(int mousenum, int buttonnum)
 {
 		if (mousenum >= nraw_mouse_count || buttonnum >= MAX_RAW_MOUSE_BUTTONS || raw_mice == NULL) return 0;
 	return (raw_mice[mousenum].buttonpressed[buttonnum]);
+}
+
+void CRawMouse::destroy_raw_mouse(void)
+{
+	free(raw_mice);
 }

@@ -86,4 +86,5 @@ private:
 public:
 	// ask if buttons are pressed 
 	bool mouse_button_pressed(int mousenum, int buttonnum);
+	void destroy_raw_mouse(void);
 };
