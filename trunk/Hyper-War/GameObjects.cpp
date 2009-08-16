@@ -131,7 +131,7 @@ float* CGameObject::GetAngularVelocity()
 	return angularVelocity;
 }
 
-void CGameObject::ProcessMotion(DWORD milliseconds)
+void CGameObject::ProcessMotion(DWORD milliseconds, bool keys[])
 {
 	//Add motion based on motion vector and elapsed time
 	translation[0] += milliseconds * motionVector[0] / 1000;
@@ -220,7 +220,7 @@ void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 
 		//Add force vector to this object's motionVector
 		motionVector[0] += forceVector[0] * milliseconds / 1000;
-		//motionVector[1] += forceVector[1] * milliseconds / 1000;
+		motionVector[1] += forceVector[1] * milliseconds / 1000;
 		motionVector[2] += forceVector[2] * milliseconds / 1000;
 	}
 }
@@ -445,6 +445,12 @@ CNuke::CNuke()
 	cSphere->globalPosition[2] = 0;
 	collisionSpheres.push_back(cSphere);
 
+	thrust = .006;
+
+	//Cycle colors
+	flameColor[0] = 1.0f;
+	flameColor[1] = 1.0f;
+	flameColor[2] = 0;
 }
 
 void CNuke::Draw()
@@ -497,8 +503,10 @@ void CNuke::Draw()
 	//Fill in bottom triangle
 	glBegin(GL_TRIANGLES);
 		glVertex3f(0,0,0);
-		glVertex3f(cos(200 * DEG2RAD)*radius - cos(150.0f*DEG2RAD), sin(200 * DEG2RAD)*radius, -.001f);
-		glVertex3f(cos(-20 * DEG2RAD)*radius - cos(-30.0f*DEG2RAD), sin(-20 * DEG2RAD)*radius, -.001f);
+		//glVertex3f(cos(200 * DEG2RAD)*radius - cos(150.0f*DEG2RAD), sin(200 * DEG2RAD)*radius, -.001f);
+		//glVertex3f(cos(-20 * DEG2RAD)*radius - cos(-30.0f*DEG2RAD), sin(-20 * DEG2RAD)*radius, -.001f);
+		glVertex3f(-0.073740899562835693, -0.34192359447479248, -.001);
+		glVertex3f(0.073662996292114258, -0.34201046824455261, -.001);
 	glEnd();
 
 	//Make one fin
@@ -572,8 +580,10 @@ void CNuke::Draw()
 	//Fill in bottom triangle
 	glBegin(GL_LINES);
 		//glVertex3f(0,0,0);
-		glVertex3f(cos(200 * DEG2RAD)*radius - cos(150.0f*DEG2RAD), sin(200 * DEG2RAD)*radius, -.00001f);
-		glVertex3f(cos(-20 * DEG2RAD)*radius - cos(-30.0f*DEG2RAD), sin(-20 * DEG2RAD)*radius, -.00001f);
+		//glVertex3f(cos(200 * DEG2RAD)*radius - cos(150.0f*DEG2RAD), sin(200 * DEG2RAD)*radius, -.00001f);
+		//glVertex3f(cos(-20 * DEG2RAD)*radius - cos(-30.0f*DEG2RAD), sin(-20 * DEG2RAD)*radius, -.00001f);
+		glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
+		glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
 	glEnd();
 
 	//Make one fin
@@ -616,6 +626,116 @@ void CNuke::Draw()
 		glVertex3f(-cos(179*DEG2RAD)*radius,sin(179*DEG2RAD)*radius + offset, -0.005f);
 	glEnd();
 
+	//Make some rocket flames!
+	//Cycle flame color
+	flameColor[1] = flameColor[1] - .1f;
+	if(flameColor[1] < 0)
+		flameColor[1] += 1.0f;
+	glColor3f(flameColor[0], flameColor[1], flameColor[2]);
+
+	/*
+	int modNum = 2;
+
+	if(modNum < 1 || modNum > 25)
+		modNum = 25;
+
+	if(rand()%modNum == 0)
+	{
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
+			
+			glVertex3f(-0.053740899562835693, -0.36192359447479248, -.00001f);
+			glVertex3f(-0.033740899562835693, -0.34192359447479248, -.00001f);
+			glVertex3f(-0.013740899562835693, -0.36192359447479248, -.00001f);
+			glVertex3f( 0.01740899562835693,  -0.34192359447479248, -.00001f);
+			glVertex3f( 0.03740899562835693,  -0.36192359447479248, -.00001f);
+			glVertex3f( 0.05740899562835693,  -0.34192359447479248, -.00001f);
+
+			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
+		glEnd();
+	}
+
+	if(rand()%modNum == 0)
+	{	
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
+			
+			glVertex3f(-0.053740899562835693, -0.34192359447479248, -.00001f);
+			glVertex3f(-0.033740899562835693, -0.36192359447479248, -.00001f);
+			glVertex3f(-0.013740899562835693, -0.34192359447479248, -.00001f);
+			glVertex3f( 0.01740899562835693,  -0.36192359447479248, -.00001f);
+			glVertex3f( 0.03740899562835693,  -0.34192359447479248, -.00001f);
+			glVertex3f( 0.05740899562835693,  -0.36192359447479248, -.00001f);
+
+			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
+		glEnd();
+	}
+
+	if(rand()%modNum == 0)
+	{
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
+			
+			glVertex3f(-0.053740899562835693, -0.37192359447479248, -.00001f);
+			glVertex3f(-0.033740899562835693, -0.34192359447479248, -.00001f);
+			glVertex3f(-0.013740899562835693, -0.37192359447479248, -.00001f);
+			glVertex3f( 0.01740899562835693,  -0.34192359447479248, -.00001f);
+			glVertex3f( 0.03740899562835693,  -0.37192359447479248, -.00001f);
+			glVertex3f( 0.05740899562835693,  -0.34192359447479248, -.00001f);
+
+			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
+		glEnd();
+	}
+
+	if(rand()%modNum == 0)
+	{	
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
+			
+			glVertex3f(-0.053740899562835693, -0.34192359447479248, -.00001f);
+			glVertex3f(-0.033740899562835693, -0.38192359447479248, -.00001f);
+			glVertex3f(-0.013740899562835693, -0.34192359447479248, -.00001f);
+			glVertex3f( 0.01740899562835693,  -0.38192359447479248, -.00001f);
+			glVertex3f( 0.03740899562835693,  -0.34192359447479248, -.00001f);
+			glVertex3f( 0.05740899562835693,  -0.38192359447479248, -.00001f);
+
+			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
+		glEnd();
+	}
+
+	if(rand()%modNum == 0)
+	{
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
+			
+			glVertex3f(-0.053740899562835693, -0.39192359447479248, -.00001f);
+			glVertex3f(-0.033740899562835693, -0.34192359447479248, -.00001f);
+			glVertex3f(-0.013740899562835693, -0.39192359447479248, -.00001f);
+			glVertex3f( 0.01740899562835693,  -0.34192359447479248, -.00001f);
+			glVertex3f( 0.03740899562835693,  -0.39192359447479248, -.00001f);
+			glVertex3f( 0.05740899562835693,  -0.34192359447479248, -.00001f);
+
+			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
+		glEnd();
+	}
+
+	if(rand()%modNum == 0)
+	{	
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
+			
+			glVertex3f(-0.053740899562835693, -0.34192359447479248, -.00001f);
+			glVertex3f(-0.033740899562835693, -0.39192359447479248, -.00001f);
+			glVertex3f(-0.013740899562835693, -0.34192359447479248, -.00001f);
+			glVertex3f( 0.01740899562835693,  -0.39192359447479248, -.00001f);
+			glVertex3f( 0.03740899562835693,  -0.34192359447479248, -.00001f);
+			glVertex3f( 0.05740899562835693,  -0.39192359447479248, -.00001f);
+
+			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
+		glEnd();
+	}
+	*/
+
 	glPopMatrix();
 
 #ifdef COLLISION_DEBUG
@@ -640,15 +760,19 @@ void CNuke::Draw()
 	
 }
 
-void CNuke::ProcessMotion(DWORD milliseconds)
+void CNuke::ProcessMotion(DWORD milliseconds, bool keyDown[])
 {
+	//Rotate to point to the direction of motion
+	rotation[2] = atan2(motionVector[1] , motionVector[0]) / DEG2RAD;
+
+	//update speed due to thrust
+	motionVector[0] += cos(rotation[2] * DEG2RAD) * thrust;
+	motionVector[1] += sin(rotation[2] * DEG2RAD) * thrust;
+
 	//Add motion based on motion vector and elapsed time
 	translation[0] += milliseconds * motionVector[0] / 1000;
 	translation[1] += milliseconds * motionVector[1] / 1000;
 	translation[2] += milliseconds * motionVector[2] / 1000;
-
-	//Rotate to point to the direction of motion
-	rotation[2] = atan2(motionVector[1] , motionVector[0]) / DEG2RAD;
 
 	//Update collision sphere locations
 	for(unsigned int i = 0; i < collisionSpheres.size(); i++)
@@ -670,6 +794,7 @@ void CNuke::ProcessMotion(DWORD milliseconds)
 		collisionSpheres[i]->globalPosition[1] += translation[1];
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
+
 
 	if(translation[1] > 1.75)
 		translation[1] = -1.75;
@@ -917,7 +1042,7 @@ void CDebris::Draw()
 #endif
 }
 
-void CDebris::ProcessMotion(DWORD milliseconds)
+void CDebris::ProcessMotion(DWORD milliseconds, bool keys[])
 {
 	//Add motion based on motion vector and elapsed time
 	translation[0] += milliseconds * motionVector[0] / 1000;
@@ -1601,7 +1726,7 @@ void CFlakCannon::Draw()
 		glVertex3f(-.03f, .8f, -.00125);
 	glEnd();
 
-	//Draw the cannon
+	//Draw the cannon outline
 	glColor3f(1, 1, 1);
 	glBegin(GL_LINE_STRIP);
 		glVertex3f(-.05f, 0, -.00125);

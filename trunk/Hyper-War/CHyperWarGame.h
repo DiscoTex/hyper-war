@@ -32,8 +32,8 @@ public:
 
 	BOOL Initialize(GL_Window* window, Keys* keys);		// Any GL Init Code & User Initialiazation Goes Here
 	void Deinitialize();								// Any User DeInitialization Goes Here
-	void ProcessRawInput(/*some parameters*/);			// Process new raw input structure
-	void ProcessKeyInput(/*some parameters*/);			// Process keyboard input
+	void ProcessRawInput(/* some params */);			// Process new raw input structure
+	void ProcessKeyInput(DWORD wParam, bool state);			// Process keyboard input
 	void Update (DWORD milliseconds);					// Perform Motion Updates Here
 	void Draw();										// Draw the current frame
 
@@ -52,4 +52,6 @@ private:
 	CAudioRenderer				audioRenderer;
 	//Raw Input Reader
 	CRawInput					rawInput;
+
+	bool						keyDown [256];
 };
