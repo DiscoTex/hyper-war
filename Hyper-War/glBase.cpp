@@ -284,7 +284,7 @@ LRESULT CALLBACK WindowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if ((wParam >= 0) && (wParam <= 255))						// Is Key (wParam) In A Valid Range?
 			{
 				window->keys->keyDown [wParam] = TRUE;					// Set The Selected Key (wParam) To True
-				hyperWarGame.ProcessKeyInput();
+				hyperWarGame.ProcessKeyInput(wParam, true);
 				return 0;												// Return
 			}
 		break;															// Break
@@ -293,7 +293,7 @@ LRESULT CALLBACK WindowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if ((wParam >= 0) && (wParam <= 255))						// Is Key (wParam) In A Valid Range?
 			{
 				window->keys->keyDown [wParam] = FALSE;					// Set The Selected Key (wParam) To False
-				hyperWarGame.ProcessKeyInput();
+				hyperWarGame.ProcessKeyInput(wParam, false);
 				return 0;												// Return
 			}
 		break;															// Break
@@ -356,7 +356,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	window.init.width			= GetSystemMetrics(SM_CXSCREEN);		// Window Width
 	window.init.height			= GetSystemMetrics(SM_CYSCREEN);		// Window Height
 	window.init.bitsPerPixel	= 16;									// Bits Per Pixel
-	window.init.isFullScreen	= TRUE;									// Fullscreen? (Set To TRUE)
+	window.init.isFullScreen	= FALSE;									// Fullscreen? (Set To TRUE)
 
 	ZeroMemory (&keys, sizeof (Keys));									// Zero keys Structure
 
