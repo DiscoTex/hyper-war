@@ -206,7 +206,6 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
 		gameObjects.push_back(cannon);
 
-		lastLaunch = 0;
 		keydownTime = 0;
 	}
 
@@ -246,12 +245,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		ToggleFullscreen (g_window);							// Toggle Fullscreen Mode
 	}
 
-	lastLaunch += milliseconds;
 	if (g_keys->keyDown ['A'] == TRUE)						// Is F1 Being Pressed?
 	{
 		keydownTime += milliseconds;
 	}
-	else if(lastLaunch > 100 && keydownTime > 100)
+	else if(keydownTime > 0)
 	{
 		nuke = new CNuke();
 		nuke->SetColor(0.0, 0.0, 1.0);
@@ -268,7 +266,6 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		nuke->SetThrust(thrust);
 		gameObjects.push_back(nuke);
 
-		lastLaunch = 0;
 		keydownTime = 0;
 	}
 

@@ -53,7 +53,6 @@ private:
 	//Raw Input Reader
 	CRawInput					rawInput;
 
-	DWORD						lastLaunch;
 	DWORD						keydownTime;
 
 };
