@@ -51,7 +51,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			DispatchMessage(&msg);
 		}
 	}
-	objMouse.~CRawMouse();
+	objMouse.destroy_raw_mouse();
 	return (int) msg.wParam;
 }
 
