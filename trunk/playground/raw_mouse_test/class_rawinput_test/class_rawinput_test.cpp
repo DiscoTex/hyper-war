@@ -133,10 +133,11 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int wmId, wmEvent;
+	int wmId, wmEvent,i;
 	PAINTSTRUCT ps;
 	HDC hdc;
-
+	RECT          rc;              /* A rectangle used during drawing */
+	char msgBuf[256] ;
 	switch (message)
 	{
 	case WM_COMMAND:
@@ -158,6 +159,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		// TODO: Add any drawing code here...
+		GetClientRect(hWnd, &rc);
+		for (i = 0; i < objMouse.raw_mouse_count(); i++) {
+		    wsprintf(msgBuf, 
+			     "Mouse %i X: %ld\nMouse %i Y: %ld\nMouse %i Buttons: %i%i%i\n", 
+			     i, 
+				 objMouse.get_x_delta(i), 
+			     i, 
+				 objMouse.get_y_delta(i), 
+			     i, 
+			     objMouse.mouse_button_pressed(i, 0), 
+			     objMouse.mouse_button_pressed(i, 1), 
+			     objMouse.mouse_button_pressed(i, 2));
+
+		    DrawText(hdc,msgBuf, strlen(msgBuf), &rc, DT_CENTER);
+		    OffsetRect(&rc,0,100); // move the draw position down a bit
+		  }
+
+		// TODO: done adding drawing code here...
+
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:
@@ -165,6 +185,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_INPUT:
 		objMouse.process_raw_mouse((HRAWINPUT)lParam);
+		InvalidateRect(hWnd,0,TRUE);
+		SendMessage(hWnd,WM_PAINT,0,0);
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);

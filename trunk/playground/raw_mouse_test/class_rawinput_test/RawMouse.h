@@ -83,4 +83,7 @@ private:
 	bool bHasBeenInitialized;
 	// read raw input
 	bool read_raw_input(PRAWINPUT raw);
+public:
+	// ask if buttons are pressed 
+	bool mouse_button_pressed(int mousenum, int buttonnum);
 };
