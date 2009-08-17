@@ -79,9 +79,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		gw->translation[2] = 0;
 		//gravityWells.push_back(gw);
 
-		//CNuke *nuke;
-
 		/*
+		CNuke *nuke;
 		//Create some blue Nukes
 		for(int i=1; i<4; i++)
 		{
@@ -104,8 +103,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 			nuke->SetMotionVector(0.0001, -0.00005, 0);
 			//nuke->SetMotionVector(0, 0, 0);
 			gameObjects.push_back(nuke);
-		}
-		*/
+		}*/
 
 		//Create missle bases
 		CMissileBase *mb = new CMissileBase;
@@ -113,6 +111,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -84);
 		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
+		mb->SetLaunchKey('A');
 		gameObjects.push_back(mb);
 
 		mb = new CMissileBase;
@@ -120,6 +119,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -96);
 		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
+		mb->SetLaunchKey('S');
 		gameObjects.push_back(mb);
 
 		mb = new CMissileBase;
@@ -127,6 +127,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, 96);
 		mb->SetTranslation(10 * cos(186*DEG2RAD) + 12.01f, 10 * sin(186*DEG2RAD), -.001f);
+		mb->SetLaunchKey('J');
 		gameObjects.push_back(mb);
 
 		mb = new CMissileBase;
@@ -134,6 +135,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, 84);
 		mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01f, 10 * sin(174*DEG2RAD), -.001f);
+		mb->SetLaunchKey('K');
 		gameObjects.push_back(mb);
 
 		CCity *city = new CCity();
@@ -205,9 +207,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, 90);
 		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
 		gameObjects.push_back(cannon);
-
-		keydownTime = 0;
 	}
+
 
 	initialized = true;
 
@@ -234,6 +235,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	int iType, objIndexType;
 	CDebris *debris;
 	CNuke *nuke;
+	float *position;
 
 	if (g_keys->keyDown [VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
 	{
@@ -245,40 +247,44 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		ToggleFullscreen (g_window);							// Toggle Fullscreen Mode
 	}
 
-	if (g_keys->keyDown ['A'] == TRUE)						// Is F1 Being Pressed?
-	{
-		keydownTime += milliseconds;
-	}
-	else if(keydownTime > 0)
-	{
-		nuke = new CNuke();
-		nuke->SetColor(0.0, 0.0, 1.0);
-		nuke->SetScale(.1f, .1f, .1f);
-		nuke->SetTranslation(1.85f, .5f, -.00f);
-		nuke->SetMotionVector(-0.1, .0000, 0);
-
-		float thrust = keydownTime / 5000.0;
-		if(thrust > 1)
-			thrust = 1;
-		else if(thrust < .1)
-			thrust = .1;
-
-		nuke->SetThrust(thrust);
-		gameObjects.push_back(nuke);
-
-		keydownTime = 0;
-	}
-
 	//For every object in the game
 	for(unsigned int i=0; i<gameObjects.size(); i++)
 	{
 		//Process motion
 		gameObjects[i]->ProcessMotion(milliseconds, g_keys);
+
 		//Process gravity
 		gameObjects[i]->ProcessGravity(milliseconds, gravityWells);
+
+		if(gameObjects[i]->GetType() == TYPE_MISSILEBASE)
+		{
+			if(g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()] && ((CMissileBase*)(gameObjects[i]))->IsLoaded())
+			{
+				((CMissileBase*)(gameObjects[i]))->AddCharge(milliseconds);
+			}
+			else if(!g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()] && ((CMissileBase*)(gameObjects[i]))->LaunchReady())
+			{
+				//Launch missile
+				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / 5000.0;
+				if(thrust > 1)
+					thrust = 1;
+				else if(thrust < .1)
+					thrust = .1;
+
+				nuke = new CNuke();
+				nuke->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
+				nuke->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
+				position = ((CMissileBase*)(gameObjects[i]))->GetNukeTranslation();
+				//nuke->SetTranslation(((CMissileBase*)(gameObjects[i]))->GetNukeTranslation()[0], ((CMissileBase*)(gameObjects[i]))->GetNukeTranslation()[1], ((CMissileBase*)(gameObjects[i]))->GetNukeTranslation()[2]);
+				nuke->SetTranslation(position[0], position[1], position[2]);
+				nuke->SetMotionVector(((CMissileBase*)(gameObjects[i]))->GetNukeVector()[0], ((CMissileBase*)(gameObjects[i]))->GetNukeVector()[1], ((CMissileBase*)(gameObjects[i]))->GetNukeVector()[2]);
+				nuke->SetThrust(thrust);
+				gameObjects.push_back(nuke);
+			}
+		}
+
 		//Check for collisions with all other objects in the game
 		//returns -1 for no collision, otherwise returns the index of the collided object
-		iType = gameObjects[i]->GetType();
 		objIndex = 	gameObjects[i]->CheckCollision(gameObjects, milliseconds, i);
 		//If a collision occurred, handle it
 		if(objIndex != -1)

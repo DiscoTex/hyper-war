@@ -120,9 +120,10 @@ public:
 
 	void Draw();
 private:
-	float thrust;
-	unsigned short   animVal;
-	float flameColor[3];
+	float				thrust;
+	unsigned short		animVal;
+	float				flameColor[3];
+	DWORD				lastLaunch;
 };
 
 class CDebris : public CGameObject
@@ -150,12 +151,22 @@ public:
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
 	bool CanDestroy(int destroyerType);
 	int	 GetType();
-
+	void SetLaunchKey(char key) {launchKey = key;}
+	char GetLaunchKey() {return launchKey;}
+	bool IsLoaded() {return loaded;}
+	int  Launch();
+	bool LaunchReady() {return launchReady;}
+	void AddCharge(DWORD milliseconds) {charge += milliseconds; launchReady = true;}
+	float* GetNukeTranslation();
+	float* GetNukeVector();
 	void Draw();
 
 private:
 	bool loaded;
-
+	char launchKey;
+	bool launchReady;
+	int  charge;
+	int	 timeToReload;
 };
 
 class CCity : public CGameObject

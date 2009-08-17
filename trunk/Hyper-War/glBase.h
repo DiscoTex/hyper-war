@@ -32,7 +32,6 @@
 *		Perform All Your Scene Drawing                                           *
 *                                                                                *
 *********************************************************************************/
-
 #ifndef GL_FRAMEWORK__INCLUDED
 #define GL_FRAMEWORK__INCLUDED
 
