@@ -52,7 +52,4 @@ private:
 	CAudioRenderer				audioRenderer;
 	//Raw Input Reader
 	CRawInput					rawInput;
-
-	DWORD						keydownTime;
-
 };

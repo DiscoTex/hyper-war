@@ -453,6 +453,7 @@ CNuke::CNuke()
 	flameColor[2] = 0;
 
 	animVal = 0;
+	lastLaunch = 0;
 }
 
 void CNuke::Draw()
@@ -1109,14 +1110,34 @@ CMissileBase::CMissileBase()
 	collisionSpheres.push_back(cSphere);
 
 	loaded = true;
+	launchKey = '\0';
+	launchReady = false;
 }
 
 CMissileBase::~CMissileBase()
 {
 }
 
+int CMissileBase::Launch()
+{
+	int oldCharge = charge;
+
+	loaded = false; 
+	launchReady = false; 
+	timeToReload = 500; 
+	charge = 0;
+
+	return oldCharge;
+}
+
 void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 {
+	if(timeToReload > 0)
+	{
+		timeToReload -= milliseconds;
+	}
+	else
+		loaded = true;
 }
 
 bool CMissileBase::CanDestroy(int destroyerType)
@@ -1125,6 +1146,41 @@ bool CMissileBase::CanDestroy(int destroyerType)
 		return false;
 	else
 		return true;
+}
+
+float* CMissileBase::GetNukeTranslation()
+{
+	float nukeTranslation[3];
+	float rotatedNuke[3];
+
+	nukeTranslation[0] = .5f * scale[0];
+	nukeTranslation[1] = 1.0f * scale[1];
+	nukeTranslation[2] = 0;
+
+	rotatedNuke[0] = nukeTranslation[0] *  cos((rotation[2]) * DEG2RAD) + nukeTranslation[1] * -sin((rotation[2]) * DEG2RAD);
+	rotatedNuke[1] = nukeTranslation[0] * sin((rotation[2]) * DEG2RAD) + nukeTranslation[1] * cos((rotation[2]) * DEG2RAD);
+	rotatedNuke[2] = 0;
+
+	rotatedNuke[0] += translation[0];
+	rotatedNuke[1] += translation[1];
+
+	return rotatedNuke;
+}
+
+float* CMissileBase::GetNukeVector()
+{
+	float nukeVector[3];
+	float divisor;
+
+	nukeVector[0] = 0 - translation[0] - 1.0f * scale[0];
+	nukeVector[1] = 0 - translation[1] - .5f * scale[1];
+	
+	//Convert to unit vector, then make it sort of small.  This will be the missile's original motion vector.
+	divisor = sqrt(nukeVector[0] * nukeVector[0] + nukeVector[1] * nukeVector[1]);
+	nukeVector[0] = (nukeVector[0] / divisor / 3.0f);
+	nukeVector[1] = (nukeVector[1] / divisor / 3.0f);
+	
+	return nukeVector;
 }
 
 void CMissileBase::Draw()
@@ -1191,6 +1247,18 @@ void CMissileBase::Draw()
 		glVertex3f(0,.5f,0);
 	glEnd();
 
+
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINES);
+		glVertex3f(-1, 0, 0);
+		glVertex3f(1,0,0);
+
+		glVertex3f(0, -1, 0);
+		glVertex3f(0,1,0);
+	glEnd();
+
+
+
 	if(loaded)
 	{
 		//Draw a missile on the launch pad
@@ -1201,7 +1269,7 @@ void CMissileBase::Draw()
 
 		//Rotate to point toward the cursor
 		//Right now, they point to (0,0), but we'll replace (0,0) with cursor coordinates
-		missileRotation = atan2(0 - translation[1] , 0 - translation[0]) / DEG2RAD;
+		missileRotation = atan2(0 - translation[1] - .5f * scale[1], 0 - translation[0] - 1.0f * scale[0]) / DEG2RAD;
 		glRotatef(missileRotation - rotation[2] - 90, 0, 0, 1);
 
 		glColor3f(color[0], color[1], color[2]);  
