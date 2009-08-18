@@ -1171,14 +1171,26 @@ float* CMissileBase::GetNukeVector()
 {
 	float nukeVector[3];
 	float divisor;
+	float nukePos[3];
 
-	nukeVector[0] = 0 - translation[0] - 1.0f * scale[0];
-	nukeVector[1] = 0 - translation[1] - .5f * scale[1];
+	//scale then rotate it
+	nukePos[0] = .5*scale[0] * cos(rotation[2] * DEG2RAD) - 1.0*scale[1] * sin(rotation[2] * DEG2RAD);
+	nukePos[1] = .5*scale[0] * sin(rotation[2] * DEG2RAD) + 1.0*scale[1] * cos(rotation[2] * DEG2RAD);
+	nukePos[2] = 0;
+
+	//translate it
+	nukePos[0] += translation[0];
+	nukePos[1] += translation[1];
+
+	//compute vector to cursor
+	nukeVector[0] = pCursorPos[0] - nukePos[0];
+	nukeVector[1] = pCursorPos[1] - nukePos[1];
 	
 	//Convert to unit vector, then make it sort of small.  This will be the missile's original motion vector.
 	divisor = sqrt(nukeVector[0] * nukeVector[0] + nukeVector[1] * nukeVector[1]);
 	nukeVector[0] = (nukeVector[0] / divisor / 3.0f);
 	nukeVector[1] = (nukeVector[1] / divisor / 3.0f);
+	nukeVector[2] = 0;
 	
 	return nukeVector;
 }
@@ -1257,19 +1269,31 @@ void CMissileBase::Draw()
 		glVertex3f(0,1,0);
 	glEnd();
 
-
-
 	if(loaded)
 	{
 		//Draw a missile on the launch pad
 		//The missile gets its own coordinate system
 		glPushMatrix();
 
-		glTranslatef(.5, 1, 0);
+		float nukePos[2];
+
+		//rotate it
+		nukePos[0] = .5 * cos(rotation[2] * DEG2RAD) - 1.0 * sin(rotation[2] * DEG2RAD);
+		nukePos[1] = .5 * sin(rotation[2] * DEG2RAD) + 1.0 * cos(rotation[2] * DEG2RAD);
+
+		//scale it
+		nukePos[0] *= scale[0];
+		nukePos[1] *= scale[1];
+
+		//translate it
+		nukePos[0] += translation[0];
+		nukePos[1] += translation[1];
 
 		//Rotate to point toward the cursor
-		//Right now, they point to (0,0), but we'll replace (0,0) with cursor coordinates
-		missileRotation = atan2(0 - translation[1] - .5f * scale[1], 0 - translation[0] - 1.0f * scale[0]) / DEG2RAD;
+		missileRotation = atan2(pCursorPos[1] - nukePos[1], pCursorPos[0] - nukePos[0]) / DEG2RAD;
+
+		//glRotatef(missileRotation + rotation[2] + 90, 0, 0, 1);
+		glTranslatef(.5, 1, 0);
 		glRotatef(missileRotation - rotation[2] - 90, 0, 0, 1);
 
 		glColor3f(color[0], color[1], color[2]);  
@@ -1723,6 +1747,8 @@ int	CFlakCannon::GetType()
 
 void CFlakCannon::Draw()
 {
+	float cannonRotation = 0;
+
 	glPushMatrix();
 	
 	glTranslatef(translation[0], translation[1], translation[2]);
@@ -1776,6 +1802,12 @@ void CFlakCannon::Draw()
 
 	glColor3f(color[0], color[1], color[2]);
 
+	cannonRotation = atan2(pCursorPos[1] - translation[1], pCursorPos[0] - translation[0]) / DEG2RAD;
+
+	glPushMatrix();
+
+	glRotatef(cannonRotation, 0, 0, 1);
+
 	//Draw the cannon
 	glBegin(GL_QUADS);
 		glVertex3f(-.05f, 0, -.00125);
@@ -1795,6 +1827,9 @@ void CFlakCannon::Draw()
 	glEnd();
 
 	glPopMatrix();
+
+	glPopMatrix();
+
 
 
 #ifdef COLLISION_DEBUG

@@ -187,15 +187,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CRawInput.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\GameObjects.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\glBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RawMouse.cpp"
 				>
 			</File>
 		</Filter>
@@ -217,15 +217,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CRawInput.h"
-				>
-			</File>
-			<File
 				RelativePath=".\GameObjects.h"
 				>
 			</File>
 			<File
 				RelativePath=".\glBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RawMouse.h"
 				>
 			</File>
 		</Filter>

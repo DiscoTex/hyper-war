@@ -159,6 +159,7 @@ public:
 	void AddCharge(DWORD milliseconds) {charge += milliseconds; launchReady = true;}
 	float* GetNukeTranslation();
 	float* GetNukeVector();
+	void  SetCursorPointer(float* newPCursorPos) {pCursorPos = newPCursorPos;}
 	void Draw();
 
 private:
@@ -167,6 +168,7 @@ private:
 	bool launchReady;
 	int  charge;
 	int	 timeToReload;
+	float*	pCursorPos;
 };
 
 class CCity : public CGameObject
@@ -194,7 +196,10 @@ public:
 
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
 	bool CanDestroy(int destroyerType);
+	void  SetCursorPointer(float* newPCursorPos) {pCursorPos = newPCursorPos;}
 	int	 GetType();
 
 	void Draw();
+private:
+	float* pCursorPos;
 };
