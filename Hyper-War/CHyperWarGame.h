@@ -11,7 +11,7 @@
 #include "glBase.h"												// Header File For NeHeGL
 #include "CAudioRenderer.h"
 #include "CEffects.h"
-#include "CRawInput.h"
+#include "RawMouse.h"
 
 using namespace std;
 
@@ -32,15 +32,17 @@ public:
 
 	BOOL Initialize(GL_Window* window, Keys* keys);		// Any GL Init Code & User Initialiazation Goes Here
 	void Deinitialize();								// Any User DeInitialization Goes Here
-	void ProcessRawInput(/* some params */);			// Process new raw input structure
-	void ProcessKeyInput(DWORD wParam, bool state);			// Process keyboard input
+	void ProcessRawInput(LPARAM lParam);				// Process new raw input structure
 	void Update (DWORD milliseconds);					// Perform Motion Updates Here
+	void DrawCursors();
 	void Draw();										// Draw the current frame
 
 private:
 	GL_Window*	g_window;
 	Keys*		g_keys;
 	bool		initialized;
+
+	float		mousePos[2][2];
 	
 	//All of the CGameObjects in the game, e.g. rockets, planets, debris
 	vector< CGameObject* >		gameObjects;
@@ -51,5 +53,5 @@ private:
 	//Audio Renderer
 	CAudioRenderer				audioRenderer;
 	//Raw Input Reader
-	CRawInput					rawInput;
+	CRawMouse					rawMouse;
 };

@@ -10,6 +10,13 @@
 CHyperWarGame::CHyperWarGame()
 {
 	initialized = false;
+
+	rawMouse.init_raw_mouse(1,0,1);
+
+	mousePos[0][0] = 0;
+	mousePos[0][1] = 0;
+	mousePos[1][0] = 0;
+	mousePos[1][1] = 0;
 }
 
 CHyperWarGame::~CHyperWarGame()
@@ -22,6 +29,7 @@ CHyperWarGame::~CHyperWarGame()
 	{
 		delete gravityWells[i];
 	}
+	rawMouse.destroy_raw_mouse();
 }
 
 BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Init Code & User Initialiazation Goes Here
@@ -112,6 +120,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetRotation(0, 0, -84);
 		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
 		mb->SetLaunchKey('A');
+		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
 		mb = new CMissileBase;
@@ -120,6 +129,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetRotation(0, 0, -96);
 		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
 		mb->SetLaunchKey('S');
+		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
 		mb = new CMissileBase;
@@ -128,6 +138,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetRotation(0, 0, 96);
 		mb->SetTranslation(10 * cos(186*DEG2RAD) + 12.01f, 10 * sin(186*DEG2RAD), -.001f);
 		mb->SetLaunchKey('J');
+		mb->SetCursorPointer(mousePos[1]);
 		gameObjects.push_back(mb);
 
 		mb = new CMissileBase;
@@ -136,6 +147,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetRotation(0, 0, 84);
 		mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01f, 10 * sin(174*DEG2RAD), -.001f);
 		mb->SetLaunchKey('K');
+		mb->SetCursorPointer(mousePos[1]);
 		gameObjects.push_back(mb);
 
 		CCity *city = new CCity();
@@ -199,6 +211,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetScale(.1f, .1f, .1f);
 		cannon->SetRotation(0, 0, -90);
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
+		cannon->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(cannon);
 
 		cannon = new CFlakCannon();
@@ -206,6 +219,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetScale(.1f, .1f, .1f);
 		cannon->SetRotation(0, 0, 90);
 		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
+		cannon->SetCursorPointer(mousePos[1]);
 		gameObjects.push_back(cannon);
 	}
 
@@ -219,13 +233,9 @@ void CHyperWarGame::Deinitialize (void)										// Any User DeInitialization Go
 {
 }
 
-void CHyperWarGame::ProcessRawInput(/*some parameters*/)
+void CHyperWarGame::ProcessRawInput(LPARAM lParam)
 {
-}
-
-void CHyperWarGame::ProcessKeyInput(DWORD wParam, bool state)
-{
-
+	rawMouse.process_raw_mouse((HRAWINPUT)lParam);
 }
 
 void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates Here
@@ -236,6 +246,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	CDebris *debris;
 	CNuke *nuke;
 	float *position;
+	float *nukeVector;
 
 	if (g_keys->keyDown [VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
 	{
@@ -265,19 +276,19 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			else if(!g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()] && ((CMissileBase*)(gameObjects[i]))->LaunchReady())
 			{
 				//Launch missile
-				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / 5000.0;
+				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / 5000.0f;
 				if(thrust > 1)
 					thrust = 1;
-				else if(thrust < .1)
-					thrust = .1;
+				else if(thrust < .1f)
+					thrust = .1f;
 
 				nuke = new CNuke();
 				nuke->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
 				nuke->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
 				position = ((CMissileBase*)(gameObjects[i]))->GetNukeTranslation();
-				//nuke->SetTranslation(((CMissileBase*)(gameObjects[i]))->GetNukeTranslation()[0], ((CMissileBase*)(gameObjects[i]))->GetNukeTranslation()[1], ((CMissileBase*)(gameObjects[i]))->GetNukeTranslation()[2]);
 				nuke->SetTranslation(position[0], position[1], position[2]);
-				nuke->SetMotionVector(((CMissileBase*)(gameObjects[i]))->GetNukeVector()[0], ((CMissileBase*)(gameObjects[i]))->GetNukeVector()[1], ((CMissileBase*)(gameObjects[i]))->GetNukeVector()[2]);
+				nukeVector = ((CMissileBase*)(gameObjects[i]))->GetNukeVector();
+				nuke->SetMotionVector(nukeVector[0], nukeVector[1], nukeVector[2]);
 				nuke->SetThrust(thrust);
 				gameObjects.push_back(nuke);
 			}
@@ -391,8 +402,79 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	//Update starfield position
 	//Starfield position should be moved as a function of time
 	//starFieldPosition = (starFieldPosition + milliseconds) % (num possible positions);
-
+	
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
+
+	mousePos[0][0] += rawMouse.get_x_delta(1) / 500.0f;
+	if(mousePos[0][0] > 0)
+		mousePos[0][0] = 0;
+	else if(mousePos[0][0] < -1.8f)
+		mousePos[0][0] = -1.8f;
+
+	mousePos[0][1] -= rawMouse.get_y_delta(1) / 500.0f;
+	if(mousePos[0][1] > 1.6)
+		mousePos[0][1] = 1.6;
+	else if(mousePos[0][1] < -1.6)
+		mousePos[0][1] = -1.6;
+
+	mousePos[1][0] += rawMouse.get_x_delta(3) / 500.0f;
+	if(mousePos[1][0] < 0)
+		mousePos[1][0] = 0;
+	else if(mousePos[1][0] > 1.8f)
+		mousePos[1][0] = 1.8f;
+
+	mousePos[1][1] -= rawMouse.get_y_delta(3) / 500.0f;
+	if(mousePos[1][1] > 1.6)
+		mousePos[1][1] = 1.6;
+	else if(mousePos[1][1] < -1.6)
+		mousePos[1][1] = -1.6;
+}
+
+void CHyperWarGame::DrawCursors()
+{
+	glPushMatrix();
+
+	glTranslatef(mousePos[0][0], mousePos[0][1], 0);
+	glScalef(.05, .05, 1);
+
+	glColor3f(0, 1, 0);
+	glBegin(GL_LINES);
+		glVertex3f(-1.0f, 0, 0);
+		glVertex3f(-.2f, 0, 0);
+
+		glVertex3f(.2f, 0, 0);
+		glVertex3f(1, 0, 0);
+
+		glVertex3f(0, -1, 0);
+		glVertex3f(0, -.2f, 0);
+
+		glVertex3f(0, .2f, 0);
+		glVertex3f(0, 1, 0);
+	glEnd();
+
+	glPopMatrix();
+
+	glPushMatrix();
+
+	glTranslatef(mousePos[1][0], mousePos[1][1], 0);
+	glScalef(.05, .05, 1);
+
+	glColor3f(0, 0, 1);
+	glBegin(GL_LINES);
+		glVertex3f(-1.0f, 0, 0);
+		glVertex3f(-.2f, 0, 0);
+
+		glVertex3f(.2f, 0, 0);
+		glVertex3f(1, 0, 0);
+
+		glVertex3f(0, -1, 0);
+		glVertex3f(0, -.2f, 0);
+
+		glVertex3f(0, .2f, 0);
+		glVertex3f(0, 1, 0);
+	glEnd();
+
+	glPopMatrix();
 }
 
 void CHyperWarGame::Draw (void)
@@ -411,6 +493,8 @@ void CHyperWarGame::Draw (void)
 	}
 
 	globalEffects.DrawStarfield();
+
+	DrawCursors();
 
 	glFlush ();													// Flush The GL Rendering Pipeline
 }
