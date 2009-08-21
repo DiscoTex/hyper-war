@@ -22,6 +22,9 @@
 #include "glBase.h"														// Header File For The NeHeGL Basecode
 #include "CHyperWarGame.h"
 
+typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALFARPROC)( int );
+PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
+
 CHyperWarGame hyperWarGame;
 
 #define WM_TOGGLEFULLSCREEN (WM_USER+1)									// Application Define Message For Toggling
@@ -331,6 +334,21 @@ BOOL RegisterWindowClass (Application* application)						// Register A Window Cl
 	return TRUE;														// Return True (Success)
 }
 
+void setVSync(int interval=1)
+{
+  const char *extensions = (char*)glGetString( GL_EXTENSIONS );
+
+  if( strstr( extensions, "WGL_EXT_swap_control" ) == 0 )
+    return; // Error: WGL_EXT_swap_control extension not supported on your computer.\n");
+  else
+  {
+    wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress( "wglSwapIntervalEXT" );
+
+    if( wglSwapIntervalEXT )
+      wglSwapIntervalEXT(interval);
+  }
+}
+
 // Program Entry (WinMain)
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -386,6 +404,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 		if (CreateWindowGL (&window) == TRUE)							// Was Window Creation Successful?
 		{
 			// At This Point We Should Have A Window That Is Setup To Render OpenGL
+			// turn off V-Sync
+			setVSync(0);
 			if (hyperWarGame.Initialize (&window, &keys) == FALSE)					// Call User Intialization
 			{
 				// Failure

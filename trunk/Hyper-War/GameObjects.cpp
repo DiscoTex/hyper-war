@@ -232,105 +232,102 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 	float relPosVector[3];
 	int thisType, otherType;
 
-	for(unsigned int k=0; k<collisionSpheres.size(); k++)
+
+	//Check for intersection with all other objects in the game
+	for(unsigned int i=checkAfterIndex; i<gObjects.size(); i++)
 	{
-		//Check for intersection with all other objects in the game
-		for(unsigned int i=checkAfterIndex; i<gObjects.size(); i++)
+		thisType = GetType();
+		otherType = gObjects[i]->GetType();
+
+		//Decide here whether or not two types of objects can collide at all.
+		//Remember we can only detect one collision per object at a time
+		switch(thisType)
 		{
-			thisType = GetType();
-			otherType = gObjects[i]->GetType();
-			if(thisType == TYPE_PLANET && otherType == TYPE_DEBRIS)
-				i=i;
+		case TYPE_DEBRIS:
+			if(otherType == TYPE_DEBRIS)
+				continue;
+			break;
+		case TYPE_PLANET:
+			if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON)
+				continue;
+			break;
+		case TYPE_MISSILEBASE:
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
+				continue;
+		case TYPE_CITY:
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
+				continue;
+			break;
+		case TYPE_FLAKCANNON:
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
+				continue;
+			break;
+		}
 
-			//Decide here whether or not two types of objects can collide at all.
-			//Remember we can only detect one collision per object at a time
-			switch(thisType)
-			{
-			case TYPE_DEBRIS:
-				if(otherType == TYPE_DEBRIS)
-					continue;
-				break;
-			case TYPE_PLANET:
-				if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON)
-					continue;
-				break;
-			case TYPE_MISSILEBASE:
-				if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
-					continue;
-			case TYPE_CITY:
-				if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
-					continue;
-				break;
-			case TYPE_FLAKCANNON:
-				if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
-					continue;
-				break;
-			}
-
+		if(gObjects[i] == this)
+			continue;
+		
+		for(unsigned int k=0; k<collisionSpheres.size(); k++)
+		{
 			for(unsigned int j=0; j<gObjects[i]->GetCollisionSpheres().size(); j++)
 			{
-				if(gObjects[i] != this)
+				// Relative velocity
+				relVelVector[0] = (gObjects[i]->GetMotionVector()[0] - motionVector[0]);
+				relVelVector[1] = (gObjects[i]->GetMotionVector()[1] - motionVector[1]);
+				relVelVector[2] = (gObjects[i]->GetMotionVector()[2] - motionVector[2]);
+
+				//Motion vector is in units per second
+				//Assume we are getting at least 60 fps
+				relVelVector[0] /= 60;
+				relVelVector[1] /= 60;
+				relVelVector[2] /= 60;
+				
+				// Relative position
+				relPosVector[0] = gObjects[i]->GetCollisionSpheres()[j]->globalPosition[0] - collisionSpheres[k]->globalPosition[0];
+				relPosVector[1] = gObjects[i]->GetCollisionSpheres()[j]->globalPosition[1] - collisionSpheres[k]->globalPosition[1];
+				relPosVector[2] = gObjects[i]->GetCollisionSpheres()[j]->globalPosition[2] - collisionSpheres[k]->globalPosition[2];
+
+				//Minimal distance to avoid collision
+				float r = collisionSpheres[k]->radius * scale[0] + gObjects[i]->GetCollisionSpheres()[j]->radius * gObjects[i]->GetScale()[0];
+
+				//(Distance between the objects)^2 - (Minimal distance)^2
+				float pp = relPosVector[0] * relPosVector[0] + relPosVector[1] * relPosVector[1] + relPosVector[2] * relPosVector[2] - r*r;
+
+				//If (pp < 0), the collision spheres are intersecting right now
+				if ( pp < 0 ) 
+					return i;
+
+				/*
+				//Now check to see if the spheres will intersect within 1/60th of a second
+				//pv = relPosVector *dot* relVelVector
+				float pv = relPosVector[0] * relVelVector[0] + relPosVector[1] * relVelVector[1] + relPosVector[2] * relVelVector[2];
+				//Check if the spheres are moving away from each other
+				if ( pv < 0 ) 
 				{
-					// Relative velocity
-					relVelVector[0] = (gObjects[i]->GetMotionVector()[0] - motionVector[0]);
-					relVelVector[1] = (gObjects[i]->GetMotionVector()[1] - motionVector[1]);
-					relVelVector[2] = (gObjects[i]->GetMotionVector()[2] - motionVector[2]);
+					//vv = (relative velocity vector)^2
+					float vv = relVelVector[0] * relVelVector[0] + relVelVector[1] * relVelVector[1] + relVelVector[2] * relVelVector[2];
 
-					relVelVector[0] /= 60;
-					relVelVector[1] /= 60;
-					relVelVector[2] /= 60;
-					
-					// Relative position
-					//relPosVector[0] = gObjects[i]->GetPosition()[0] - translation[0];
-					//relPosVector[1] = gObjects[i]->GetPosition()[1] - translation[1];
-					//relPosVector[2] = gObjects[i]->GetPosition()[2] - translation[2];
-
-					relPosVector[0] = gObjects[i]->GetCollisionSpheres()[j]->globalPosition[0] - collisionSpheres[k]->globalPosition[0];
-					relPosVector[1] = gObjects[i]->GetCollisionSpheres()[j]->globalPosition[1] - collisionSpheres[k]->globalPosition[1];
-					relPosVector[2] = gObjects[i]->GetCollisionSpheres()[j]->globalPosition[2] - collisionSpheres[k]->globalPosition[2];
-
-					//Minimal distance
-					float r = collisionSpheres[k]->radius * scale[0] + gObjects[i]->GetCollisionSpheres()[j]->radius * gObjects[i]->GetScale()[0];
-
-					//dP^2-r^2
-					float pp = relPosVector[0] * relPosVector[0] + relPosVector[1] * relPosVector[1] + relPosVector[2] * relPosVector[2] - r*r;
-
-					//(1)Check if the spheres are already intersecting
-					if ( pp < 0 ) 
-						return i;
-/*
-					//Now check to see if the spheres will intersect within 1/60th of a second
-					//dP*dV
-					float pv = relPosVector[0] * relVelVector[0] + relPosVector[1] * relVelVector[1] + relPosVector[2] * relVelVector[2];
-					//(2)Check if the spheres are moving away from each other
-					if ( pv < 0 ) 
+					//(3)Check if the spheres can intersect within 1 frame
+					if ( (pv + vv) <= 0 && (vv + 2 * pv + pp) >= 0 )
 					{
-						//dV^2
-						float vv = relVelVector[0] * relVelVector[0] + relVelVector[1] * relVelVector[1] + relVelVector[2] * relVelVector[2];
-
-						//(3)Check if the spheres can intersect within 1 frame
-						if ( (pv + vv) <= 0 && (vv + 2 * pv + pp) >= 0 )
-						{
-							return -1;
-						}
-						else
-						{
-							//Discriminant/4
-							float D    = pv * pv - pp * vv; 
-							if ( D > 0 )
-								return -1;
-
-							// tmin = -dP*dV/dV*2 
-							//the time when the distance between the spheres is minimal
-							//float tmin = -pv/vv;
-
-							//Discriminant/(4*dV^2) = -(dp^2-r^2+dP*dV*tmin)
-							//if( pp + pv * tmin > 0 )
-							//	return i;
-						}
+						return -1;
 					}
-					*/
-				}
+					else
+					{
+						//Discriminant/4
+						float D    = pv * pv - pp * vv; 
+						if ( D > 0 )
+							return -1;
+
+						// tmin = -dP*dV/dV*2 
+						//the time when the distance between the spheres is minimal
+						float tmin = -pv/vv;
+
+						//Discriminant/(4*dV^2) = -(dp^2-r^2+dP*dV*tmin)
+						if( pp + pv * tmin > 0 )
+							return i;
+					}
+				}*/
 			}
 		}
 	}
@@ -380,7 +377,7 @@ void CPlanet::Draw()
 
 	float radius = 1;
 	glBegin(GL_TRIANGLES);
-		for (int i=0; i<360; i+=4)
+		for (int i=0; i<360; i+=2)
 		{
 			float degInRad = i*DEG2RAD;
 			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
@@ -394,7 +391,7 @@ void CPlanet::Draw()
 
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_LINE_LOOP);
-		for (int i=0; i<360; i+=4)
+		for (int i=0; i<360; i+=2)
 		{
 			float degInRad = i*DEG2RAD;
 			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
@@ -1090,20 +1087,10 @@ CMissileBase::CMissileBase()
 	sCollisionSphere *cSphere;
 
 	cSphere  = new sCollisionSphere;
-	cSphere->translation[0] = .25;
-	cSphere->translation[1] = .25;
+	cSphere->translation[0] = .50;
+	cSphere->translation[1] = .1;
 	cSphere->translation[2] = 0;
-	cSphere->radius = .25f;
-	cSphere->globalPosition[0] = 0;
-	cSphere->globalPosition[1] = 0;
-	cSphere->globalPosition[2] = 0;
-	collisionSpheres.push_back(cSphere);
-
-	cSphere  = new sCollisionSphere;
-	cSphere->translation[0] = .75f;
-	cSphere->translation[1] = .25;
-	cSphere->translation[2] = 0;
-	cSphere->radius = .25f;
+	cSphere->radius = .50f;
 	cSphere->globalPosition[0] = 0;
 	cSphere->globalPosition[1] = 0;
 	cSphere->globalPosition[2] = 0;
@@ -1704,24 +1691,18 @@ CFlakCannon::CFlakCannon()
 	sCollisionSphere *cSphere;
 
 	cSphere  = new sCollisionSphere;
-	cSphere->translation[0] = .25;
-	cSphere->translation[1] = .25;
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = 0;
 	cSphere->translation[2] = 0;
-	cSphere->radius = .25f;
+	cSphere->radius = .5f;
 	cSphere->globalPosition[0] = 0;
 	cSphere->globalPosition[1] = 0;
 	cSphere->globalPosition[2] = 0;
 	collisionSpheres.push_back(cSphere);
 
-	cSphere  = new sCollisionSphere;
-	cSphere->translation[0] = -.25;
-	cSphere->translation[1] = .25;
-	cSphere->translation[2] = 0;
-	cSphere->radius = .25f;
-	cSphere->globalPosition[0] = 0;
-	cSphere->globalPosition[1] = 0;
-	cSphere->globalPosition[2] = 0;
-	collisionSpheres.push_back(cSphere);
+	fireKey = '\0';
+	loaded = true;
+	timeToReload = 0;
 }
 
 CFlakCannon::~CFlakCannon()
@@ -1743,6 +1724,47 @@ bool CFlakCannon::CanDestroy(int destroyerType)
 int	CFlakCannon::GetType()
 {
 	return TYPE_FLAKCANNON;
+}
+
+void CFlakCannon::Fire()
+{
+	loaded = false; 
+	timeToReload = 100; 
+}
+
+void CFlakCannon::GetProjVector(int* TTL, float* projVector)
+{
+	projVector[0] = (pCursorPos[0] - translation[0]);
+	projVector[1] = (pCursorPos[1] - translation[1]);
+	projVector[2] = 0;//pCursorPos[2] - translation[2]/3.0;
+
+	float magnitude = sqrt(projVector[0] * projVector[0] + projVector[1] * projVector[1]) / 2.0;
+
+	projVector[0] /= magnitude;
+	projVector[1] /= magnitude;
+
+	*TTL = 1000 * magnitude;
+}
+
+float* CFlakCannon::GetProjTranslation()
+{
+	float projTranslation[3];
+
+	projTranslation[0] = translation[0];
+	projTranslation[1] = translation[1];
+	projTranslation[2] = -.0010;
+
+	return projTranslation;
+}
+
+void CFlakCannon::AddTimeSinceFired(DWORD milliseconds)
+{
+	timeToReload -= milliseconds;
+
+	if(timeToReload < 0)
+	{
+		loaded = true; 
+	}
 }
 
 void CFlakCannon::Draw()
@@ -1806,7 +1828,7 @@ void CFlakCannon::Draw()
 
 	glPushMatrix();
 
-	glRotatef(cannonRotation, 0, 0, 1);
+	glRotatef(cannonRotation - rotation[2] - 90, 0, 0, 1);
 
 	//Draw the cannon
 	glBegin(GL_QUADS);
@@ -1852,4 +1874,65 @@ void CFlakCannon::Draw()
 
 	glPopMatrix();
 #endif
+}
+
+CProjectile::CProjectile()
+{
+	origin[0] = 0;
+	origin[1] = 0;
+	origin[2] = 0;
+
+	timeToLive = 1000;
+}
+
+CProjectile::~CProjectile()
+{
+}
+
+void CProjectile::Draw()
+{
+	float projRotation = 0;
+
+	glPushMatrix();
+	
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	glColor3f(color[0], color[1], color[2]);
+
+	projRotation = atan2(motionVector[1], motionVector[0]) / DEG2RAD;
+
+	glRotatef(projRotation - 90, 0, 0, 1);
+
+	glBegin(GL_QUADS);
+		glVertex3f(-.05f, -.05f, -.01);	
+		glVertex3f(.05f, -.05f, -.01);
+		glVertex3f(.05f, .05f, -.01);
+		glVertex3f(-.05f, .05f, -.01);
+	glEnd();
+
+	glBegin(GL_TRIANGLES);
+		glVertex3f(.05f, .05f, -.01f);
+		glVertex3f(-.05f, .05f, -.01f);
+		glVertex3f(0, .2f, -.001f);
+	glEnd();
+
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(-.05f, -.05f, -.01);	
+		glVertex3f(.05f, -.05f, -.01);
+		glVertex3f(.05f, .05f, -.01);
+		glVertex3f(0, .2f, -.01f);
+		glVertex3f(-.05f, .05f, -.01);
+	glEnd();
+
+	glPopMatrix();
+
+	//Draw a line from her to this object's origination point
+	glBegin(GL_LINES);
+		glVertex3f(origin[0], origin[1], -.002);
+		glVertex3f(translation[0], translation[1], -.002);
+	glEnd();
 }

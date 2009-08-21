@@ -39,6 +39,7 @@
 #include <math.h>
 #include <vector>
 
+
 typedef struct {									// Structure For Keyboard Stuff
 	BOOL keyDown [256];								// Holds TRUE / FALSE For Each Key
 } Keys;												// Keys

@@ -27,7 +27,8 @@ enum{
 	TYPE_DEBRIS,
 	TYPE_MISSILEBASE,
 	TYPE_CITY,
-	TYPE_FLAKCANNON
+	TYPE_FLAKCANNON,
+	TYPE_PROJECTILE
 };
 
 enum{
@@ -196,10 +197,40 @@ public:
 
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
 	bool CanDestroy(int destroyerType);
-	void  SetCursorPointer(float* newPCursorPos) {pCursorPos = newPCursorPos;}
+	void SetCursorPointer(float* newPCursorPos) {pCursorPos = newPCursorPos;}
+	void SetFireKey(char key) {fireKey = key;}
+	char GetFireKey() {return fireKey;}
 	int	 GetType();
+	bool IsLoaded() {return loaded;}
+	void Fire();
+	void GetProjVector(int* TTL, float* projVector);
+	float* GetProjTranslation();
+	void AddTimeSinceFired(DWORD milliseconds);
 
 	void Draw();
 private:
 	float* pCursorPos;
+	char   fireKey;
+	bool   loaded;
+	int	   timeToReload;
+};
+
+class CProjectile : public CGameObject
+{
+public:
+	CProjectile();
+	~CProjectile();
+
+	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells) {}
+	int	 GetType() {return TYPE_PROJECTILE;}
+
+	void SetOrigin(float x, float y, float z) {origin[0] = x; origin[1] = y; origin[2] = z;}
+	void SubtractTTL(DWORD milliseconds) {timeToLive -= milliseconds;}
+	int	 GetTTL() {return timeToLive;}
+	void SetTTL(int newTTL) {timeToLive = newTTL;}
+
+	void Draw();
+private:
+	float origin[3];
+	int		timeToLive;
 };

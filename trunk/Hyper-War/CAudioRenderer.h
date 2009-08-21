@@ -16,6 +16,13 @@ using namespace std;
 
 #define AUDIO_RENDER_FREQ_MS  67  //67 == 15 times per seconds
 
+typedef enum TYPE_SOUND
+{
+	SOUND_EXPLOSION,
+	SOUND_MISSILE,
+	SOUND_LAUNCH
+};
+
 class CAudioRenderer
 {
 public:
@@ -24,6 +31,7 @@ public:
 
 	//Render/update OpenAL audio rendering
 	void RenderAudio(DWORD milliseconds, vector< CGameObject* > gObjects);
+	void PlaySound(TYPE_SOUND soundIndex, float xpos, float ypos);
 private:
 
 	//Audio rendering data

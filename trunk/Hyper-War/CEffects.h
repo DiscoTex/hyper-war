@@ -4,9 +4,16 @@
 /*	July 2009												 */
 /*************************************************************/
 #include <windows.h>
-//#include "glBase.h"
+#include "glBase.h"
 #include "gl/gl.h"
 #include "gl/glu.h"
+
+using namespace std;
+
+typedef struct _Star
+{
+	float xpos, ypos;
+} Star;
 
 class CEffects
 {
@@ -15,13 +22,17 @@ public:
 	~CEffects();
 
 	//Get or set the starfield position
-	void		SetStarFieldPosition(int newPos);
+	void		SetStarFieldPosition(int newPos) {starFieldPosition = newPos;}
 	int			GetStarFieldPosition() {return starFieldPosition;}
-	void		CEffects::SetTranslation(float x, float y, float z);
+	void		SetTranslation(float x, float y, float z);
+	void		DrawStar();
 
 	//Draw the starfield effect
 	void		DrawStarfield();
 private:
 	float		translation[3];
 	int			starFieldPosition;
+	float		starColor;
+
+	vector < Star >	stars;
 };
