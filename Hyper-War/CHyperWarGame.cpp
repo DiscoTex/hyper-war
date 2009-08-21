@@ -66,7 +66,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 
 		//Create a gravity well for the green planet
 		sGravityWell *gw = new sGravityWell;
-		gw->mass = 50;
+		gw->mass = 100;
 		gw->translation[0] = -12;
 		gw->translation[1] = 0;
 		gw->translation[2] = 0;
@@ -74,44 +74,11 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 
 		//Gravity well for blue
 		gw = new sGravityWell;
-		gw->mass = 50;
+		gw->mass = 100;
 		gw->translation[0] = 12;
 		gw->translation[1] = 0;
 		gw->translation[2] = 0;
 		gravityWells.push_back(gw);
-
-		gw = new sGravityWell;
-		gw->mass = .02f;
-		gw->translation[0] = -.1f;
-		gw->translation[1] = -.4f;
-		gw->translation[2] = 0;
-		//gravityWells.push_back(gw);
-
-		/*
-		CNuke *nuke;
-		//Create some blue Nukes
-		for(int i=1; i<4; i++)
-		{
-			nuke = new CNuke();
-			nuke->SetColor(0.0, 0.0, 1.0);
-			nuke->SetScale(.1f, .1f, .1f);
-			nuke->SetTranslation(1.85f, i/1.3f - 2.5f, -.00f);
-			nuke->SetMotionVector(-0.0001, .0000, 0);
-			//nuke->SetMotionVector(.001, 0, 0);
-			gameObjects.push_back(nuke);
-		}
-
-		//Create some green Nukes
-		for(int i=1; i<12; i++)
-		{
-			nuke = new CNuke();
-			nuke->SetColor(0.0, 1.0, 0.0);
-			nuke->SetScale(.1f, .1f, .1f);
-			nuke->SetTranslation(-1.35f, i/5.0f -1.5f, -.00f);
-			nuke->SetMotionVector(0.0001, -0.00005, 0);
-			//nuke->SetMotionVector(0, 0, 0);
-			gameObjects.push_back(nuke);
-		}*/
 
 		//Create missle bases
 		CMissileBase *mb = new CMissileBase;
@@ -128,7 +95,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -96);
 		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
-		mb->SetLaunchKey('S');
+		mb->SetLaunchKey('D');
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -146,7 +113,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, 84);
 		mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01f, 10 * sin(174*DEG2RAD), -.001f);
-		mb->SetLaunchKey('K');
+		mb->SetLaunchKey('L');
 		mb->SetCursorPointer(mousePos[1]);
 		gameObjects.push_back(mb);
 
@@ -212,6 +179,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, -90);
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[0]);
+		cannon->SetFireKey('S');
 		gameObjects.push_back(cannon);
 
 		cannon = new CFlakCannon();
@@ -220,6 +188,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, 90);
 		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[1]);
+		cannon->SetFireKey('K');
 		gameObjects.push_back(cannon);
 	}
 
@@ -245,8 +214,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	int iType, objIndexType;
 	CDebris *debris;
 	CNuke *nuke;
+	CProjectile *pj;
 	float *position;
 	float *nukeVector;
+	float projVector[3];
+	int TTL;
 
 	if (g_keys->keyDown [VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
 	{
@@ -276,11 +248,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			else if(!g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()] && ((CMissileBase*)(gameObjects[i]))->LaunchReady())
 			{
 				//Launch missile
-				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / 5000.0f;
+				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / 5000.0;
 				if(thrust > 1)
 					thrust = 1;
-				else if(thrust < .1f)
-					thrust = .1f;
+				else if(thrust < .2f)
+					thrust = .2f;
 
 				nuke = new CNuke();
 				nuke->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
@@ -293,6 +265,61 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				gameObjects.push_back(nuke);
 			}
 		}
+
+		else if(gameObjects[i]->GetType() == TYPE_FLAKCANNON)
+		{
+			if(g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetFireKey()] && ((CFlakCannon*)(gameObjects[i]))->IsLoaded())
+			{
+				//Launch projectile
+				//Set flak cannon to "just launched"
+				((CFlakCannon*)(gameObjects[i]))->Fire();
+
+				//Spawn a projectile
+				pj = new CProjectile();
+				pj->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
+				pj->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
+				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
+				pj->SetTranslation(position[0], position[1], -.0010);
+				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
+				pj->SetMotionVector(projVector[0], projVector[1], projVector[2]);
+				position = gameObjects[i]->GetTranslation();
+				pj->SetOrigin(position[0], position[1],position[2]);
+				pj->SetTTL(TTL);
+				gameObjects.push_back(pj);
+			}	
+			else if(!g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetFireKey()] && !((CFlakCannon*)(gameObjects[i]))->IsLoaded())
+			{
+				//Allow reload			
+				((CFlakCannon*)(gameObjects[i]))->AddTimeSinceFired(milliseconds);
+			}
+		}
+		
+		else if(gameObjects[i]->GetType() == TYPE_PROJECTILE)
+		{
+			((CProjectile*)(gameObjects[i]))->SubtractTTL(milliseconds);
+
+			if(((CProjectile*)(gameObjects[i]))->GetTTL() < 0)
+			{
+				for(int k=0; k<DEBRIS_AMOUNT*2; k++)
+				{
+					debris = new CDebris();
+					debris->SetMotionVector(
+						float((rand()%100-50)/200.0), 
+						float((rand()%100-50)/200.0), 
+						0);
+					debris->SetTranslation(
+						float(gameObjects[i]->GetTranslation()[0]),
+						float(gameObjects[i]->GetTranslation()[1]),
+						float(gameObjects[i]->GetTranslation()[2]));
+					debris->SetScale(.1f, .1f, .1f);
+					gameObjects.push_back(debris);
+				}
+				// Time to explode
+				gameObjects.erase(gameObjects.begin() + i);
+				continue;
+			}		
+		}
+
 
 		//Check for collisions with all other objects in the game
 		//returns -1 for no collision, otherwise returns the index of the collided object
@@ -401,7 +428,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 	//Update starfield position
 	//Starfield position should be moved as a function of time
-	//starFieldPosition = (starFieldPosition + milliseconds) % (num possible positions);
+	//starFieldPosition = (starFieldPosition + milliseconds) % (65535);
+	globalEffects.SetStarFieldPosition((globalEffects.GetStarFieldPosition() + milliseconds) % 65535);
 	
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
 
