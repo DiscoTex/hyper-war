@@ -70,7 +70,7 @@ public:
 	float* GetRotation();
 	float* GetTranslation();
 	float* GetColor();
-	float* GetMotionVector();
+	virtual float* GetMotionVector();
 	float* GetAngularVelocity();
 
 	vector < sCollisionSphere * > GetCollisionSpheres() { return collisionSpheres;}
@@ -118,6 +118,7 @@ public:
 	void ProcessMotion(DWORD milliseconds, Keys * keys);
 	int	 GetType();
 	void SetThrust(float newThrust) {thrust = newThrust;}
+	float* GetMotionVector();
 
 	void Draw();
 private:
@@ -125,6 +126,7 @@ private:
 	unsigned short		animVal;
 	float				flameColor[3];
 	DWORD				lastLaunch;
+	float				tempVec[3];
 };
 
 class CDebris : public CGameObject
@@ -136,11 +138,13 @@ public:
 	void ProcessMotion(DWORD milliseconds, Keys * keys);
 	int GetType();
 	bool CanDestroy(int destroyerType);
+	int	 GetTTL() {return TTL;}
 
 	void Draw();
 
 private:
 	int debType;
+	int	TTL;
 };
 
 class CMissileBase : public CGameObject
@@ -157,7 +161,7 @@ public:
 	bool IsLoaded() {return loaded;}
 	int  Launch();
 	bool LaunchReady() {return launchReady;}
-	void AddCharge(DWORD milliseconds) {charge += milliseconds; launchReady = true;}
+	void AddCharge(DWORD milliseconds) {charge = 4000; launchReady = true;}
 	float* GetNukeTranslation();
 	float* GetNukeVector();
 	void  SetCursorPointer(float* newPCursorPos) {pCursorPos = newPCursorPos;}

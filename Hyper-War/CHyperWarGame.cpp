@@ -230,6 +230,30 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		ToggleFullscreen (g_window);							// Toggle Fullscreen Mode
 	}
 
+	mousePos[0][0] += rawMouse.get_x_delta(1) / 500.0f;
+	if(mousePos[0][0] > 0)
+		mousePos[0][0] = 0;
+	else if(mousePos[0][0] < -1.8f)
+		mousePos[0][0] = -1.8f;
+
+	mousePos[0][1] -= rawMouse.get_y_delta(1) / 500.0f;
+	if(mousePos[0][1] > 1.6)
+		mousePos[0][1] = 1.6;
+	else if(mousePos[0][1] < -1.6)
+		mousePos[0][1] = -1.6;	
+
+	mousePos[1][0] += rawMouse.get_x_delta(2) / 500.0f;
+	if(mousePos[1][0] < 0)
+		mousePos[1][0] = 0;
+	else if(mousePos[1][0] > 1.8f)
+		mousePos[1][0] = 1.8f;
+
+	mousePos[1][1] -= rawMouse.get_y_delta(2) / 500.0f;
+	if(mousePos[1][1] > 1.6)
+		mousePos[1][1] = 1.6;
+	else if(mousePos[1][1] < -1.6)
+		mousePos[1][1] = -1.6;
+
 	//For every object in the game
 	for(unsigned int i=0; i<gameObjects.size(); i++)
 	{
@@ -249,8 +273,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			{
 				//Launch missile
 				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / 5000.0;
-				if(thrust > 1)
-					thrust = 1;
+				if(thrust > 5)
+					thrust = 5;
 				else if(thrust < .2f)
 					thrust = .2f;
 
@@ -300,18 +324,21 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 			if(((CProjectile*)(gameObjects[i]))->GetTTL() < 0)
 			{
-				for(int k=0; k<DEBRIS_AMOUNT*2; k++)
+				for(int k=0; k<DEBRIS_AMOUNT*8; k++)
 				{
+					float heading = rand()%360;
+					float velocity = ((rand()%100-50) / 250.0);
+
 					debris = new CDebris();
 					debris->SetMotionVector(
-						float((rand()%100-50)/200.0), 
-						float((rand()%100-50)/200.0), 
+						float(cos(heading*DEG2RAD) * velocity), 
+						float(sin(heading*DEG2RAD) * velocity), 
 						0);
 					debris->SetTranslation(
 						float(gameObjects[i]->GetTranslation()[0]),
 						float(gameObjects[i]->GetTranslation()[1]),
 						float(gameObjects[i]->GetTranslation()[2]));
-					debris->SetScale(.1f, .1f, .1f);
+					debris->SetScale(.01f, .01f, .01f);
 					gameObjects.push_back(debris);
 				}
 				// Time to explode
@@ -320,6 +347,14 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			}		
 		}
 
+		else if(gameObjects[i]->GetType() == TYPE_DEBRIS)
+		{
+			if(((CDebris*)(gameObjects[i]))->GetTTL() < 0)
+			{
+				gameObjects.erase(gameObjects.begin() + i);
+				continue;
+			}
+		}
 
 		//Check for collisions with all other objects in the game
 		//returns -1 for no collision, otherwise returns the index of the collided object
@@ -432,30 +467,6 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	globalEffects.SetStarFieldPosition((globalEffects.GetStarFieldPosition() + milliseconds) % 65535);
 	
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
-
-	mousePos[0][0] += rawMouse.get_x_delta(1) / 500.0f;
-	if(mousePos[0][0] > 0)
-		mousePos[0][0] = 0;
-	else if(mousePos[0][0] < -1.8f)
-		mousePos[0][0] = -1.8f;
-
-	mousePos[0][1] -= rawMouse.get_y_delta(1) / 500.0f;
-	if(mousePos[0][1] > 1.6)
-		mousePos[0][1] = 1.6;
-	else if(mousePos[0][1] < -1.6)
-		mousePos[0][1] = -1.6;
-
-	mousePos[1][0] += rawMouse.get_x_delta(3) / 500.0f;
-	if(mousePos[1][0] < 0)
-		mousePos[1][0] = 0;
-	else if(mousePos[1][0] > 1.8f)
-		mousePos[1][0] = 1.8f;
-
-	mousePos[1][1] -= rawMouse.get_y_delta(3) / 500.0f;
-	if(mousePos[1][1] > 1.6)
-		mousePos[1][1] = 1.6;
-	else if(mousePos[1][1] < -1.6)
-		mousePos[1][1] = -1.6;
 }
 
 void CHyperWarGame::DrawCursors()
