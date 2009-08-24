@@ -220,8 +220,8 @@ void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 
 		//Add force vector to this object's motionVector
 		motionVector[0] += forceVector[0] * milliseconds / 1000;
-		motionVector[1] += forceVector[1] * milliseconds / 1000;
-		motionVector[2] += forceVector[2] * milliseconds / 1000;
+		//motionVector[1] += forceVector[1] * milliseconds / 1000;
+		//motionVector[2] += forceVector[2] * milliseconds / 1000;
 	}
 }
 
@@ -637,7 +637,7 @@ void CNuke::Draw()
 
 	int flameSize = (thrust + .3) / .2;
 
-	if(animVal % 12 == 0)
+	if(animVal % 6 == 0)
 	{
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
@@ -651,7 +651,7 @@ void CNuke::Draw()
 		glEnd();
 	}
 
-	else if(animVal % 12 == 2)
+	else if(animVal % 6 == 1)
 	{	
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
@@ -665,7 +665,7 @@ void CNuke::Draw()
 		glEnd();
 	}
 
-	else if(animVal % 12 == 4)
+	else if(animVal % 6 == 2)
 	{
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
@@ -679,7 +679,7 @@ void CNuke::Draw()
 		glEnd();
 	}
 
-	if(animVal % 12 == 6)
+	if(animVal % 6 == 3)
 	{	
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
@@ -693,7 +693,7 @@ void CNuke::Draw()
 		glEnd();
 	}
 
-	if(animVal % 12 == 8)
+	if(animVal % 6 == 4)
 	{
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
@@ -707,7 +707,7 @@ void CNuke::Draw()
 		glEnd();
 	}
 
-	if(animVal % 12 == 10)
+	if(animVal % 6 == 5)
 	{	
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693, -0.34192359447479248, -.00001f);
@@ -758,9 +758,9 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 	}
 
 	//Add motion based on motion vector and elapsed time
-	translation[0] += milliseconds * motionVector[0] / 1000;
-	translation[1] += milliseconds * motionVector[1] / 1000;
-	translation[2] += milliseconds * motionVector[2] / 1000;
+	translation[0] += milliseconds * motionVector[0] / 10000;
+	translation[1] += milliseconds * motionVector[1] / 10000;
+	translation[2] += milliseconds * motionVector[2] / 10000;
 
 	//Update collision sphere locations
 	for(unsigned int i = 0; i < collisionSpheres.size(); i++)
@@ -793,6 +793,15 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 		translation[0] = -2.75;
 	else if(translation[0] < -2.75)
 		translation[0] = 2.75;
+}
+
+float *CNuke::GetMotionVector()
+{
+	tempVec[0] = motionVector[0]/10.0f;
+	tempVec[1] = motionVector[1]/10.0f;
+	tempVec[2] = motionVector[2]/10.0f;
+
+	return tempVec;
 }
 
 int CNuke::GetType()
@@ -944,6 +953,8 @@ CDebris::CDebris()
 	angularVelocity[2] = float(rand() % 500);
 
 	rotation[2] = float(rand() % 500);
+
+	TTL = 1500 - rand()%500;
 }
 
 CDebris::~CDebris()
@@ -1072,6 +1083,8 @@ void CDebris::ProcessMotion(DWORD milliseconds, Keys* keys)
 		translation[0] = -14;
 	else if(translation[0] < -14)
 		translation[0] = 14;
+
+	TTL -= milliseconds;
 }
 
 bool CDebris::CanDestroy(int destroyerType)
@@ -1111,7 +1124,7 @@ int CMissileBase::Launch()
 
 	loaded = false; 
 	launchReady = false; 
-	timeToReload = 500; 
+	timeToReload = 5000; 
 	charge = 0;
 
 	return oldCharge;
@@ -1129,10 +1142,10 @@ void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gW
 
 bool CMissileBase::CanDestroy(int destroyerType)
 {
-	if(destroyerType != TYPE_NUKE)
+	//if(destroyerType != TYPE_NUKE)
 		return false;
-	else
-		return true;
+	//else
+	//	return true;
 }
 
 float* CMissileBase::GetNukeTranslation()
@@ -1175,8 +1188,8 @@ float* CMissileBase::GetNukeVector()
 	
 	//Convert to unit vector, then make it sort of small.  This will be the missile's original motion vector.
 	divisor = sqrt(nukeVector[0] * nukeVector[0] + nukeVector[1] * nukeVector[1]);
-	nukeVector[0] = (nukeVector[0] / divisor / 3.0f);
-	nukeVector[1] = (nukeVector[1] / divisor / 3.0f);
+	nukeVector[0] = (nukeVector[0] / divisor / 100);
+	nukeVector[1] = (nukeVector[1] / divisor / 100);
 	nukeVector[2] = 0;
 	
 	return nukeVector;
@@ -1715,10 +1728,10 @@ void CFlakCannon::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 
 bool CFlakCannon::CanDestroy(int destroyerType)
 {
-	if(destroyerType != TYPE_NUKE)
+	//if(destroyerType != TYPE_NUKE)
 		return false;
-	else
-		return true;
+	//else
+	//	return true;
 }
 
 int	CFlakCannon::GetType()
@@ -1729,7 +1742,7 @@ int	CFlakCannon::GetType()
 void CFlakCannon::Fire()
 {
 	loaded = false; 
-	timeToReload = 100; 
+	timeToReload = 25; 
 }
 
 void CFlakCannon::GetProjVector(int* TTL, float* projVector)
@@ -1738,7 +1751,7 @@ void CFlakCannon::GetProjVector(int* TTL, float* projVector)
 	projVector[1] = (pCursorPos[1] - translation[1]);
 	projVector[2] = 0;//pCursorPos[2] - translation[2]/3.0;
 
-	float magnitude = sqrt(projVector[0] * projVector[0] + projVector[1] * projVector[1]) / 2.0;
+	float magnitude = sqrt(projVector[0] * projVector[0] + projVector[1] * projVector[1]) / 6.0;
 
 	projVector[0] /= magnitude;
 	projVector[1] /= magnitude;
@@ -1931,6 +1944,7 @@ void CProjectile::Draw()
 	glPopMatrix();
 
 	//Draw a line from her to this object's origination point
+	glColor3f(.2f, .2f, .2f);
 	glBegin(GL_LINES);
 		glVertex3f(origin[0], origin[1], -.002);
 		glVertex3f(translation[0], translation[1], -.002);
