@@ -103,7 +103,7 @@ bool CRawMouse::process_raw_mouse(HANDLE in_device_handle)
 }
 
 // init the raw mouses
-int CRawMouse::init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL in_include_individual_mice)
+int CRawMouse::init_raw_mouse(bool in_include_sys_mouse, bool in_include_rdp_mouse, bool in_include_individual_mice)
 {
 	unsigned int i,j;
 	unsigned int nInputDevices;
@@ -393,8 +393,12 @@ bool CRawMouse::read_raw_input(PRAWINPUT raw)
 // ask if buttons are pressed 
 bool CRawMouse::mouse_button_pressed(int mousenum, int buttonnum)
 {
-		if (mousenum >= nraw_mouse_count || buttonnum >= MAX_RAW_MOUSE_BUTTONS || raw_mice == NULL) return 0;
-	return (raw_mice[mousenum].buttonpressed[buttonnum]);
+	if (mousenum >= nraw_mouse_count || buttonnum >= MAX_RAW_MOUSE_BUTTONS || raw_mice == NULL) 
+		return false;
+	else if(raw_mice[mousenum].buttonpressed[buttonnum] == 0)
+		return false;
+	else
+		return true;
 }
 
 void CRawMouse::destroy_raw_mouse(void)

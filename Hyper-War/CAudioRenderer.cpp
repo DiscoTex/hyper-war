@@ -30,5 +30,4 @@ void CAudioRenderer::RenderAudio(DWORD milliseconds, vector< CGameObject* > gObj
 		//Do all OpenAL calls here
 		//Loop through entire gObjects vector and render sounds for each object
 	}
-
 }

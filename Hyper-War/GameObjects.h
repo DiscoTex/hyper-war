@@ -139,6 +139,7 @@ public:
 	int GetType();
 	bool CanDestroy(int destroyerType);
 	int	 GetTTL() {return TTL;}
+	void SetTTL(int newTTL) {TTL = newTTL;}
 
 	void Draw();
 
@@ -174,6 +175,8 @@ private:
 	int  charge;
 	int	 timeToReload;
 	float*	pCursorPos;
+	float rotatedNuke[3];
+	float nukeVector[3];
 };
 
 class CCity : public CGameObject
@@ -217,6 +220,7 @@ private:
 	char   fireKey;
 	bool   loaded;
 	int	   timeToReload;
+	float  projTranslation[3];
 };
 
 class CProjectile : public CGameObject
