@@ -72,7 +72,7 @@ void CEffects::DrawStarfield()
 	double color[3] = {1, 1, 1};
 	glTranslated(0, 0, -1);	
 	
-	for(int i=0; i<stars.size(); i++)
+	for(unsigned int i=0; i<stars.size(); i++)
 	{
 		glPushMatrix();
 		glTranslatef(stars[i].xpos, stars[i].ypos, 0);

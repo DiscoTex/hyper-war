@@ -237,10 +237,10 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		mousePos[0][0] = -1.8f;
 
 	mousePos[0][1] -= rawMouse.get_y_delta(1) / 500.0f;
-	if(mousePos[0][1] > 1.6)
-		mousePos[0][1] = 1.6;
-	else if(mousePos[0][1] < -1.6)
-		mousePos[0][1] = -1.6;	
+	if(mousePos[0][1] > 1.6f)
+		mousePos[0][1] = 1.6f;
+	else if(mousePos[0][1] < -1.6f)
+		mousePos[0][1] = -1.6f;	
 
 	mousePos[1][0] += rawMouse.get_x_delta(2) / 500.0f;
 	if(mousePos[1][0] < 0)
@@ -249,10 +249,10 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		mousePos[1][0] = 1.8f;
 
 	mousePos[1][1] -= rawMouse.get_y_delta(2) / 500.0f;
-	if(mousePos[1][1] > 1.6)
-		mousePos[1][1] = 1.6;
-	else if(mousePos[1][1] < -1.6)
-		mousePos[1][1] = -1.6;
+	if(mousePos[1][1] > 1.6f)
+		mousePos[1][1] = 1.6f;
+	else if(mousePos[1][1] < -1.6f)
+		mousePos[1][1] = -1.6f;
 
 	//For every object in the game
 	for(unsigned int i=0; i<gameObjects.size(); i++)
@@ -272,7 +272,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			else if(!g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()] && ((CMissileBase*)(gameObjects[i]))->LaunchReady())
 			{
 				//Launch missile
-				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / 5000.0;
+				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / 5000.0f;
 				if(thrust > 5)
 					thrust = 5;
 				else if(thrust < .2f)
@@ -303,7 +303,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				pj->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
 				pj->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
 				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
-				pj->SetTranslation(position[0], position[1], -.0010);
+				pj->SetTranslation(position[0], position[1], -.0010f);
 				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
 				pj->SetMotionVector(projVector[0], projVector[1], projVector[2]);
 				position = gameObjects[i]->GetTranslation();
@@ -326,8 +326,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			{
 				for(int k=0; k<DEBRIS_AMOUNT*8; k++)
 				{
-					float heading = rand()%360;
-					float velocity = ((rand()%100-50) / 250.0);
+					int heading = rand()%360;
+					float velocity = (float)((rand()%100-50) / 250.0f);
 
 					debris = new CDebris();
 					debris->SetMotionVector(
@@ -372,7 +372,30 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			{
 				if(gameObjects[i]->CanDestroy(objIndexType))
 				{
-					if(iType != TYPE_DEBRIS)
+					if(iType == TYPE_CITY)
+					{
+						for(int k=0; k<DEBRIS_AMOUNT; k++)
+						{
+							float  debrisAngle;
+							float  debrisSize;							
+
+							debrisAngle = gameObjects[i]->GetRotation()[2];
+							debrisSize = ((rand()%6) / 6) * .1f;
+
+							debris = new CDebris();
+							debris->SetMotionVector(
+								float(cos(debrisAngle)),
+								float(sin(debrisAngle)),
+								0);
+							debris->SetTranslation(
+								float(gameObjects[i]->GetTranslation()[0]),
+								float(gameObjects[i]->GetTranslation()[1]),
+								float(gameObjects[i]->GetTranslation()[2]));
+							debris->SetScale(debrisSize, debrisSize, debrisSize);
+							gameObjects.push_back(debris);
+						}
+					}
+					else if(iType != TYPE_DEBRIS)
 					{
 						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
@@ -393,7 +416,30 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				}
 				if(gameObjects[objIndex]->CanDestroy(iType))
 				{
-					if(objIndexType != TYPE_DEBRIS)
+					if(objIndexType == TYPE_CITY)
+					{
+						for(int k=0; k<DEBRIS_AMOUNT; k++)
+						{
+							float  debrisAngle;
+							float  debrisSize;							
+
+							debrisAngle = gameObjects[i]->GetRotation()[2];
+							debrisSize = ((rand()%6) / 6) * .1f;
+
+							debris = new CDebris();
+							debris->SetMotionVector(
+								float(cos(debrisAngle)),
+								float(sin(debrisAngle)),
+								0);
+							debris->SetTranslation(
+								float(gameObjects[i]->GetTranslation()[0]),
+								float(gameObjects[i]->GetTranslation()[1]),
+								float(gameObjects[i]->GetTranslation()[2]));
+							debris->SetScale(debrisSize, debrisSize, debrisSize);
+							gameObjects.push_back(debris);
+						}
+					}
+					else if(objIndexType != TYPE_DEBRIS)
 					{
 						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
@@ -417,7 +463,30 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			{
 				if(gameObjects[objIndex]->CanDestroy(iType))
 				{
-					if(objIndexType != TYPE_DEBRIS)
+					if(objIndexType == TYPE_CITY)
+					{
+						for(int k=0; k<DEBRIS_AMOUNT; k++)
+						{
+							float  debrisAngle;
+							float  debrisSize;							
+
+							debrisAngle = gameObjects[i]->GetRotation()[2];
+							debrisSize = ((rand()%6) / 6) * .1f;
+
+							debris = new CDebris();
+							debris->SetMotionVector(
+								float(cos(debrisAngle)),
+								float(sin(debrisAngle)),
+								0);
+							debris->SetTranslation(
+								float(gameObjects[i]->GetTranslation()[0]),
+								float(gameObjects[i]->GetTranslation()[1]),
+								float(gameObjects[i]->GetTranslation()[2]));
+							debris->SetScale(debrisSize, debrisSize, debrisSize);
+							gameObjects.push_back(debris);
+						}
+					}
+					else if(objIndexType != TYPE_DEBRIS)
 					{
 						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
@@ -438,7 +507,31 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				}
 				if(gameObjects[i]->CanDestroy(objIndexType))
 				{
-					if(iType != TYPE_DEBRIS)
+					if(iType == TYPE_CITY)
+					{
+						for(int k=0; k<DEBRIS_AMOUNT*16; k++)
+						{
+							float  debrisAngle;
+							float  debrisSize;							
+
+							debrisAngle = rand() % 180 + gameObjects[i]->GetRotation()[2];
+							debrisSize = ((rand()%100) / 100.0f) * .2f;
+
+							debris = new CDebris();
+							debris->SetMotionVector(
+								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+								0);
+							debris->SetTranslation(
+								float(gameObjects[i]->GetTranslation()[0]),
+								float(gameObjects[i]->GetTranslation()[1]),
+								float(gameObjects[i]->GetTranslation()[2]));
+							debris->SetScale(debrisSize, debrisSize, debrisSize);
+							debris->SetTTL(15000 - rand()%5000);
+							gameObjects.push_back(debris);
+						}
+					}
+					else if(iType != TYPE_DEBRIS)
 					{
 						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
@@ -474,7 +567,7 @@ void CHyperWarGame::DrawCursors()
 	glPushMatrix();
 
 	glTranslatef(mousePos[0][0], mousePos[0][1], 0);
-	glScalef(.05, .05, 1);
+	glScalef(.05f, .05f, 1);
 
 	glColor3f(0, 1, 0);
 	glBegin(GL_LINES);
@@ -496,7 +589,7 @@ void CHyperWarGame::DrawCursors()
 	glPushMatrix();
 
 	glTranslatef(mousePos[1][0], mousePos[1][1], 0);
-	glScalef(.05, .05, 1);
+	glScalef(.05f, .05f, 1);
 
 	glColor3f(0, 0, 1);
 	glBegin(GL_LINES);
@@ -523,7 +616,7 @@ void CHyperWarGame::Draw (void)
 	
 	//Set up the global rendering coordinate system
 	glTranslatef (0.0f, 0.0f, -1.0f);
-	glScalef(.25, .25, 1);
+	glScalef(.25f, .25f, 1);
 
 	//Draw all objects in the game at their current positions
 	for(unsigned int i=0; i<gameObjects.size(); i++)

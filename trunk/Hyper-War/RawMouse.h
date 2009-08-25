@@ -57,34 +57,28 @@ public:
 	// Every time the WM_INPUT message is received, the lparam must be passed to this function to keep
 	// a running tally of every mouse move to maintain accurate results
 	bool process_raw_mouse(HANDLE in_device_handle);
+	// init the raw mice
+	int init_raw_mouse(bool in_include_sys_mouse, bool in_include_rdp_mouse, bool in_include_individual_mice);
+	// ask if buttons are pressed 
+	bool mouse_button_pressed(int mousenum, int buttonnum);
+	void destroy_raw_mouse(void);
+
 private:
+	// is_rm_rdp_mouse
+	static bool is_rm_rdp_mouse(char* cDeviceString);
+	// This function registers to receive the WM_INPUT messages
+	bool register_raw_mouse(void);
+	// read raw input
+	bool read_raw_input(PRAWINPUT raw);
+
 	int excluded_sysmouse_devices_count;
 	// number of raw mouse found
-	 int nraw_mouse_count;
-
+	int nraw_mouse_count;
 	// did we include the ?  mouse
 	bool include_sys_mouse;
 	bool include_rdp_mouse;
 	bool include_individual_mice; 
-
 	// Pointer to our array of raw mice.  Created with .. init_raw_mouse()
 	PRAW_MOUSE raw_mice;
-public:
-	// init the raw mouses
-	int init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL in_include_individual_mice);
-private:
-	// is_rm_rdp_mouse
-	static bool is_rm_rdp_mouse(char* cDeviceString);
-public:
-private:
-
-	// This function registers to receive the WM_INPUT messages
-	bool register_raw_mouse(void);
 	bool bHasBeenInitialized;
-	// read raw input
-	bool read_raw_input(PRAWINPUT raw);
-public:
-	// ask if buttons are pressed 
-	bool mouse_button_pressed(int mousenum, int buttonnum);
-	void destroy_raw_mouse(void);
 };
