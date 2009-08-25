@@ -243,9 +243,9 @@ int CRawMouse::init_raw_mouse(bool in_include_sys_mouse, bool in_include_rdp_mou
 			raw_mice[i].buttonpressed[j] = 0;
 
 			// Create the name for this button
-			sprintf(buffer, "Button %i", j);
+			sprintf_s(buffer, 80, "Button %i", j);
 			raw_mice[i].button_name[j] = (char *)malloc(strlen(buffer) + 1);
-			sprintf(raw_mice[i].button_name[j], "%s", buffer);
+			sprintf_s(raw_mice[i].button_name[j], strlen(buffer) + 1, "%s", buffer);
 		}
 	}
 

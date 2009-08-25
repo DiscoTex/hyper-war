@@ -190,6 +190,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetCursorPointer(mousePos[1]);
 		cannon->SetFireKey('K');
 		gameObjects.push_back(cannon);
+
+		audioRenderer.PlaySound(SOUND_INTRO, 0, 0);	
 	}
 
 
@@ -297,6 +299,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				//Launch projectile
 				//Set flak cannon to "just launched"
 				((CFlakCannon*)(gameObjects[i]))->Fire();
+				audioRenderer.PlaySound(SOUND_SHOOT, 0, 0);				
 
 				//Spawn a projectile
 				pj = new CProjectile();
@@ -374,29 +377,32 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				{
 					if(iType == TYPE_CITY)
 					{
-						for(int k=0; k<DEBRIS_AMOUNT; k++)
+						for(int k=0; k<DEBRIS_AMOUNT*16; k++)
 						{
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameObjects[i]->GetRotation()[2];
-							debrisSize = ((rand()%6) / 6) * .1f;
+							debrisAngle = rand() % 180 + gameObjects[i]->GetRotation()[2];
+							debrisSize = ((rand()%100) / 100.0f) * .2f;
 
 							debris = new CDebris();
 							debris->SetMotionVector(
-								float(cos(debrisAngle)),
-								float(sin(debrisAngle)),
+								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
 								0);
 							debris->SetTranslation(
 								float(gameObjects[i]->GetTranslation()[0]),
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
+							debris->SetTTL(15000 - rand()%5000);
 							gameObjects.push_back(debris);
 						}
+						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
 					}
 					else if(iType != TYPE_DEBRIS)
 					{
+						audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0);	
 						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
 							debris = new CDebris();
@@ -418,29 +424,32 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				{
 					if(objIndexType == TYPE_CITY)
 					{
-						for(int k=0; k<DEBRIS_AMOUNT; k++)
+						for(int k=0; k<DEBRIS_AMOUNT*16; k++)
 						{
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameObjects[i]->GetRotation()[2];
-							debrisSize = ((rand()%6) / 6) * .1f;
+							debrisAngle = rand() % 180 + gameObjects[objIndex]->GetRotation()[2];
+							debrisSize = ((rand()%100) / 100.0f) * .2f;
 
 							debris = new CDebris();
 							debris->SetMotionVector(
-								float(cos(debrisAngle)),
-								float(sin(debrisAngle)),
+								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
 								0);
 							debris->SetTranslation(
-								float(gameObjects[i]->GetTranslation()[0]),
-								float(gameObjects[i]->GetTranslation()[1]),
-								float(gameObjects[i]->GetTranslation()[2]));
+								float(gameObjects[objIndex]->GetTranslation()[0]),
+								float(gameObjects[objIndex]->GetTranslation()[1]),
+								float(gameObjects[objIndex]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
+							debris->SetTTL(15000 - rand()%5000);
 							gameObjects.push_back(debris);
 						}
+						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
 					}
 					else if(objIndexType != TYPE_DEBRIS)
 					{
+						audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0);	
 						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
 							debris = new CDebris();
@@ -465,29 +474,32 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				{
 					if(objIndexType == TYPE_CITY)
 					{
-						for(int k=0; k<DEBRIS_AMOUNT; k++)
+						for(int k=0; k<DEBRIS_AMOUNT*16; k++)
 						{
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameObjects[i]->GetRotation()[2];
-							debrisSize = ((rand()%6) / 6) * .1f;
+							debrisAngle = rand() % 180 + gameObjects[objIndex]->GetRotation()[2];
+							debrisSize = ((rand()%100) / 100.0f) * .2f;
 
 							debris = new CDebris();
 							debris->SetMotionVector(
-								float(cos(debrisAngle)),
-								float(sin(debrisAngle)),
+								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
 								0);
 							debris->SetTranslation(
-								float(gameObjects[i]->GetTranslation()[0]),
-								float(gameObjects[i]->GetTranslation()[1]),
-								float(gameObjects[i]->GetTranslation()[2]));
+								float(gameObjects[objIndex]->GetTranslation()[0]),
+								float(gameObjects[objIndex]->GetTranslation()[1]),
+								float(gameObjects[objIndex]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
+							debris->SetTTL(15000 - rand()%5000);
 							gameObjects.push_back(debris);
 						}
+						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
 					}
 					else if(objIndexType != TYPE_DEBRIS)
 					{
+						audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0);	
 						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
 							debris = new CDebris();
@@ -530,9 +542,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							debris->SetTTL(15000 - rand()%5000);
 							gameObjects.push_back(debris);
 						}
+						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
 					}
 					else if(iType != TYPE_DEBRIS)
 					{
+						audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0);	
 						for(int k=0; k<DEBRIS_AMOUNT; k++)
 						{
 							debris = new CDebris();
