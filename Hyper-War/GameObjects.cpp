@@ -946,7 +946,7 @@ CDebris::CDebris()
 	}	
 
 	color[0] = 1;
-	color[1] = 0;
+	color[1] = (float)rand() / RAND_MAX;;
 	color[2] = 0;
 
 	angularVelocity[0] = float(rand() % 500);
