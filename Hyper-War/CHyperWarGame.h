@@ -22,7 +22,7 @@ using namespace std;
 #define CDS_FULLSCREEN 4										// Compilers. By Defining It This Way,
 #endif	
 
-#define DEBRIS_AMOUNT 12
+#define DEBRIS_AMOUNT 8
 
 class CHyperWarGame
 {
