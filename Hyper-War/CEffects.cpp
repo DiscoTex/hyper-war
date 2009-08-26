@@ -9,33 +9,30 @@
 
 CEffects::CEffects()
 {
-	//starFieldPosition = 1000;
-	//srand(12422434);
 	for(int i=0; i<2000; i++)
 	{
 		Star newStar;
-		
 		newStar.xpos = (((float)rand() / (float)RAND_MAX) - .5f) * 10000;
 		newStar.ypos = (((float)rand() / (float)RAND_MAX) - 1.0f) * 10000;
 		newStar.zpos = (((float)rand() / (float)RAND_MAX) -  1.0f) * 50.0f - 1;
-		newStar.color1 = 1; //((float)rand() / (float)RAND_MAX);
-		newStar.color2 = 1; //((float)rand() / (float)RAND_MAX);
-		newStar.color3 = 1; //((float)rand() / (float)RAND_MAX);
-		newStar.scale = .04;//((float)rand()/ (float)RAND_MAX) * .05 ;
+		newStar.color1 = 1; 
+		newStar.color2 = 1; 
+		newStar.color3 = 1; 
+		newStar.scale = .03;
 		newStar.rotation = (rand()%360)+1;
 		stars.push_back(newStar);
 	}
-	//srand(-4344421);
+	
 	for(int i=0; i<1000; i++)
 	{
 		Star newStar;
 		newStar.xpos = (((float)rand() / (float)RAND_MAX) - .5f) * 10000;
 		newStar.ypos = (((float)rand() / (float)RAND_MAX) - .5f) * 10000;
 		newStar.zpos = (((float)rand() / (float)RAND_MAX) -  1.0f) * 50.0f - 1;
-		newStar.color1 = 1; //((float)rand() / (float)RAND_MAX);
-		newStar.color2 = 0.7; //((float)rand() / (float)RAND_MAX);
-		newStar.color3 = 0.8; //((float)rand() / (float)RAND_MAX);
-		newStar.scale = .04;//((float)rand()/ (float)RAND_MAX) * .05 ;
+		newStar.color1 = 1; 
+		newStar.color2 = 0.7;
+		newStar.color3 = 0.8; 
+		newStar.scale = .03;
 		newStar.rotation = (rand()%360)+1;
 		stars.push_back(newStar);
 	}
@@ -102,7 +99,8 @@ void CEffects::DrawStarfield()
 		if (stars[i].ypos > 1000)
 			stars[i].ypos = -1000;
 
-		glScaled(.04,.03,1);
+		//glScalef(.04,.04,1);
+		glScaled(stars[i].scale,stars[i].scale,1);
 		glTranslatef(stars[i].xpos, stars[i].ypos+tmp, stars[i].zpos);
 		
 		//printf("x=%f\ty=%f",stars[i].xpos,stars[i].ypos);
