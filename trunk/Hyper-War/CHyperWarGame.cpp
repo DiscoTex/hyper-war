@@ -327,7 +327,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 			if(((CProjectile*)(gameObjects[i]))->GetTTL() < 0)
 			{
-				for(int k=0; k<DEBRIS_AMOUNT*8; k++)
+				for(int k=0; k<DEBRIS_AMOUNT*FLAK_DEBRIS_FACTOR; k++)
 				{
 					int heading = rand()%360;
 					float velocity = (float)((rand()%100-50) / 250.0f);
