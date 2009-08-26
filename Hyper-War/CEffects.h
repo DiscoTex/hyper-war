@@ -12,7 +12,10 @@ using namespace std;
 
 typedef struct _Star
 {
-	float xpos, ypos;
+	float xpos, ypos, zpos;
+	float color1, color2, color3;
+	int rotation;
+	float scale;
 } Star;
 
 class CEffects
@@ -25,7 +28,7 @@ public:
 	void		SetStarFieldPosition(int newPos) {starFieldPosition = newPos;}
 	int			GetStarFieldPosition() {return starFieldPosition;}
 	void		SetTranslation(float x, float y, float z);
-	void		DrawStar();
+	void		DrawStar(Star inStar);
 
 	//Draw the starfield effect
 	void		DrawStarfield();

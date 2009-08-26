@@ -5,22 +5,41 @@
 /*************************************************************/
 
 #include "CEffects.h"
+#include "time.h"
 
 CEffects::CEffects()
 {
-	starFieldPosition = 0;
-
-	Star newStar;
-
-	for(int i=0; i<10; i++)
+	starFieldPosition = -2;
+	srand(1234);
+	for(int i=0; i<1000; i++)
 	{
-		newStar.xpos = ((float)rand() / INT_MAX) * 6 - 3;
-		newStar.ypos = ((float)rand() / INT_MAX) * 4 - 2;
-
-		newStar.xpos *= 20;
-		newStar.ypos *= 20;
+		Star newStar;
+		//newStar.xpos = 20*((float)rand() / (float)RAND_MAX) * 35 - 130;
+		//newStar.ypos = 20*((float)rand() / (float)RAND_MAX) * 35 - 130;
+		newStar.xpos = (((float)rand() / (float)RAND_MAX) - .5f) * 10000;
+		newStar.ypos = (((float)rand() / (float)RAND_MAX) - .5f) * 10000;
+		newStar.zpos = (((float)rand() / (float)RAND_MAX) -  1.0f) * 40.0f - 1;
+		newStar.color1 = 1; //((float)rand() / (float)RAND_MAX);
+		newStar.color2 = 1; //((float)rand() / (float)RAND_MAX);
+		newStar.color3 = 1; //((float)rand() / (float)RAND_MAX);
+		newStar.scale = .03;//((float)rand()/ (float)RAND_MAX) * .05 ;
+		newStar.rotation = (rand()%360)+1;
 		stars.push_back(newStar);
 	}
+	/*//srand(-4321);
+	for(int i=0; i<50; i++)
+	{
+		Star newStar;
+		newStar.xpos = 50*((float)rand() / (float)RAND_MAX) * 6 - 3;
+		newStar.ypos = 50*((float)rand() / (float)RAND_MAX) * 4 - 2;
+		newStar.zpos = -1;
+		newStar.color1 = 1; //((float)rand() / (float)RAND_MAX);
+		newStar.color2 = 0; //((float)rand() / (float)RAND_MAX);
+		newStar.color3 = 0; //((float)rand() / (float)RAND_MAX);
+		newStar.rotation = (rand()%360)+1;
+		stars.push_back(newStar);
+	}
+	*/
 }
 
 CEffects::~CEffects()
@@ -33,52 +52,62 @@ void CEffects::SetTranslation(float x, float y, float z)
 	translation[2] = z;
 }
 
-void CEffects::DrawStar()
+void CEffects::DrawStar(Star inStar)
 {
-	glColor3f(1, 1, 1);
-
+	glColor3f(inStar.color1, inStar.color2, inStar.color3);
+/*
 	glBegin(GL_POLYGON);
+		glVertex3d( 0.0f, 1.0f, 0.0f);
 		glVertex3d( 0.25f, 0.25f, 0.0f);
 		glVertex3d( 1.0f, 0.0f, 0.0f);
 		glVertex3d( 0.25f,-0.25f, 0.0f);
 		glVertex3d( 0.0f,-1.0f, 0.0f);
-		glVertex3d( 0.0f, 1.0f, 0.0f);
 		glVertex3d( -0.25f, -0.25f, 0.0f);
-		glVertex3d(-1.0f, 0.0f, 0.0f);
+		glVertex3d( -1.0f, 0.0f, 0.0f);
 		glVertex3d( -0.25f, 0.25f, 0.0f);
-		glVertex3d(-1.0f, 0.0f, 0.0f);
+		
 	glEnd();
-	glBegin(GL_LINE_STRIP);
-		glVertex3f(-1.0f, 0.0f, 0.0f);
-		glVertex3f( -0.25f, 0.25f, 0.0f);
+*/
+	glPushMatrix();
+	glBegin(GL_LINE_LOOP);
+		//glColor3d (, color[1], color[2]);
 		glVertex3f( 0.0f, 1.0f, 0.0f);
 		glVertex3f( 0.25f, 0.25f, 0.0f);
 		glVertex3f( 1.0f, 0.0f, 0.0f);
 		glVertex3f( 0.25f,-0.25f, 0.0f);
 		glVertex3f( 0.0f,-1.0f, 0.0f);
 		glVertex3f( -0.25f, -0.25f, 0.0f);
-		glVertex3f(-1.0f, 0.0f, 0.0f);
+		glVertex3f( -1.0f, 0.0f, 0.0f);
+		glVertex3f( -0.25f, 0.25f, 0.0f);
 	glEnd();
+	glPopMatrix();
 
 }
 void CEffects::DrawStarfield()
-{
-	glPushMatrix();
-
-	glTranslated(0, starFieldPosition / 1000.0, 0);	
-
+{	
+	//glTranslated(0, starFieldPosition / 1000.0, -1);	
+	float tmp = starFieldPosition / 100.0;
 	//glRotated(33, 0, 0, 1);
-	glScaled(.05,.05,1);
+	//glScalef(.03,.03,1);
 	double color[3] = {1, 1, 1};
-	glTranslated(0, 0, -1);	
-	
-	for(unsigned int i=0; i<stars.size(); i++)
+	//glTranslated(0, 0, -1);	
+
+	for(int i=0; i<stars.size(); i++)
 	{
+		//if (stars[i].ypos > 1.9)
+		//	stars[i].ypos = -1.9;
+		//glScaled(stars[i].scale,stars[i].scale,1);		
 		glPushMatrix();
-		glTranslatef(stars[i].xpos, stars[i].ypos, 0);
-		DrawStar();
+		
+		if (stars[i].ypos >100)
+			stars[i].ypos = -100;
+
+		glScaled(.03,.03,1);
+		glTranslatef(stars[i].xpos, stars[i].ypos+tmp, stars[i].zpos);
+		
+		//printf("x=%f\ty=%f",stars[i].xpos,stars[i].ypos);
+		
+		DrawStar((Star)stars[i]);
 		glPopMatrix();
 	}	
-
-	glPopMatrix();
 }
