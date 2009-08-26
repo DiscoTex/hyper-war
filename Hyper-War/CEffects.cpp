@@ -9,15 +9,14 @@
 
 CEffects::CEffects()
 {
-	starFieldPosition = -1000;
-	srand(12422434);
+	starFieldPosition = 1000;
+	//srand(12422434);
 	for(int i=0; i<2000; i++)
 	{
 		Star newStar;
-		//newStar.xpos = 20*((float)rand() / (float)RAND_MAX) * 35 - 130;
-		//newStar.ypos = 20*((float)rand() / (float)RAND_MAX) * 35 - 130;
+		
 		newStar.xpos = (((float)rand() / (float)RAND_MAX) - .5f) * 10000;
-		newStar.ypos = (((float)rand() / (float)RAND_MAX) - .5f) * 2000;
+		newStar.ypos = (((float)rand() / (float)RAND_MAX) - 1.0f) * 2000;
 		newStar.zpos = (((float)rand() / (float)RAND_MAX) -  1.0f) * 40.0f - 1;
 		newStar.color1 = 1; //((float)rand() / (float)RAND_MAX);
 		newStar.color2 = 1; //((float)rand() / (float)RAND_MAX);
@@ -26,7 +25,7 @@ CEffects::CEffects()
 		newStar.rotation = (rand()%360)+1;
 		stars.push_back(newStar);
 	}
-	srand(-4344421);
+	//srand(-4344421);
 	for(int i=0; i<500; i++)
 	{
 		Star newStar;
