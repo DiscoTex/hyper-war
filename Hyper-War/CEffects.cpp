@@ -95,7 +95,7 @@ void CEffects::DrawStar(Star inStar)
 void CEffects::DrawStarfield()
 {	
 	//glTranslated(0, starFieldPosition / 1000.0, -1);	
-	float tmp = starFieldPosition / 100.0;
+	float tmp = starFieldPosition / 400.0;
 	//glRotated(33, 0, 0, 1);
 	//glScalef(.03,.03,1);
 	double color[3] = {1, 1, 1};
