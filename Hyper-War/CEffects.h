@@ -25,17 +25,17 @@ public:
 	~CEffects();
 
 	//Get or set the starfield position
-	void		SetStarFieldPosition(int newPos) {starFieldPosition = newPos;}
-	int			GetStarFieldPosition() {return starFieldPosition;}
+	void		SetStarFieldPosition(long long int newPos) {starFieldPosition = newPos;}
+	long long int	GetStarFieldPosition() {return starFieldPosition;}
 	void		SetTranslation(float x, float y, float z);
 	void		DrawStar(Star inStar);
 
 	//Draw the starfield effect
 	void		DrawStarfield();
 private:
-	float		translation[3];
-	int			starFieldPosition;
-	float		starColor;
+	float			translation[3];
+	long long int	starFieldPosition;
+	float			starColor;
 
 	vector < Star >	stars;
 };
