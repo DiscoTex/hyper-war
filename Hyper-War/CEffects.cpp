@@ -111,7 +111,7 @@ void CEffects::DrawStarfield()
 
 		//glScalef(.05,.05,1);
 		glScalef(stars[i].scale,stars[i].scale,1);
-		glRotated(stars[i].rotation, 0, 0, 1);
+		glRotatef(stars[i].rotation, 0, 0, 1);
 		glTranslatef(stars[i].xpos, stars[i].ypos+tmp, stars[i].zpos);
 		
 		//printf("x=%f\ty=%f",stars[i].xpos,stars[i].ypos);
