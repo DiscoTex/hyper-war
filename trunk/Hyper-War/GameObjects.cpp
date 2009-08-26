@@ -228,7 +228,7 @@ void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 //Return the index of collided object
 int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseconds, unsigned int checkAfterIndex)
 {
-	float relVelVector[3];
+	//float relVelVector[3];
 	float relPosVector[3];
 	int thisType, otherType;
 
@@ -244,7 +244,7 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 		switch(thisType)
 		{
 		case TYPE_DEBRIS:
-			if(otherType == TYPE_DEBRIS)
+			if(otherType == TYPE_DEBRIS || otherType == TYPE_MISSILEBASE || otherType == TYPE_CITY || otherType == TYPE_FLAKCANNON)
 				continue;
 			break;
 		case TYPE_PLANET:
@@ -272,29 +272,40 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 			for(unsigned int j=0; j<gObjects[i]->GetCollisionSpheres().size(); j++)
 			{
 				// Relative velocity
-				relVelVector[0] = (gObjects[i]->GetMotionVector()[0] - motionVector[0]);
-				relVelVector[1] = (gObjects[i]->GetMotionVector()[1] - motionVector[1]);
-				relVelVector[2] = (gObjects[i]->GetMotionVector()[2] - motionVector[2]);
+				//relVelVector[0] = (gObjects[i]->GetMotionVector()[0] - motionVector[0]);
+				//relVelVector[1] = (gObjects[i]->GetMotionVector()[1] - motionVector[1]);
+				//relVelVector[2] = (gObjects[i]->GetMotionVector()[2] - motionVector[2]);
 
 				//Motion vector is in units per second
 				//Assume we are getting at least 60 fps
-				relVelVector[0] /= 60;
-				relVelVector[1] /= 60;
-				relVelVector[2] /= 60;
+				//relVelVector[0] /= 60;
+				//relVelVector[1] /= 60;
+				//relVelVector[2] /= 60;
 				
 				// Relative position
+				float *gPos, *cPos;
+				gPos = gObjects[i]->GetCollisionSpheres()[j]->globalPosition;
+				cPos = collisionSpheres[k]->globalPosition;
+
+				relPosVector[0] = gPos[0] - cPos[0];
+				relPosVector[1] = gPos[1] - cPos[1];
+				relPosVector[2] = gPos[2] - cPos[2];
+
+				/*
 				relPosVector[0] = gObjects[i]->GetCollisionSpheres()[j]->globalPosition[0] - collisionSpheres[k]->globalPosition[0];
 				relPosVector[1] = gObjects[i]->GetCollisionSpheres()[j]->globalPosition[1] - collisionSpheres[k]->globalPosition[1];
 				relPosVector[2] = gObjects[i]->GetCollisionSpheres()[j]->globalPosition[2] - collisionSpheres[k]->globalPosition[2];
+				*/
 
 				//Minimal distance to avoid collision
 				float r = collisionSpheres[k]->radius * scale[0] + gObjects[i]->GetCollisionSpheres()[j]->radius * gObjects[i]->GetScale()[0];
 
 				//(Distance between the objects)^2 - (Minimal distance)^2
-				float pp = relPosVector[0] * relPosVector[0] + relPosVector[1] * relPosVector[1] + relPosVector[2] * relPosVector[2] - r*r;
+				//float pp = relPosVector[0] * relPosVector[0] + relPosVector[1] * relPosVector[1] + relPosVector[2] * relPosVector[2] - r*r;
+				float pp = relPosVector[0] * relPosVector[0] + relPosVector[1] * relPosVector[1] - r*r;
 
 				//If (pp < 0), the collision spheres are intersecting right now
-				if ( pp < 0 ) 
+				if ( pp < 0 )
 					return i;
 
 				/*
@@ -377,7 +388,7 @@ void CPlanet::Draw()
 
 	float radius = 1;
 	glBegin(GL_TRIANGLES);
-		for (int i=0; i<360; i+=2)
+		for (int i=0; i<360; i+=4)
 		{
 			float degInRad = i*DEG2RAD;
 			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
@@ -391,9 +402,9 @@ void CPlanet::Draw()
 
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_LINE_LOOP);
-		for (int i=0; i<360; i+=2)
+		for (int i=0; i<360; i+=4)
 		{
-			float degInRad = i*DEG2RAD;
+			float degInRad = (i+4)*DEG2RAD;
 			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
 		}
 	glEnd();
@@ -427,8 +438,8 @@ CNuke::CNuke()
 	cSphere->translation[1] = 0;
 	cSphere->translation[2] = 0;
 	cSphere->radius = .2f;
-	cSphere->globalPosition[0] = 0;
-	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[0] = 10;
+	cSphere->globalPosition[1] = 10;
 	cSphere->globalPosition[2] = 0;
 	collisionSpheres.push_back(cSphere);
 
@@ -437,8 +448,8 @@ CNuke::CNuke()
 	cSphere->translation[1] = 0.0f;
 	cSphere->translation[2] = 0.0f;
 	cSphere->radius = .25;
-	cSphere->globalPosition[0] = 0;
-	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[0] = 10;
+	cSphere->globalPosition[1] = 10;
 	cSphere->globalPosition[2] = 0;
 	collisionSpheres.push_back(cSphere);
 
@@ -474,12 +485,12 @@ void CNuke::Draw()
 	offset = -cos(-30.0f*DEG2RAD);
 
 	glBegin(GL_TRIANGLES);
-	for (int i=-20; i<30; i+=5)
+	for (int i=-20; i<30; i+=10)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius + offset, sin(degInRad)*radius, -.001f);
 
-		degInRad = (i+5)*DEG2RAD;
+		degInRad = (i+10)*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
 		glVertex3f(0, 0, -.001f);
@@ -489,12 +500,12 @@ void CNuke::Draw()
 	//Draw the other half of Nuke body
 	offset = -cos(150.0f*DEG2RAD);
 	glBegin(GL_TRIANGLES);
-	for (int i=150; i<200; i+=5)
+	for (int i=150; i<200; i+=10)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
-		degInRad = (i+5)*DEG2RAD;
+		degInRad = (i+10)*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
 		glVertex3f(0, 0, -.001f);
@@ -514,12 +525,12 @@ void CNuke::Draw()
 	offset = sin(200 * DEG2RAD);
 	glBegin(GL_TRIANGLES);
 	radius = .28f;
-	for (int i=120; i<180; i+=4)
+	for (int i=120; i<180; i+=8)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
 
-		degInRad = (i+4)*DEG2RAD;
+		degInRad = (i+8)*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
 
 		glVertex3f(0, offset/2, -.01f);
@@ -528,12 +539,12 @@ void CNuke::Draw()
 
 	glBegin(GL_TRIANGLES);
 	//Make another fin
-	for (int i=120; i<180; i+=4)
+	for (int i=120; i<180; i+=8)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
 
-		degInRad = (i+4)*DEG2RAD;
+		degInRad = (i+8)*DEG2RAD;
 		glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
 
 		glVertex3f(0, offset/2, -.01f);
@@ -550,12 +561,12 @@ void CNuke::Draw()
 	offset = -cos(-30.0f*DEG2RAD);
 
 	glBegin(GL_LINES);
-	for (int i=-20; i<30; i+=5)
+	for (int i=-20; i<30; i+=10)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
-		degInRad = (i+5)*DEG2RAD;
+		degInRad = (i+10)*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
 		//glVertex3f(0, 0, 0);
@@ -565,12 +576,12 @@ void CNuke::Draw()
 	//Draw the other half of Nuke body
 	offset = -cos(150.0f*DEG2RAD);
 	glBegin(GL_LINES);
-	for (int i=150; i<200; i+=5)
+	for (int i=150; i<200; i+=10)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
-		degInRad = (i+5)*DEG2RAD;
+		degInRad = (i+10)*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius + offset,sin(degInRad)*radius, -.001f);
 
 		//glVertex3f(0, 0, 0);
@@ -591,12 +602,12 @@ void CNuke::Draw()
 	offset = sin(200 * DEG2RAD);
 	glBegin(GL_LINES);
 	radius = .28f;
-	for (int i=120; i<180; i+=4)
+	for (int i=120; i<180; i+=8)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
 
-		degInRad = (i+4)*DEG2RAD;
+		degInRad = (i+8)*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
 
 		//glVertex3f(0, offset/2, 0);
@@ -610,12 +621,12 @@ void CNuke::Draw()
 
 	glBegin(GL_LINES);
 	//Make another fin
-	for (int i=120; i<180; i+=4)
+	for (int i=120; i<180; i+=8)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
 
-		degInRad = (i+4)*DEG2RAD;
+		degInRad = (i+8)*DEG2RAD;
 		glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
 
 		//glVertex3f(0, offset/2, 0);
@@ -639,7 +650,7 @@ void CNuke::Draw()
 
 	int flameSize = (int)((thrust + .3f) / .2f);
 
-	if(animVal % 6 == 0)
+	if(animVal % 2 == 0)
 	{
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.00001f);
@@ -653,7 +664,7 @@ void CNuke::Draw()
 		glEnd();
 	}
 
-	else if(animVal % 6 == 1)
+	else if(animVal % 2 == 1)
 	{	
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.00001f);
@@ -664,62 +675,6 @@ void CNuke::Draw()
 			glVertex3f( 0.04414f,  -0.34192359447479248f * 4*flameSize/6.0f, -.00001f);
 
 			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
-		glEnd();
-	}
-
-	else if(animVal % 6 == 2)
-	{
-		glBegin(GL_LINE_LOOP);
-			glVertex3f(-0.073740899562835693f, -0.34192359447479248, -.00001f);
-			
-			glVertex3f(-0.04424f, -0.34201046824455261f * 5*flameSize/6.0f, -.00001f);
-			glVertex3f(-0.01478f, -0.34192359447479248f, -.00001f);
-			glVertex3f(0.01468f, -0.34201046824455261f * 5*flameSize/6.0f, -.00001f);
-			glVertex3f( 0.04414f,  -0.34192359447479248f, -.00001f);
-
-			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
-		glEnd();
-	}
-
-	if(animVal % 6 == 3)
-	{	
-		glBegin(GL_LINE_LOOP);
-			glVertex3f(-0.073740899562835693f, -0.34192359447479248, -.00001f);
-			
-			glVertex3f(-0.04424f, -0.34201046824455261f * 5*flameSize/6.0f, -.00001f);
-			glVertex3f(-0.01478f, -0.34192359447479248f, -.00001f);
-			glVertex3f(0.01468f, -0.34201046824455261f * 5*flameSize/6.0f, -.00001f);
-			glVertex3f( 0.04414f,  -0.34192359447479248f, -.00001f);
-
-			glVertex3f(0.073662996292114258f, -0.34201046824455261f, -.00001f);
-		glEnd();
-	}
-
-	if(animVal % 6 == 4)
-	{
-		glBegin(GL_LINE_LOOP);
-			glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.00001f);
-			
-			glVertex3f(-0.04424f, -0.34201046824455261f * flameSize, -.00001f);
-			glVertex3f(-0.01478f, -0.34192359447479248f, -.00001f);
-			glVertex3f(0.01468f, -0.34201046824455261f * flameSize, -.00001f);
-			glVertex3f( 0.04414f,  -0.34192359447479248f, -.00001f);
-
-			glVertex3f(0.073662996292114258f, -0.34201046824455261f, -.00001f);
-		glEnd();
-	}
-
-	if(animVal % 6 == 5)
-	{	
-		glBegin(GL_LINE_LOOP);
-			glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.00001f);
-			
-			glVertex3f(-0.04424f, -0.34201046824455261f * flameSize, -.00001f);
-			glVertex3f(-0.01478f, -0.34192359447479248f, -.00001f);
-			glVertex3f(0.01468f, -0.34201046824455261f * flameSize, -.00001f);
-			glVertex3f( 0.04414f,  -0.34192359447479248f, -.00001f);
-
-			glVertex3f(0.073662996292114258f, -0.34201046824455261f, -.00001f);
 		glEnd();
 	}
 
@@ -878,121 +833,44 @@ CDebris::CDebris()
 	{
 	case DEBRIS_TYPE_0:
 		cSphere  = new sCollisionSphere;
-		cSphere->translation[0] = -.19f;
-		cSphere->translation[1] = 0;
+		cSphere->translation[0] = -.05f;
+		cSphere->translation[1] = 0.05f;
 		cSphere->translation[2] = 0;
-		cSphere->radius = .05f;
+		cSphere->radius = .1f;
 		cSphere->globalPosition[0] = 0;
 		cSphere->globalPosition[1] = 0;
 		cSphere->globalPosition[2] = 0;
 		collisionSpheres.push_back(cSphere);
 
-		cSphere = new sCollisionSphere;
-		cSphere->translation[0] = 0;
-		cSphere->translation[1] = .19f;
-		cSphere->translation[2] = 0;
-		cSphere->radius = .05f;
-		cSphere->globalPosition[0] = 0;
-		cSphere->globalPosition[1] = 0;
-		cSphere->globalPosition[2] = 0;
-		collisionSpheres.push_back(cSphere);
-
-		cSphere  = new sCollisionSphere;
-		cSphere->translation[0] = -.06f;
-		cSphere->translation[1] = 0;
-		cSphere->translation[2] = 0;
-		cSphere->radius = .05f;
-		cSphere->globalPosition[0] = 0;
-		cSphere->globalPosition[1] = 0;
-		cSphere->globalPosition[2] = 0;
-		collisionSpheres.push_back(cSphere);
-
-		cSphere = new sCollisionSphere;
-		cSphere->translation[0] = 0;
-		cSphere->translation[1] = .06f;
-		cSphere->translation[2] = 0;
-		cSphere->radius = .05f;
-		cSphere->globalPosition[0] = 0;
-		cSphere->globalPosition[1] = 0;
-		cSphere->globalPosition[2] = 0;
-		collisionSpheres.push_back(cSphere);
 		break;
 	case DEBRIS_TYPE_1:
-		cSphere = new sCollisionSphere;
-		cSphere->translation[0] = 0;
-		cSphere->translation[1] = .19f;
-		cSphere->translation[2] = 0;
-		cSphere->radius = .05f;
-		cSphere->globalPosition[0] = 0;
-		cSphere->globalPosition[1] = 0;
-		cSphere->globalPosition[2] = 0;
-		collisionSpheres.push_back(cSphere);
-
 		cSphere  = new sCollisionSphere;
-		cSphere->translation[0] = -.06f;
-		cSphere->translation[1] = 0;
+		cSphere->translation[0] = 0;
+		cSphere->translation[1] = 0.1f;
 		cSphere->translation[2] = 0;
-		cSphere->radius = .05f;
+		cSphere->radius = .1f;
 		cSphere->globalPosition[0] = 0;
 		cSphere->globalPosition[1] = 0;
 		cSphere->globalPosition[2] = 0;
 		collisionSpheres.push_back(cSphere);
 
-		cSphere = new sCollisionSphere;
-		cSphere->translation[0] = 0;
-		cSphere->translation[1] = .06f;
-		cSphere->translation[2] = 0;
-		cSphere->radius = .05f;
-		cSphere->globalPosition[0] = 0;
-		cSphere->globalPosition[1] = 0;
-		cSphere->globalPosition[2] = 0;
-		collisionSpheres.push_back(cSphere);
 		break;
 	case DEBRIS_TYPE_2:
 		cSphere  = new sCollisionSphere;
-		cSphere->translation[0] = -.19f;
-		cSphere->translation[1] = 0;
-		cSphere->translation[2] = 0;
-		cSphere->radius = .05f;
-		cSphere->globalPosition[0] = 0;
-		cSphere->globalPosition[1] = 0;
-		cSphere->globalPosition[2] = 0;
-		collisionSpheres.push_back(cSphere);
-
-		cSphere  = new sCollisionSphere;
-		cSphere->translation[0] = -.06f;
-		cSphere->translation[1] = 0;
-		cSphere->translation[2] = 0;
-		cSphere->radius = .05f;
-		cSphere->globalPosition[0] = 0;
-		cSphere->globalPosition[1] = 0;
-		cSphere->globalPosition[2] = 0;
-		collisionSpheres.push_back(cSphere);
-
-		cSphere = new sCollisionSphere;
 		cSphere->translation[0] = 0;
-		cSphere->translation[1] = .06f;
+		cSphere->translation[1] = 0.05f;
 		cSphere->translation[2] = 0;
 		cSphere->radius = .05f;
 		cSphere->globalPosition[0] = 0;
 		cSphere->globalPosition[1] = 0;
 		cSphere->globalPosition[2] = 0;
 		collisionSpheres.push_back(cSphere);
+
 		break;
 	case DEBRIS_TYPE_3:
 		cSphere  = new sCollisionSphere;
-		cSphere->translation[0] = -.06f;
-		cSphere->translation[1] = 0;
-		cSphere->translation[2] = 0;
-		cSphere->radius = .05f;
-		cSphere->globalPosition[0] = 0;
-		cSphere->globalPosition[1] = 0;
-		cSphere->globalPosition[2] = 0;
-		collisionSpheres.push_back(cSphere);
-
-		cSphere = new sCollisionSphere;
-		cSphere->translation[0] = 0;
-		cSphere->translation[1] = .06f;
+		cSphere->translation[0] = -.025f;
+		cSphere->translation[1] = 0.025f;
 		cSphere->translation[2] = 0;
 		cSphere->radius = .05f;
 		cSphere->globalPosition[0] = 0;
@@ -1159,7 +1037,7 @@ CMissileBase::CMissileBase()
 
 	cSphere  = new sCollisionSphere;
 	cSphere->translation[0] = .50f;
-	cSphere->translation[1] = .1f;
+	cSphere->translation[1] = 0;
 	cSphere->translation[2] = 0;
 	cSphere->radius = .50f;
 	cSphere->globalPosition[0] = 0;
@@ -1799,7 +1677,7 @@ int	CFlakCannon::GetType()
 void CFlakCannon::Fire()
 {
 	loaded = false; 
-	timeToReload = 25; 
+	timeToReload = FLAK_RELOAD_TIME; 
 }
 
 void CFlakCannon::GetProjVector(int* TTL, float* projVector)
@@ -1808,7 +1686,7 @@ void CFlakCannon::GetProjVector(int* TTL, float* projVector)
 	projVector[1] = (pCursorPos[1] - translation[1]);
 	projVector[2] = 0;//pCursorPos[2] - translation[2]/3.0;
 
-	float magnitude = sqrt(projVector[0] * projVector[0] + projVector[1] * projVector[1]) / 6.0f;
+	float magnitude = sqrt(projVector[0] * projVector[0] + projVector[1] * projVector[1]) / 5.0f;
 
 	projVector[0] /= magnitude;
 	projVector[1] /= magnitude;

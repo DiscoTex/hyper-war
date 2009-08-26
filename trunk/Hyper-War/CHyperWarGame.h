@@ -22,9 +22,19 @@ using namespace std;
 #define CDS_FULLSCREEN 4										// Compilers. By Defining It This Way,
 #endif	
 
+/*
+//SLOW-MODE
 #define DEBRIS_AMOUNT 6
-#define CHARGE_RATE_DIVIDER 2000.0f
+#define CHARGE_RATE_DIVIDER 5000.0f
 #define MAX_THRUST 5.0f		//thrust = (ms held) / CHARGE_RATE_DIVIDER.  1000 == practically infinite
+#define MIN_THRUST .3f
+#define FLAK_DEBRIS_FACTOR 4
+*/
+
+//HYPER-MODE
+#define DEBRIS_AMOUNT 6
+#define CHARGE_RATE_DIVIDER 500.0f
+#define MAX_THRUST 50000.0f		//thrust = (ms held) / CHARGE_RATE_DIVIDER.  1000 == practically infinite
 #define MIN_THRUST .3f
 #define FLAK_DEBRIS_FACTOR 4
 

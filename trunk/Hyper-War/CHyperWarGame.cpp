@@ -232,13 +232,13 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		ToggleFullscreen (g_window);							// Toggle Fullscreen Mode
 	}
 
-	mousePos[0][0] += rawMouse.get_x_delta(1) / 500.0f;
+	mousePos[0][0] += rawMouse.get_x_delta(3) / 500.0f;
 	if(mousePos[0][0] > 0)
 		mousePos[0][0] = 0;
 	else if(mousePos[0][0] < -1.8f)
 		mousePos[0][0] = -1.8f;
 
-	mousePos[0][1] -= rawMouse.get_y_delta(1) / 500.0f;
+	mousePos[0][1] -= rawMouse.get_y_delta(3) / 500.0f;
 	if(mousePos[0][1] > 1.6f)
 		mousePos[0][1] = 1.6f;
 	else if(mousePos[0][1] < -1.6f)
@@ -570,8 +570,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 	//Update starfield position
 	//Starfield position should be moved as a function of time
-	//starFieldPosition = (starFieldPosition + milliseconds) % (65535);
-	globalEffects.SetStarFieldPosition((globalEffects.GetStarFieldPosition() + milliseconds) % 65535);
+	globalEffects.SetStarFieldPosition(globalEffects.GetStarFieldPosition() + milliseconds);
 	
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
 }
