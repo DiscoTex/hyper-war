@@ -451,6 +451,7 @@ CNuke::CNuke()
 
 	animVal = 0;
 	lastLaunch = 0;
+	gravityImmunity = NUKE_GRAVITY_IMMUNITY_TIME;
 }
 
 void CNuke::Draw()
@@ -759,9 +760,9 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 	}
 
 	//Add motion based on motion vector and elapsed time
-	translation[0] += milliseconds * motionVector[0] / 10000;
-	translation[1] += milliseconds * motionVector[1] / 10000;
-	translation[2] += milliseconds * motionVector[2] / 10000;
+	translation[0] += milliseconds * motionVector[0] / NUKE_SPEED_DIVIDER;
+	translation[1] += milliseconds * motionVector[1] / NUKE_SPEED_DIVIDER;
+	translation[2] += milliseconds * motionVector[2] / NUKE_SPEED_DIVIDER;
 
 	//Update collision sphere locations
 	for(unsigned int i = 0; i < collisionSpheres.size(); i++)
@@ -784,7 +785,6 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
 
-
 	if(translation[1] > 1.75)
 		translation[1] = -1.75;
 	else if(translation[1] < -1.75)
@@ -794,13 +794,16 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 		translation[0] = -2.75;
 	else if(translation[0] < -2.75)
 		translation[0] = 2.75;
+
+	if(gravityImmunity > 0)
+		gravityImmunity -= milliseconds;
 }
 
 float *CNuke::GetMotionVector()
 {
-	tempVec[0] = motionVector[0]/10.0f;
-	tempVec[1] = motionVector[1]/10.0f;
-	tempVec[2] = motionVector[2]/10.0f;
+	tempVec[0] = motionVector[0] / (NUKE_SPEED_DIVIDER / 1000);
+	tempVec[1] = motionVector[1] / (NUKE_SPEED_DIVIDER / 1000);
+	tempVec[2] = motionVector[2] / (NUKE_SPEED_DIVIDER / 1000);
 
 	return tempVec;
 }
@@ -808,6 +811,60 @@ float *CNuke::GetMotionVector()
 int CNuke::GetType()
 {
 	return TYPE_NUKE;
+}
+
+void CNuke::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
+{
+	float vectorToGravity[3];
+	float forceVector[3];
+	float distance;
+
+
+	if(gravityImmunity <= 0)
+	{
+		//CGameObject::ProcessGravity(milliseconds, gWells);
+		
+		for(unsigned int i=0; i<gWells.size(); i++)
+		{
+			//Determine vector from this object to gravity well
+			vectorToGravity[0] = gWells[i]->translation[0] - translation[0];
+			vectorToGravity[1] = gWells[i]->translation[1] - translation[1];
+			vectorToGravity[2] = gWells[i]->translation[2] - translation[2];
+			
+			//Find distance to gravity well
+			distance = sqrt(pow(vectorToGravity[0], 2) + pow(vectorToGravity[1], 2) + pow(vectorToGravity[2], 2));
+			
+			//Make vectorToGravity a unit vector
+			vectorToGravity[0] /= distance;
+			vectorToGravity[1] /= distance;
+			vectorToGravity[2] /= distance;
+			
+			//Compute force vector due to gravity
+			forceVector[0] = vectorToGravity[0] * (gWells[i]->mass / pow(distance, 2));
+			forceVector[1] = vectorToGravity[1] * (gWells[i]->mass / pow(distance, 2));
+			forceVector[2] = vectorToGravity[2] * (gWells[i]->mass / pow(distance, 2));
+
+			if(forceVector[0] > MAX_GRAVITY_FORCE)
+				forceVector[0] = MAX_GRAVITY_FORCE;
+			if(forceVector[1] > MAX_GRAVITY_FORCE)
+				forceVector[1] = MAX_GRAVITY_FORCE;
+			if(forceVector[2] > MAX_GRAVITY_FORCE)
+				forceVector[2] = MAX_GRAVITY_FORCE;
+
+			if(forceVector[0] < -MAX_GRAVITY_FORCE)
+				forceVector[0] = -MAX_GRAVITY_FORCE;
+			if(forceVector[1] < -MAX_GRAVITY_FORCE)
+				forceVector[1] = -MAX_GRAVITY_FORCE;
+			if(forceVector[2] < -MAX_GRAVITY_FORCE)
+				forceVector[2] = -MAX_GRAVITY_FORCE;
+
+			//Add force vector to this object's motionVector
+			motionVector[0] += forceVector[0] * milliseconds / 1000;
+			//motionVector[1] += forceVector[1] * milliseconds / 1000;
+			//motionVector[2] += forceVector[2] * milliseconds / 1000;
+		}
+		
+	}
 }
 
 CDebris::CDebris()
@@ -1113,6 +1170,7 @@ CMissileBase::CMissileBase()
 	loaded = true;
 	launchKey = '\0';
 	launchReady = false;
+	charge = 0;
 }
 
 CMissileBase::~CMissileBase()
@@ -1125,7 +1183,7 @@ int CMissileBase::Launch()
 
 	loaded = false; 
 	launchReady = false; 
-	timeToReload = 5000; 
+	timeToReload = NUKE_RELOAD_TIME; 
 	charge = 0;
 
 	return oldCharge;

@@ -274,11 +274,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			else if(!g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()] && ((CMissileBase*)(gameObjects[i]))->LaunchReady())
 			{
 				//Launch missile
-				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / 5000.0f;
-				if(thrust > 5)
-					thrust = 5;
-				else if(thrust < .2f)
-					thrust = .2f;
+				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / CHARGE_RATE_DIVIDER;
+				if(thrust > MAX_THRUST)
+					thrust = MAX_THRUST;
+				if(thrust < MIN_THRUST)
+					thrust = MIN_THRUST;
 
 				nuke = new CNuke();
 				nuke->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);

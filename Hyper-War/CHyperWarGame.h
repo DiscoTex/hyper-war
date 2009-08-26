@@ -23,6 +23,9 @@ using namespace std;
 #endif	
 
 #define DEBRIS_AMOUNT 8
+#define CHARGE_RATE_DIVIDER 5000.0f
+#define MAX_THRUST 5.0f		//thrust = (ms held) / CHARGE_RATE_DIVIDER.  1000 == practically infinite
+#define MIN_THRUST .3f
 
 class CHyperWarGame
 {

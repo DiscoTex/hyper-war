@@ -14,7 +14,11 @@
 #pragma comment( lib, "glu32.lib" )								// Search For GLu32.lib While Linking
 
 const float DEG2RAD = 3.1415f/180;
-#define MAX_GRAVITY_FORCE 10
+
+#define MAX_GRAVITY_FORCE 10.0f
+#define NUKE_GRAVITY_IMMUNITY_TIME 1000.0f
+#define NUKE_SPEED_DIVIDER 5000.0f
+#define NUKE_RELOAD_TIME 2000
 
 //#define COLLISION_DEBUG 1
 
@@ -117,6 +121,8 @@ public:
 
 	void ProcessMotion(DWORD milliseconds, Keys * keys);
 	int	 GetType();
+	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
+
 	void SetThrust(float newThrust) {thrust = newThrust;}
 	float* GetMotionVector();
 
@@ -127,6 +133,7 @@ private:
 	float				flameColor[3];
 	DWORD				lastLaunch;
 	float				tempVec[3];
+	int					gravityImmunity;
 };
 
 class CDebris : public CGameObject
@@ -162,7 +169,7 @@ public:
 	bool IsLoaded() {return loaded;}
 	int  Launch();
 	bool LaunchReady() {return launchReady;}
-	void AddCharge(DWORD milliseconds) {charge = 4000; launchReady = true;}
+	void AddCharge(DWORD milliseconds) {charge += milliseconds; launchReady = true;}
 	float* GetNukeTranslation();
 	float* GetNukeVector();
 	void  SetCursorPointer(float* newPCursorPos) {pCursorPos = newPCursorPos;}
