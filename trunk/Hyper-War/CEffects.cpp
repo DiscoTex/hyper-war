@@ -29,9 +29,9 @@ CEffects::CEffects()
 		newStar.xpos = (((float)rand() / (float)RAND_MAX) - .5f) * 10000;
 		newStar.ypos = (((float)rand() / (float)RAND_MAX) - .5f) * 10000;
 		newStar.zpos = (((float)rand() / (float)RAND_MAX) -  1.0f) * 50.0f - 1;
-		newStar.color1 = 1; 
+		newStar.color1 = .7; 
 		newStar.color2 = 0.7;
-		newStar.color3 = 0.8; 
+		newStar.color3 = 1; 
 		newStar.scale = .03;
 		newStar.rotation = (rand()%360)+1;
 		stars.push_back(newStar);
@@ -91,16 +91,14 @@ void CEffects::DrawStarfield()
 
 	for(int i=0; i<stars.size(); i++)
 	{
-		//if (stars[i].ypos > 1.9)
-		//	stars[i].ypos = -1.9;
-		//glScaled(stars[i].scale,stars[i].scale,1);		
+			
 		glPushMatrix();
 		
 		if (stars[i].ypos > 1000)
 			stars[i].ypos = -1000;
 
-		//glScalef(.04,.04,1);
-		glScaled(stars[i].scale,stars[i].scale,1);
+		glScalef(.05,.05,1);
+		//glScalef(stars[i].scale,stars[i].scale,1);
 		glTranslatef(stars[i].xpos, stars[i].ypos+tmp, stars[i].zpos);
 		
 		//printf("x=%f\ty=%f",stars[i].xpos,stars[i].ypos);
