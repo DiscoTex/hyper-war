@@ -15,24 +15,6 @@
 
 const float DEG2RAD = 3.1415f/180;
 
-/*
-//SLOW-MODE
-#define MAX_GRAVITY_FORCE 10.0f
-#define NUKE_GRAVITY_IMMUNITY_TIME 1000.0f
-#define NUKE_SPEED_DIVIDER 5000.0f
-#define NUKE_RELOAD_TIME 2000
-#define FLAK_RELOAD_TIME 10
-*/
-
- 
-//HYPER-MODE
-#define MAX_GRAVITY_FORCE 10.0f
-#define NUKE_GRAVITY_IMMUNITY_TIME 500.0f
-#define NUKE_SPEED_DIVIDER 1000.0f
-#define NUKE_RELOAD_TIME 150
-#define FLAK_RELOAD_TIME 10
-
-
 //#define COLLISION_DEBUG 1
 
 using namespace std;
@@ -54,6 +36,25 @@ enum{
 	DEBRIS_TYPE_2,
 	DEBRIS_TYPE_3
 };
+
+struct sGameParams
+{
+	//Speed info
+	float chargeRateDivider;
+	float maxThrust;
+	float minThrust;
+	float maxGravityForce;
+	int nukeGravityImmunityTime;
+	float nukeSpeedDivider;
+	int nukeReloadTime;
+	int flakReloadTime;
+	int debrisAmount;
+	int flakDebrisFactor;
+	int hyperModeDelay;
+	int mouse1Index;
+	int mouse2Index;
+};
+
 struct sGravityWell
 {
 	float translation[3];
@@ -71,7 +72,7 @@ struct sCollisionSphere
 class CGameObject
 {
 public:
-	CGameObject();
+	CGameObject(sGameParams *newGameParams);
 	~CGameObject();
 
 	virtual void Draw();
@@ -82,6 +83,7 @@ public:
 	void SetColor(float r, float g, float b);
 	void SetMotionVector(float x, float y, float z);
 	void SetAngularVelocity(float x, float y, float z);
+	//void SetGameParams(sGameParams *newGameParams);
 
 	float* GetScale();
 	float* GetRotation();
@@ -108,13 +110,15 @@ protected:
 	float translation[3];
 	float color[3];
 
+	sGameParams *gameParams;
+
 	vector < sCollisionSphere* > collisionSpheres;
 };
 
 class CPlanet : public CGameObject
 {
 public:
-	CPlanet();
+	CPlanet(sGameParams *newGameParams);
 	~CPlanet() {}
 
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
@@ -129,7 +133,7 @@ private:
 class CNuke : public CGameObject
 {
 public:
-	CNuke();
+	CNuke(sGameParams *newGameParams);
 	~CNuke() {}
 
 	void ProcessMotion(DWORD milliseconds, Keys * keys);
@@ -152,7 +156,7 @@ private:
 class CDebris : public CGameObject
 {
 public:
-	CDebris();
+	CDebris(sGameParams *newGameParams);
 	~CDebris();
 
 	void ProcessMotion(DWORD milliseconds, Keys * keys);
@@ -171,7 +175,7 @@ private:
 class CMissileBase : public CGameObject
 {
 public:
-	CMissileBase();
+	CMissileBase(sGameParams *newGameParams);
 	~CMissileBase();
 
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
@@ -202,7 +206,7 @@ private:
 class CCity : public CGameObject
 {
 public:
-	CCity();
+	CCity(sGameParams *newGameParams);
 	~CCity();
 
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
@@ -219,7 +223,7 @@ private:
 class CFlakCannon : public CGameObject
 {
 public:
-	CFlakCannon();
+	CFlakCannon(sGameParams *newGameParams);
 	~CFlakCannon();
 
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
@@ -246,7 +250,7 @@ private:
 class CProjectile : public CGameObject
 {
 public:
-	CProjectile();
+	CProjectile(sGameParams *newGameParams);
 	~CProjectile();
 
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells) {}
