@@ -8,7 +8,7 @@
 #include "GameObjects.h"
 
 //Generic Game Object
-CGameObject::CGameObject()
+CGameObject::CGameObject(sGameParams *newGameParams)
 {
 	for(int i=0; i<3; i++)
 	{
@@ -22,6 +22,8 @@ CGameObject::CGameObject()
 	color[0] = 0;
 	color[1] = 0;
 	color[2] = 1;
+
+	gameParams = newGameParams;
 }
 
 CGameObject::~CGameObject()
@@ -100,6 +102,24 @@ void CGameObject::SetAngularVelocity(float x, float y, float z)
 	angularVelocity[1] = y;
 	angularVelocity[2] = z;
 }
+
+/*
+void CGameObject::SetGameParams(sGameParams *newGameParams)
+{
+	// memcpy(&gameParams, &newGameParams, sizeof(sGameParams));
+
+	gameParams->chargeRateDivider = 5000.0f;			//min 500
+	gameParams->maxThrust = 5.0f;					//max 500
+	gameParams->minThrust = 0.3f;
+	gameParams->maxGravityForce = 10.0f;
+	gameParams->nukeGravityImmunityTime = 1000;	//min 200
+	gameParams->nukeSpeedDivider = 5000.0f;			//min 1000
+	gameParams->nukeReloadTime = 4000;				//min 150
+	gameParams->flakReloadTime = 10;	
+	gameParams->debrisAmount = 6;
+	gameParams->flakDebrisFactor = 4;
+}
+*/
 
 float* CGameObject::GetScale()
 {
@@ -204,19 +224,19 @@ void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 		forceVector[1] = vectorToGravity[1] * (gWells[i]->mass / pow(distance, 2));
 		forceVector[2] = vectorToGravity[2] * (gWells[i]->mass / pow(distance, 2));
 
-		if(forceVector[0] > MAX_GRAVITY_FORCE)
-			forceVector[0] = MAX_GRAVITY_FORCE;
-		if(forceVector[1] > MAX_GRAVITY_FORCE)
-			forceVector[1] = MAX_GRAVITY_FORCE;
-		if(forceVector[2] > MAX_GRAVITY_FORCE)
-			forceVector[2] = MAX_GRAVITY_FORCE;
+		if(forceVector[0] > gameParams->maxGravityForce)
+			forceVector[0] = gameParams->maxGravityForce;
+		if(forceVector[1] > gameParams->maxGravityForce)
+			forceVector[1] = gameParams->maxGravityForce;
+		if(forceVector[2] > gameParams->maxGravityForce)
+			forceVector[2] = gameParams->maxGravityForce;
 
-		if(forceVector[0] < -MAX_GRAVITY_FORCE)
-			forceVector[0] = -MAX_GRAVITY_FORCE;
-		if(forceVector[1] < -MAX_GRAVITY_FORCE)
-			forceVector[1] = -MAX_GRAVITY_FORCE;
-		if(forceVector[2] < -MAX_GRAVITY_FORCE)
-			forceVector[2] = -MAX_GRAVITY_FORCE;
+		if(forceVector[0] < -gameParams->maxGravityForce)
+			forceVector[0] = -gameParams->maxGravityForce;
+		if(forceVector[1] < -gameParams->maxGravityForce)
+			forceVector[1] = -gameParams->maxGravityForce;
+		if(forceVector[2] < -gameParams->maxGravityForce)
+			forceVector[2] = -gameParams->maxGravityForce;
 
 		//Add force vector to this object's motionVector
 		motionVector[0] += forceVector[0] * milliseconds / 1000;
@@ -359,7 +379,7 @@ bool CGameObject::CanDestroy(int destroyerType)
 
 //CPlanet
 
-CPlanet::CPlanet()
+CPlanet::CPlanet(sGameParams *newGameParams) : CGameObject(newGameParams)
 {
 	//Create collision spheres
 	sCollisionSphere* cSphere = new sCollisionSphere;
@@ -430,7 +450,7 @@ bool CPlanet::CanDestroy(int destroyerType)
 
 // CNuke
 
-CNuke::CNuke()
+CNuke::CNuke(sGameParams *newGameParams) : CGameObject(newGameParams)
 {
 	//Create collision spheres
 	sCollisionSphere* cSphere = new sCollisionSphere;
@@ -462,7 +482,7 @@ CNuke::CNuke()
 
 	animVal = 0;
 	lastLaunch = 0;
-	gravityImmunity = NUKE_GRAVITY_IMMUNITY_TIME;
+	gravityImmunity = gameParams->nukeGravityImmunityTime;
 }
 
 void CNuke::Draw()
@@ -715,9 +735,9 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 	}
 
 	//Add motion based on motion vector and elapsed time
-	translation[0] += milliseconds * motionVector[0] / NUKE_SPEED_DIVIDER;
-	translation[1] += milliseconds * motionVector[1] / NUKE_SPEED_DIVIDER;
-	translation[2] += milliseconds * motionVector[2] / NUKE_SPEED_DIVIDER;
+	translation[0] += milliseconds * motionVector[0] / gameParams->nukeSpeedDivider;
+	translation[1] += milliseconds * motionVector[1] / gameParams->nukeSpeedDivider;
+	translation[2] += milliseconds * motionVector[2] / gameParams->nukeSpeedDivider;
 
 	//Update collision sphere locations
 	for(unsigned int i = 0; i < collisionSpheres.size(); i++)
@@ -756,9 +776,9 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 
 float *CNuke::GetMotionVector()
 {
-	tempVec[0] = motionVector[0] / (NUKE_SPEED_DIVIDER / 1000);
-	tempVec[1] = motionVector[1] / (NUKE_SPEED_DIVIDER / 1000);
-	tempVec[2] = motionVector[2] / (NUKE_SPEED_DIVIDER / 1000);
+	tempVec[0] = motionVector[0] / (gameParams->nukeSpeedDivider / 1000);
+	tempVec[1] = motionVector[1] / (gameParams->nukeSpeedDivider / 1000);
+	tempVec[2] = motionVector[2] / (gameParams->nukeSpeedDivider / 1000);
 
 	return tempVec;
 }
@@ -799,19 +819,19 @@ void CNuke::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 			forceVector[1] = vectorToGravity[1] * (gWells[i]->mass / pow(distance, 2));
 			forceVector[2] = vectorToGravity[2] * (gWells[i]->mass / pow(distance, 2));
 
-			if(forceVector[0] > MAX_GRAVITY_FORCE)
-				forceVector[0] = MAX_GRAVITY_FORCE;
-			if(forceVector[1] > MAX_GRAVITY_FORCE)
-				forceVector[1] = MAX_GRAVITY_FORCE;
-			if(forceVector[2] > MAX_GRAVITY_FORCE)
-				forceVector[2] = MAX_GRAVITY_FORCE;
+			if(forceVector[0] > gameParams->maxGravityForce)
+				forceVector[0] = gameParams->maxGravityForce;
+			if(forceVector[1] > gameParams->maxGravityForce)
+				forceVector[1] = gameParams->maxGravityForce;
+			if(forceVector[2] > gameParams->maxGravityForce)
+				forceVector[2] = gameParams->maxGravityForce;
 
-			if(forceVector[0] < -MAX_GRAVITY_FORCE)
-				forceVector[0] = -MAX_GRAVITY_FORCE;
-			if(forceVector[1] < -MAX_GRAVITY_FORCE)
-				forceVector[1] = -MAX_GRAVITY_FORCE;
-			if(forceVector[2] < -MAX_GRAVITY_FORCE)
-				forceVector[2] = -MAX_GRAVITY_FORCE;
+			if(forceVector[0] < -gameParams->maxGravityForce)
+				forceVector[0] = -gameParams->maxGravityForce;
+			if(forceVector[1] < -gameParams->maxGravityForce)
+				forceVector[1] = -gameParams->maxGravityForce;
+			if(forceVector[2] < -gameParams->maxGravityForce)
+				forceVector[2] = -gameParams->maxGravityForce;
 
 			//Add force vector to this object's motionVector
 			motionVector[0] += forceVector[0] * milliseconds / 1000;
@@ -822,7 +842,7 @@ void CNuke::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 	}
 }
 
-CDebris::CDebris()
+CDebris::CDebris(sGameParams *newGameParams) : CGameObject(newGameParams)
 {
 	//Pick a random debris type
 	debType = rand() * 4 / 32768;
@@ -1031,7 +1051,7 @@ bool CDebris::CanDestroy(int destroyerType)
 		return true;	
 }
 
-CMissileBase::CMissileBase()
+CMissileBase::CMissileBase(sGameParams *newGameParams) : CGameObject(newGameParams)
 {
 	sCollisionSphere *cSphere;
 
@@ -1061,7 +1081,7 @@ int CMissileBase::Launch()
 
 	loaded = false; 
 	launchReady = false; 
-	timeToReload = NUKE_RELOAD_TIME; 
+	timeToReload = gameParams->nukeReloadTime; 
 	charge = 0;
 
 	return oldCharge;
@@ -1421,7 +1441,7 @@ int CMissileBase::GetType()
 }
 
 
-CCity::CCity()
+CCity::CCity(sGameParams *newGameParams) : CGameObject(newGameParams)
 {
 	sCollisionSphere *cSphere;
 
@@ -1634,7 +1654,7 @@ void CCity::Draw()
 }
 
 
-CFlakCannon::CFlakCannon()
+CFlakCannon::CFlakCannon(sGameParams *newGameParams) : CGameObject(newGameParams)
 {
 	sCollisionSphere *cSphere;
 
@@ -1677,7 +1697,7 @@ int	CFlakCannon::GetType()
 void CFlakCannon::Fire()
 {
 	loaded = false; 
-	timeToReload = FLAK_RELOAD_TIME; 
+	timeToReload = gameParams->flakReloadTime; 
 }
 
 void CFlakCannon::GetProjVector(int* TTL, float* projVector)
@@ -1686,7 +1706,7 @@ void CFlakCannon::GetProjVector(int* TTL, float* projVector)
 	projVector[1] = (pCursorPos[1] - translation[1]);
 	projVector[2] = 0;//pCursorPos[2] - translation[2]/3.0;
 
-	float magnitude = sqrt(projVector[0] * projVector[0] + projVector[1] * projVector[1]) / 5.0f;
+	float magnitude = sqrt(projVector[0] * projVector[0] + projVector[1] * projVector[1]) / 8.0f;
 
 	projVector[0] /= magnitude;
 	projVector[1] /= magnitude;
@@ -1822,7 +1842,7 @@ void CFlakCannon::Draw()
 #endif
 }
 
-CProjectile::CProjectile()
+CProjectile::CProjectile(sGameParams *newGameParams) : CGameObject(newGameParams)
 {
 	origin[0] = 0;
 	origin[1] = 0;
