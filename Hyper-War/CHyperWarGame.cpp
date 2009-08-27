@@ -18,7 +18,7 @@ CHyperWarGame::CHyperWarGame()
 	mousePos[1][0] = 0;
 	mousePos[1][1] = 0;
 
-	SetHyperLevel(5);
+	SetHyperLevel(1);
 
 	gameParams.debrisAmount = 6;
 	gameParams.flakDebrisFactor = 4;
