@@ -219,10 +219,10 @@ int main(int argc, char *argv[])
 
     			SourcesPos[i][0] = -float(cos(theta));
     			SourcesPos[i][1] = -float(rand()%2);
-    			SourcesPos[i][2] = -float(sin(theta));
+    			SourcesPos[i][2] = 0;
 
     			alSourcefv(Sources[i], AL_POSITION, SourcesPos[i]);
-
+				printf("source = %i  [%f,%f]\n",i,SourcesPos[i][0],SourcesPos[i][1]);
     			alSourcePlay(Sources[i]);
             }
 		}
