@@ -22,6 +22,12 @@ CAudioRenderer::CAudioRenderer()
 
 	// Orientation of the listener. (first 3 elements are "at", second 3 are "up")
 	memset(ListenerOri, 0, sizeof(float)*6);
+	ListenerOri[0] = 0.0;
+	ListenerOri[1] = 0.0;
+	ListenerOri[2] = -1.0;
+	ListenerOri[3] = 0.0;
+	ListenerOri[4] = 1.0;
+	ListenerOri[5] = 0.0;
 
 	LoadALData();
 	SetListenerValues();
@@ -99,6 +105,12 @@ ALboolean CAudioRenderer::LoadALData()
 	if(alGetError() != AL_NO_ERROR)
 		return AL_FALSE;
 
+	//OpenAL distance model
+	alDistanceModel(AL_NONE);
+
+	if(alGetError() != AL_NO_ERROR)
+		return AL_FALSE;
+
 	return AL_TRUE;
 
 }
@@ -109,7 +121,6 @@ ALboolean CAudioRenderer::SetListenerValues()
 	alListenerfv(AL_POSITION,    ListenerPos);
 	alListenerfv(AL_VELOCITY,    ListenerVel);
 	alListenerfv(AL_ORIENTATION, ListenerOri);
-
 	if(alGetError() != AL_NO_ERROR)
 		return AL_FALSE;
 
