@@ -232,25 +232,25 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		ToggleFullscreen (g_window);							// Toggle Fullscreen Mode
 	}
 
-	mousePos[0][0] += rawMouse.get_x_delta(3) / 500.0f;
+	mousePos[0][0] += rawMouse.get_x_delta(MOUSE_LEFT) / 500.0f;
 	if(mousePos[0][0] > 0)
 		mousePos[0][0] = 0;
 	else if(mousePos[0][0] < -1.8f)
 		mousePos[0][0] = -1.8f;
 
-	mousePos[0][1] -= rawMouse.get_y_delta(3) / 500.0f;
+	mousePos[0][1] -= rawMouse.get_y_delta(MOUSE_LEFT) / 500.0f;
 	if(mousePos[0][1] > 1.6f)
 		mousePos[0][1] = 1.6f;
 	else if(mousePos[0][1] < -1.6f)
 		mousePos[0][1] = -1.6f;	
 
-	mousePos[1][0] += rawMouse.get_x_delta(2) / 500.0f;
+	mousePos[1][0] += rawMouse.get_x_delta(MOUSE_RIGHT) / 500.0f;
 	if(mousePos[1][0] < 0)
 		mousePos[1][0] = 0;
 	else if(mousePos[1][0] > 1.8f)
 		mousePos[1][0] = 1.8f;
 
-	mousePos[1][1] -= rawMouse.get_y_delta(2) / 500.0f;
+	mousePos[1][1] -= rawMouse.get_y_delta(MOUSE_RIGHT) / 500.0f;
 	if(mousePos[1][1] > 1.6f)
 		mousePos[1][1] = 1.6f;
 	else if(mousePos[1][1] < -1.6f)

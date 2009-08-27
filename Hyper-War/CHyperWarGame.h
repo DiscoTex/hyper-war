@@ -38,6 +38,12 @@ using namespace std;
 #define MIN_THRUST .3f
 #define FLAK_DEBRIS_FACTOR 4
 
+
+// mouse 
+#define MOUSE_LEFT 1
+#define MOUSE_RIGHT 3
+
+
 class CHyperWarGame
 {
 public:
