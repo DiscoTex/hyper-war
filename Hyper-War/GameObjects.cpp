@@ -103,24 +103,6 @@ void CGameObject::SetAngularVelocity(float x, float y, float z)
 	angularVelocity[2] = z;
 }
 
-/*
-void CGameObject::SetGameParams(sGameParams *newGameParams)
-{
-	// memcpy(&gameParams, &newGameParams, sizeof(sGameParams));
-
-	gameParams->chargeRateDivider = 5000.0f;			//min 500
-	gameParams->maxThrust = 5.0f;					//max 500
-	gameParams->minThrust = 0.3f;
-	gameParams->maxGravityForce = 10.0f;
-	gameParams->nukeGravityImmunityTime = 1000;	//min 200
-	gameParams->nukeSpeedDivider = 5000.0f;			//min 1000
-	gameParams->nukeReloadTime = 4000;				//min 150
-	gameParams->flakReloadTime = 10;	
-	gameParams->debrisAmount = 6;
-	gameParams->flakDebrisFactor = 4;
-}
-*/
-
 float* CGameObject::GetScale()
 {
 	return scale;
@@ -190,7 +172,7 @@ void CGameObject::ProcessMotion(DWORD milliseconds, Keys* keys)
 		else if(translation[1] < -1.75)
 			translation[1] = 1.75;
 
-		if(translation[0] > 2.75)
+		if(translation[0] > 7.5)
 			translation[0] = -2.75;
 		else if(translation[0] < -2.75)
 			translation[0] = 2.75;
@@ -240,7 +222,7 @@ void CGameObject::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 
 		//Add force vector to this object's motionVector
 		motionVector[0] += forceVector[0] * milliseconds / 1000;
-		//motionVector[1] += forceVector[1] * milliseconds / 1000;
+		motionVector[1] += forceVector[1] * milliseconds / 1000;
 		//motionVector[2] += forceVector[2] * milliseconds / 1000;
 	}
 }
@@ -477,7 +459,7 @@ CNuke::CNuke(sGameParams *newGameParams) : CGameObject(newGameParams)
 
 	//Cycle colors
 	flameColor[0] = 1.0f;
-	flameColor[1] = (float)(rand() / INT_MAX);
+	flameColor[1] = (float)(gameParams->randoms[gameParams->randIndex++%512] / RAND_MAX);
 	flameColor[2] = 0;
 
 	animVal = 0;
@@ -765,7 +747,7 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 	else if(translation[1] < -1.75)
 		translation[1] = 1.75;
 
-	if(translation[0] > 2.75)
+	if(translation[0] > 7.5)
 		translation[0] = -2.75;
 	else if(translation[0] < -2.75)
 		translation[0] = 2.75;
@@ -835,7 +817,7 @@ void CNuke::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 
 			//Add force vector to this object's motionVector
 			motionVector[0] += forceVector[0] * milliseconds / 1000;
-			//motionVector[1] += forceVector[1] * milliseconds / 1000;
+			motionVector[1] += forceVector[1] * milliseconds / 1000;
 			//motionVector[2] += forceVector[2] * milliseconds / 1000;
 		}
 		
@@ -845,7 +827,7 @@ void CNuke::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 CDebris::CDebris(sGameParams *newGameParams) : CGameObject(newGameParams)
 {
 	//Pick a random debris type
-	debType = rand() * 4 / 32768;
+	debType = gameParams->randoms[gameParams->randIndex++%512] * 4 / 32768;
 
 	sCollisionSphere* cSphere;
 
@@ -901,16 +883,16 @@ CDebris::CDebris(sGameParams *newGameParams) : CGameObject(newGameParams)
 	}	
 
 	color[0] = 1;
-	color[1] = (float)rand() / RAND_MAX;;
+	color[1] = (float)gameParams->randoms[gameParams->randIndex++%512] / RAND_MAX;;
 	color[2] = 0;
 
-	angularVelocity[0] = float(rand() % 500);
-	angularVelocity[1] = float(rand() % 500);
-	angularVelocity[2] = float(rand() % 500);
+	angularVelocity[0] = float(gameParams->randoms[gameParams->randIndex++%512] % 500);
+	angularVelocity[1] = float(gameParams->randoms[gameParams->randIndex++%512] % 500);
+	angularVelocity[2] = float(gameParams->randoms[gameParams->randIndex++%512] % 500);
 
-	rotation[2] = float(rand() % 500);
+	rotation[2] = float(gameParams->randoms[gameParams->randIndex++%512] % 500);
 
-	TTL = 1500 - rand()%500;
+	TTL = 1500 - gameParams->randoms[gameParams->randIndex++%512]%500;
 }
 
 CDebris::~CDebris()

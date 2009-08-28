@@ -36,7 +36,9 @@ public:
 	void Draw();										// Draw the current frame
 
 	void SetHyperLevel(int newLevel);
-	int GetHyperLevel() {return hyperLevel;}
+	int  GetHyperLevel() {return hyperLevel;}
+	void GenerateWave(int waveNumber);
+	int  GetCurrentWaveNumber() {return currentWaveNumber;}
 
 
 private:
@@ -62,5 +64,7 @@ private:
 	int							hyperModeTimer;
 	//hyper level
 	int							hyperLevel;
+	//wave number for single player
+	int							currentWaveNumber;
 
 };
