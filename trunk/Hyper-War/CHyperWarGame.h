@@ -22,12 +22,6 @@ using namespace std;
 #define CDS_FULLSCREEN 4										// Compilers. By Defining It This Way,
 #endif	
 
-
-// mouse 
-#define MOUSE_LEFT 1
-#define MOUSE_RIGHT 3
-
-
 class CHyperWarGame
 {
 public:
