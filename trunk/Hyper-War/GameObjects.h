@@ -31,6 +31,12 @@ enum{
 };
 
 enum{
+	MODE_VS,
+	MODE_SINGLE,
+	MODE_COOP
+};
+
+enum{
 	DEBRIS_TYPE_0,
 	DEBRIS_TYPE_1,
 	DEBRIS_TYPE_2,
@@ -48,11 +54,15 @@ struct sGameParams
 	float nukeSpeedDivider;
 	int nukeReloadTime;
 	int flakReloadTime;
+	int gameMode;
 	int debrisAmount;
 	int flakDebrisFactor;
 	int hyperModeDelay;
+	int	waveTime;
 	int mouse1Index;
 	int mouse2Index;
+	int randoms[1024];
+	unsigned long int	randIndex;
 };
 
 struct sGravityWell

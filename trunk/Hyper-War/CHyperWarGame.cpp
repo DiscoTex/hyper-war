@@ -21,9 +21,17 @@ CHyperWarGame::CHyperWarGame()
 	SetHyperLevel(1);
 
 	gameParams.debrisAmount = 6;
-	gameParams.flakDebrisFactor = 4;
+	gameParams.flakDebrisFactor = 6;
 	gameParams.mouse1Index = 3;
 	gameParams.mouse2Index = 2;
+	gameParams.gameMode = MODE_SINGLE;
+	gameParams.waveTime = 10000;
+
+	for(int i=0; i<512; i++)
+	{
+		gameParams.randoms[i] = rand();
+	}
+	gameParams.randIndex = 0;
 }
 
 CHyperWarGame::~CHyperWarGame()
@@ -57,148 +65,224 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		glShadeModel (GL_SMOOTH);									// Select Smooth Shading
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);			// Set Perspective Calculations To Most Accurate
 
-		//** Create game objects
+		if(gameParams.gameMode == MODE_VS)
+		{
+			//** Create game objects
+			//Create a green planet
+			CPlanet *planet = new CPlanet(&gameParams);
+			planet->SetColor(0.0f, 0.1f, 0.0f);
+			planet->SetTranslation(-12, 0, 0);
+			planet->SetScale(10, 10, 10);
+			gameObjects.push_back(planet);
 
-		//Create a green planet
-		CPlanet *planet = new CPlanet(&gameParams);
-		planet->SetColor(0.0f, 0.1f, 0.0f);
-		planet->SetTranslation(-12, 0, 0);
-		planet->SetScale(10, 10, 10);
-		gameObjects.push_back(planet);
+			//Create a blue planet
+			planet = new CPlanet(&gameParams);
+			planet->SetColor(0.0f, 0.0f, 0.1f);
+			planet->SetTranslation(12, 0, 0);
+			planet->SetScale(10, 10, 10);
+			gameObjects.push_back(planet);
 
-		//Create a blue planet
-		planet = new CPlanet(&gameParams);
-		planet->SetColor(0.0f, 0.0f, 0.1f);
-		planet->SetTranslation(12, 0, 0);
-		planet->SetScale(10, 10, 10);
-		gameObjects.push_back(planet);
+			//Create a gravity well for the green planet
+			sGravityWell *gw = new sGravityWell();
+			gw->mass = 100;
+			gw->translation[0] = -12;
+			gw->translation[1] = 0;
+			gw->translation[2] = 0;
+			gravityWells.push_back(gw);
 
-		//Create a gravity well for the green planet
-		sGravityWell *gw = new sGravityWell();
-		gw->mass = 100;
-		gw->translation[0] = -12;
-		gw->translation[1] = 0;
-		gw->translation[2] = 0;
-		gravityWells.push_back(gw);
+			//Gravity well for blue
+			gw = new sGravityWell();
+			gw->mass = 100;
+			gw->translation[0] = 12;
+			gw->translation[1] = 0;
+			gw->translation[2] = 0;
+			gravityWells.push_back(gw);
 
-		//Gravity well for blue
-		gw = new sGravityWell();
-		gw->mass = 100;
-		gw->translation[0] = 12;
-		gw->translation[1] = 0;
-		gw->translation[2] = 0;
-		gravityWells.push_back(gw);
+			//Create missle bases
+			CMissileBase *mb = new CMissileBase(&gameParams);
+			mb->SetColor(0, .8f, 0);
+			mb->SetScale(.1f, .1f, .1f);
+			mb->SetRotation(0, 0, -84);
+			mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
+			mb->SetLaunchKey('A');
+			mb->SetCursorPointer(mousePos[0]);
+			gameObjects.push_back(mb);
 
-		//Create missle bases
-		CMissileBase *mb = new CMissileBase(&gameParams);
-		mb->SetColor(0, .8f, 0);
-		mb->SetScale(.1f, .1f, .1f);
-		mb->SetRotation(0, 0, -84);
-		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
-		mb->SetLaunchKey('A');
-		mb->SetCursorPointer(mousePos[0]);
-		gameObjects.push_back(mb);
+			mb = new CMissileBase(&gameParams);
+			mb->SetColor(0, .8f, 0);
+			mb->SetScale(.1f, .1f, .1f);
+			mb->SetRotation(0, 0, -96);
+			mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
+			mb->SetLaunchKey('D');
+			mb->SetCursorPointer(mousePos[0]);
+			gameObjects.push_back(mb);
 
-		mb = new CMissileBase(&gameParams);
-		mb->SetColor(0, .8f, 0);
-		mb->SetScale(.1f, .1f, .1f);
-		mb->SetRotation(0, 0, -96);
-		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
-		mb->SetLaunchKey('D');
-		mb->SetCursorPointer(mousePos[0]);
-		gameObjects.push_back(mb);
+			mb = new CMissileBase(&gameParams);
+			mb->SetColor(0, 0, .8f);
+			mb->SetScale(.1f, .1f, .1f);
+			mb->SetRotation(0, 0, 96);
+			mb->SetTranslation(10 * cos(186*DEG2RAD) + 12.01f, 10 * sin(186*DEG2RAD), -.001f);
+			mb->SetLaunchKey('J');
+			mb->SetCursorPointer(mousePos[1]);
+			gameObjects.push_back(mb);
 
-		mb = new CMissileBase(&gameParams);
-		mb->SetColor(0, 0, .8f);
-		mb->SetScale(.1f, .1f, .1f);
-		mb->SetRotation(0, 0, 96);
-		mb->SetTranslation(10 * cos(186*DEG2RAD) + 12.01f, 10 * sin(186*DEG2RAD), -.001f);
-		mb->SetLaunchKey('J');
-		mb->SetCursorPointer(mousePos[1]);
-		gameObjects.push_back(mb);
+			mb = new CMissileBase(&gameParams);
+			mb->SetColor(0, 0, .8f);
+			mb->SetScale(.1f, .1f, .1f);
+			mb->SetRotation(0, 0, 84);
+			mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01f, 10 * sin(174*DEG2RAD), -.001f);
+			mb->SetLaunchKey('L');
+			mb->SetCursorPointer(mousePos[1]);
+			gameObjects.push_back(mb);
 
-		mb = new CMissileBase(&gameParams);
-		mb->SetColor(0, 0, .8f);
-		mb->SetScale(.1f, .1f, .1f);
-		mb->SetRotation(0, 0, 84);
-		mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01f, 10 * sin(174*DEG2RAD), -.001f);
-		mb->SetLaunchKey('L');
-		mb->SetCursorPointer(mousePos[1]);
-		gameObjects.push_back(mb);
+			CCity *city = new CCity(&gameParams);
+			city->SetColor(0, 0, .8f);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, 82);
+			city->SetTranslation(10 * cos(172*DEG2RAD) + 12.01f, 10 * sin(172*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
 
-		CCity *city = new CCity(&gameParams);
-		city->SetColor(0, 0, .8f);
-		city->SetScale(.1f, .1f, .1f);
-		city->SetRotation(0, 0, 82);
-		city->SetTranslation(10 * cos(172*DEG2RAD) + 12.01f, 10 * sin(172*DEG2RAD), -.001f);
-		gameObjects.push_back(city);
+			city = new CCity(&gameParams);
+			city->SetColor(0, 0, .8f);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, 87);
+			city->SetTranslation(10 * cos(177*DEG2RAD) + 12.01f, 10 * sin(177*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
 
-		city = new CCity(&gameParams);
-		city->SetColor(0, 0, .8f);
-		city->SetScale(.1f, .1f, .1f);
-		city->SetRotation(0, 0, 87);
-		city->SetTranslation(10 * cos(177*DEG2RAD) + 12.01f, 10 * sin(177*DEG2RAD), -.001f);
-		gameObjects.push_back(city);
+			city = new CCity(&gameParams);
+			city->SetColor(0, 0, .8f);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, 93);
+			city->SetTranslation(10 * cos(183*DEG2RAD) + 12.01f, 10 * sin(183*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
 
-		city = new CCity(&gameParams);
-		city->SetColor(0, 0, .8f);
-		city->SetScale(.1f, .1f, .1f);
-		city->SetRotation(0, 0, 93);
-		city->SetTranslation(10 * cos(183*DEG2RAD) + 12.01f, 10 * sin(183*DEG2RAD), -.001f);
-		gameObjects.push_back(city);
+			city = new CCity(&gameParams);
+			city->SetColor(0, 0, .8f);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, 98);
+			city->SetTranslation(10 * cos(188*DEG2RAD) + 12.01f, 10 * sin(188*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
 
-		city = new CCity(&gameParams);
-		city->SetColor(0, 0, .8f);
-		city->SetScale(.1f, .1f, .1f);
-		city->SetRotation(0, 0, 98);
-		city->SetTranslation(10 * cos(188*DEG2RAD) + 12.01f, 10 * sin(188*DEG2RAD), -.001f);
-		gameObjects.push_back(city);
+			city = new CCity(&gameParams);
+			city->SetColor(0, .8f, 0);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, -98);
+			city->SetTranslation(10 * cos(-8*DEG2RAD) - 12.01f, 10 * sin(-8*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
 
-		city = new CCity(&gameParams);
-		city->SetColor(0, .8f, 0);
-		city->SetScale(.1f, .1f, .1f);
-		city->SetRotation(0, 0, -98);
-		city->SetTranslation(10 * cos(-8*DEG2RAD) - 12.01f, 10 * sin(-8*DEG2RAD), -.001f);
-		gameObjects.push_back(city);
+			city = new CCity(&gameParams);
+			city->SetColor(0, .8f, 0);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, -93);
+			city->SetTranslation(10 * cos(-3*DEG2RAD) - 12.01f, 10 * sin(-3*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
 
-		city = new CCity(&gameParams);
-		city->SetColor(0, .8f, 0);
-		city->SetScale(.1f, .1f, .1f);
-		city->SetRotation(0, 0, -93);
-		city->SetTranslation(10 * cos(-3*DEG2RAD) - 12.01f, 10 * sin(-3*DEG2RAD), -.001f);
-		gameObjects.push_back(city);
+			city = new CCity(&gameParams);
+			city->SetColor(0, .8f, 0);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, -87);
+			city->SetTranslation(10 * cos(3*DEG2RAD) - 12.01f, 10 * sin(3*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
 
-		city = new CCity(&gameParams);
-		city->SetColor(0, .8f, 0);
-		city->SetScale(.1f, .1f, .1f);
-		city->SetRotation(0, 0, -87);
-		city->SetTranslation(10 * cos(3*DEG2RAD) - 12.01f, 10 * sin(3*DEG2RAD), -.001f);
-		gameObjects.push_back(city);
+			city = new CCity(&gameParams);
+			city->SetColor(0, .8f, 0);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, -82);
+			city->SetTranslation(10 * cos(8*DEG2RAD) - 12.01f, 10 * sin(8*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
 
-		city = new CCity(&gameParams);
-		city->SetColor(0, .8f, 0);
-		city->SetScale(.1f, .1f, .1f);
-		city->SetRotation(0, 0, -82);
-		city->SetTranslation(10 * cos(8*DEG2RAD) - 12.01f, 10 * sin(8*DEG2RAD), -.001f);
-		gameObjects.push_back(city);
+			CFlakCannon *cannon = new CFlakCannon(&gameParams);
+			cannon->SetColor(0, .8f, 0);
+			cannon->SetScale(.1f, .1f, .1f);
+			cannon->SetRotation(0, 0, -90);
+			cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
+			cannon->SetCursorPointer(mousePos[0]);
+			cannon->SetFireKey('S');
+			gameObjects.push_back(cannon);
 
-		CFlakCannon *cannon = new CFlakCannon(&gameParams);
-		cannon->SetColor(0, .8f, 0);
-		cannon->SetScale(.1f, .1f, .1f);
-		cannon->SetRotation(0, 0, -90);
-		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
-		cannon->SetCursorPointer(mousePos[0]);
-		cannon->SetFireKey('S');
-		gameObjects.push_back(cannon);
+			cannon = new CFlakCannon(&gameParams);
+			cannon->SetColor(0, 0, .8f);
+			cannon->SetScale(.1f, .1f, .1f);
+			cannon->SetRotation(0, 0, 90);
+			cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
+			cannon->SetCursorPointer(mousePos[1]);
+			cannon->SetFireKey('K');
+			gameObjects.push_back(cannon);
+		}
+		else if(gameParams.gameMode == MODE_SINGLE)
+		{
+			//Create a green planet
+			CPlanet *planet = new CPlanet(&gameParams);
+			planet->SetColor(0.0f, 0.1f, 0.0f);
+			planet->SetTranslation(-12, 0, 0);
+			planet->SetScale(10, 10, 10);
+			gameObjects.push_back(planet);
 
-		cannon = new CFlakCannon(&gameParams);
-		cannon->SetColor(0, 0, .8f);
-		cannon->SetScale(.1f, .1f, .1f);
-		cannon->SetRotation(0, 0, 90);
-		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
-		cannon->SetCursorPointer(mousePos[1]);
-		cannon->SetFireKey('K');
-		gameObjects.push_back(cannon);
+			//Create a gravity well for the green planet
+			sGravityWell *gw = new sGravityWell();
+			gw->mass = 30;
+			gw->translation[0] = -12;
+			gw->translation[1] = 0;
+			gw->translation[2] = 0;
+			gravityWells.push_back(gw);
+
+			CMissileBase *mb = new CMissileBase(&gameParams);
+			mb->SetColor(0, .8f, 0);
+			mb->SetScale(.1f, .1f, .1f);
+			mb->SetRotation(0, 0, -84);
+			mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
+			mb->SetLaunchKey('A');
+			mb->SetCursorPointer(mousePos[0]);
+			gameObjects.push_back(mb);
+
+			mb = new CMissileBase(&gameParams);
+			mb->SetColor(0, .8f, 0);
+			mb->SetScale(.1f, .1f, .1f);
+			mb->SetRotation(0, 0, -96);
+			mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
+			mb->SetLaunchKey('D');
+			mb->SetCursorPointer(mousePos[0]);
+			gameObjects.push_back(mb);
+
+			CCity *city = new CCity(&gameParams);
+			city->SetColor(0, .8f, 0);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, -98);
+			city->SetTranslation(10 * cos(-8*DEG2RAD) - 12.01f, 10 * sin(-8*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
+
+			city = new CCity(&gameParams);
+			city->SetColor(0, .8f, 0);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, -93);
+			city->SetTranslation(10 * cos(-3*DEG2RAD) - 12.01f, 10 * sin(-3*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
+
+			city = new CCity(&gameParams);
+			city->SetColor(0, .8f, 0);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, -87);
+			city->SetTranslation(10 * cos(3*DEG2RAD) - 12.01f, 10 * sin(3*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
+
+			city = new CCity(&gameParams);
+			city->SetColor(0, .8f, 0);
+			city->SetScale(.1f, .1f, .1f);
+			city->SetRotation(0, 0, -82);
+			city->SetTranslation(10 * cos(8*DEG2RAD) - 12.01f, 10 * sin(8*DEG2RAD), -.001f);
+			gameObjects.push_back(city);
+
+			CFlakCannon *cannon = new CFlakCannon(&gameParams);
+			cannon->SetColor(0, .8f, 0);
+			cannon->SetScale(.1f, .1f, .1f);
+			cannon->SetRotation(0, 0, -90);
+			cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
+			cannon->SetCursorPointer(mousePos[0]);
+			cannon->SetFireKey('S');
+			gameObjects.push_back(cannon);
+
+			GenerateWave(1);
+		}
 	}
 
 
@@ -239,29 +323,46 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		ToggleFullscreen (g_window);							// Toggle Fullscreen Mode
 	}
 
-	mousePos[0][0] += rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
-	if(mousePos[0][0] > 0)
-		mousePos[0][0] = 0;
-	else if(mousePos[0][0] < -1.8f)
-		mousePos[0][0] = -1.8f;
+	if(gameParams.gameMode == MODE_VS)
+	{
+		mousePos[0][0] += rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
+		if(mousePos[0][0] > 0)
+			mousePos[0][0] = 0;
+		else if(mousePos[0][0] < -1.8f)
+			mousePos[0][0] = -1.8f;
 
-	mousePos[0][1] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
-	if(mousePos[0][1] > 1.6f)
-		mousePos[0][1] = 1.6f;
-	else if(mousePos[0][1] < -1.6f)
-		mousePos[0][1] = -1.6f;	
+		mousePos[0][1] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
+		if(mousePos[0][1] > 1.6f)
+			mousePos[0][1] = 1.6f;
+		else if(mousePos[0][1] < -1.6f)
+			mousePos[0][1] = -1.6f;	
 
-	mousePos[1][0] += rawMouse.get_x_delta(gameParams.mouse2Index) / 500.0f;
-	if(mousePos[1][0] < 0)
-		mousePos[1][0] = 0;
-	else if(mousePos[1][0] > 1.8f)
-		mousePos[1][0] = 1.8f;
+		mousePos[1][0] += rawMouse.get_x_delta(gameParams.mouse2Index) / 500.0f;
+		if(mousePos[1][0] < 0)
+			mousePos[1][0] = 0;
+		else if(mousePos[1][0] > 1.8f)
+			mousePos[1][0] = 1.8f;
 
-	mousePos[1][1] -= rawMouse.get_y_delta(gameParams.mouse2Index) / 500.0f;
-	if(mousePos[1][1] > 1.6f)
-		mousePos[1][1] = 1.6f;
-	else if(mousePos[1][1] < -1.6f)
-		mousePos[1][1] = -1.6f;
+		mousePos[1][1] -= rawMouse.get_y_delta(gameParams.mouse2Index) / 500.0f;
+		if(mousePos[1][1] > 1.6f)
+			mousePos[1][1] = 1.6f;
+		else if(mousePos[1][1] < -1.6f)
+			mousePos[1][1] = -1.6f;
+	}
+	else if(gameParams.gameMode == MODE_SINGLE)
+	{
+		mousePos[0][0] += rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
+		if(mousePos[0][0] > 2.2f)
+			mousePos[0][0] = 2.2f;
+		else if(mousePos[0][0] < -1.8f)
+			mousePos[0][0] = -1.8f;
+
+		mousePos[0][1] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
+		if(mousePos[0][1] > 1.6f)
+			mousePos[0][1] = 1.6f;
+		else if(mousePos[0][1] < -1.6f)
+			mousePos[0][1] = -1.6f;	
+	}
 
 	//For every object in the game
 	for(unsigned int i=0; i<gameObjects.size(); i++)
@@ -336,8 +437,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			{
 				for(int k=0; k<gameParams.debrisAmount*gameParams.flakDebrisFactor; k++)
 				{
-					int heading = rand()%360;
-					float velocity = (float)((rand()%100-50) / 250.0f);
+					int heading = gameParams.randoms[gameParams.randIndex++%512]%360;
+					float velocity = (float)((gameParams.randoms[gameParams.randIndex++%512]%100-50) / 250.0f);
 
 					debris = new CDebris(&gameParams);
 					debris->SetMotionVector(
@@ -390,8 +491,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = rand() % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((rand()%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[i]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -403,7 +504,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - rand()%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -415,8 +516,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
-								float(gameObjects[i]->GetMotionVector()[0] + (rand()%100-50)/100.0), 
-								float(gameObjects[i]->GetMotionVector()[1]+ (rand()%100-50)/100.0), 
+								float(gameObjects[i]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
+								float(gameObjects[i]->GetMotionVector()[1]+ (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
 								0);
 							debris->SetTranslation(
 								float(gameObjects[i]->GetTranslation()[0]),
@@ -438,8 +539,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = rand() % 180 + gameObjects[objIndex]->GetRotation()[2];
-							debrisSize = ((rand()%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[objIndex]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -451,7 +552,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[objIndex]->GetTranslation()[1]),
 								float(gameObjects[objIndex]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - rand()%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -463,8 +564,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
-								float(gameObjects[objIndex]->GetMotionVector()[0] + (rand()%100-50)/100.0), 
-								float(gameObjects[objIndex]->GetMotionVector()[1]+ (rand()%100-50)/100.0), 
+								float(gameObjects[objIndex]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
+								float(gameObjects[objIndex]->GetMotionVector()[1]+ (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
 								0);
 							debris->SetTranslation(
 								float(gameObjects[objIndex]->GetTranslation()[0]),
@@ -489,8 +590,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = rand() % 180 + gameObjects[objIndex]->GetRotation()[2];
-							debrisSize = ((rand()%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[objIndex]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -502,7 +603,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[objIndex]->GetTranslation()[1]),
 								float(gameObjects[objIndex]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - rand()%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -514,8 +615,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
-								float(gameObjects[objIndex]->GetMotionVector()[0] + (rand()%100-50)/100.0),
-								float(gameObjects[objIndex]->GetMotionVector()[1] + (rand()%100-50)/100.0),
+								float(gameObjects[objIndex]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0),
+								float(gameObjects[objIndex]->GetMotionVector()[1] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0),
 								0);
 							debris->SetTranslation(
 								float(gameObjects[objIndex]->GetTranslation()[0]),
@@ -537,8 +638,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = rand() % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((rand()%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[i]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -550,7 +651,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - rand()%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -562,8 +663,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
-								float(gameObjects[i]->GetMotionVector()[0] + (rand()%100-50)/100.0), 
-								float(gameObjects[i]->GetMotionVector()[1] + (rand()%100-50)/100.0), 
+								float(gameObjects[i]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
+								float(gameObjects[i]->GetMotionVector()[1] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
 								0);
 							debris->SetTranslation(
 								float(gameObjects[i]->GetTranslation()[0]),
@@ -580,10 +681,15 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	}
 
 	hyperModeTimer += milliseconds;
-	if(hyperModeTimer > gameParams.hyperModeDelay)
+	if(hyperModeTimer > gameParams.hyperModeDelay && gameParams.gameMode != MODE_SINGLE)
 	{
 		//increase hyper level
 		SetHyperLevel(GetHyperLevel() + 1);
+	}
+	else if(gameParams.gameMode == MODE_SINGLE && hyperModeTimer > gameParams.waveTime)
+	{
+		GenerateWave(GetCurrentWaveNumber()+1);
+		hyperModeTimer = 0;
 	}
 
 	//Update starfield position
@@ -617,27 +723,30 @@ void CHyperWarGame::DrawCursors()
 
 	glPopMatrix();
 
-	glPushMatrix();
+	if(gameParams.gameMode != MODE_SINGLE)
+	{
+		glPushMatrix();
 
-	glTranslatef(mousePos[1][0], mousePos[1][1], 0);
-	glScalef(.05f, .05f, 1);
+		glTranslatef(mousePos[1][0], mousePos[1][1], 0);
+		glScalef(.05f, .05f, 1);
 
-	glColor3f(0, 0, 1);
-	glBegin(GL_LINES);
-		glVertex3f(-1.0f, 0, 0);
-		glVertex3f(-.2f, 0, 0);
+		glColor3f(0, 0, 1);
+		glBegin(GL_LINES);
+			glVertex3f(-1.0f, 0, 0);
+			glVertex3f(-.2f, 0, 0);
 
-		glVertex3f(.2f, 0, 0);
-		glVertex3f(1, 0, 0);
+			glVertex3f(.2f, 0, 0);
+			glVertex3f(1, 0, 0);
 
-		glVertex3f(0, -1, 0);
-		glVertex3f(0, -.2f, 0);
+			glVertex3f(0, -1, 0);
+			glVertex3f(0, -.2f, 0);
 
-		glVertex3f(0, .2f, 0);
-		glVertex3f(0, 1, 0);
-	glEnd();
+			glVertex3f(0, .2f, 0);
+			glVertex3f(0, 1, 0);
+		glEnd();
 
-	glPopMatrix();
+		glPopMatrix();
+	}
 }
 
 void CHyperWarGame::Draw (void)
@@ -737,5 +846,52 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 	default:
 		hyperLevel = 5;
 		break;
+	}
+}
+
+void CHyperWarGame::GenerateWave(int waveNumber)
+{
+	CNuke *nuke;
+	currentWaveNumber = waveNumber;
+
+	for(int i=0; i<waveNumber && i < 9; i++)
+	{
+		//Use layers for x location between 2.7 and 7.7
+
+		nuke = new CNuke(&gameParams);
+		nuke->SetColor(0, 0, .8f);
+		nuke->SetScale(.1f, .1f, .1f);
+		nuke->SetTranslation(2.75 + (i-1)%10 * .5, (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX) * -1.7f, 0);
+		nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX - .5f), 0);
+		nuke->SetThrust(.025f * waveNumber);
+		gameObjects.push_back(nuke);
+
+		nuke = new CNuke(&gameParams);
+		nuke->SetColor(0, 0, .8f);
+		nuke->SetScale(.1f, .1f, .1f);
+		nuke->SetTranslation(2.75 + (i-1)%10 * .5, (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX) * 1.7f, 0);
+		nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX * -waveNumber/8.0, (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX - .5f), 0);
+		nuke->SetThrust(.025f * waveNumber);
+		gameObjects.push_back(nuke);
+	}
+
+	//Add a mothership
+
+	if(waveNumber % 6 == 0 && waveNumber > 18)
+	{
+		/*
+		//Add a random gravity well
+		sGravityWell *gw = new sGravityWell();
+		gw->mass = gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX * 2;
+		gw->translation[0] = (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX - .5f) * 5.5f;
+		gw->translation[1] = (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX - .5f) * 3.5f;
+		gw->translation[2] = 0;
+		gravityWells.push_back(gw);
+		*/
+	}
+
+	if(waveNumber % 10 == 0)
+	{
+		SetHyperLevel(GetHyperLevel() + 1);
 	}
 }
