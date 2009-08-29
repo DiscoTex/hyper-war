@@ -10,6 +10,8 @@
 //Generic Game Object
 CGameObject::CGameObject(sGameParams *newGameParams)
 {
+	mySide = SIDE_NONE;
+
 	for(int i=0; i<3; i++)
 	{
 		scale[i] = 1;
@@ -17,13 +19,13 @@ CGameObject::CGameObject(sGameParams *newGameParams)
 		translation[i] = 0;
 		motionVector[i] = 0;
 		angularVelocity[i] = 0;
-	}
+	}	
 
 	color[0] = 0;
 	color[1] = 0;
 	color[2] = 1;
 
-	gameParams = newGameParams;
+	gameParams = newGameParams;	
 }
 
 CGameObject::~CGameObject()
@@ -246,27 +248,34 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 		switch(thisType)
 		{
 		case TYPE_DEBRIS:
-			if(otherType == TYPE_DEBRIS || otherType == TYPE_MISSILEBASE || otherType == TYPE_CITY || otherType == TYPE_FLAKCANNON)
+			if(otherType == TYPE_DEBRIS || otherType == TYPE_MISSILEBASE || otherType == TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP)
 				continue;
 			break;
 		case TYPE_PLANET:
-			if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON)
+			if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP)
 				continue;
 			break;
 		case TYPE_MISSILEBASE:
-			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP)
 				continue;
 		case TYPE_CITY:
-			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP)
 				continue;
 			break;
 		case TYPE_FLAKCANNON:
-			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS)
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP)
+				continue;
+			break;
+		case TYPE_MOSHIP:
+			if(otherType != TYPE_NUKE || gObjects[i]->GetSide() == mySide)
 				continue;
 			break;
 		}
 
 		if(gObjects[i] == this)
+			continue;
+
+		if(otherType == TYPE_MOSHIP && mySide == SIDE_BLUE)
 			continue;
 		
 		for(unsigned int k=0; k<collisionSpheres.size(); k++)
@@ -1488,10 +1497,10 @@ void CCity::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 
 bool CCity::CanDestroy(int destroyerType)
 {
-	if(destroyerType != TYPE_NUKE)
-		return false;
-	else
+	if(destroyerType == TYPE_NUKE)
 		return true;
+	else
+		return false;
 }
 
 int	 CCity::GetType()
@@ -1884,4 +1893,150 @@ void CProjectile::Draw()
 		glVertex3f(origin[0], origin[1], -.002f);
 		glVertex3f(translation[0], translation[1], -.002f);
 	glEnd();
+}
+
+CMothership::CMothership(sGameParams *newGameParams) : CGameObject(newGameParams)
+{
+	sCollisionSphere *cSphere;
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = .25;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 1.0f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = -1.1f;
+	cSphere->translation[1] = 0;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 0.8f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = 1.1f;
+	cSphere->translation[1] = 0;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 0.8f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+}
+
+CMothership::~CMothership()
+{
+}
+
+void CMothership::Draw()
+{
+	glPushMatrix();
+	
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	glColor3f(color[0], color[1], color[2]);
+
+	glBegin(GL_QUADS);
+		glVertex3f(-2.0f, 0, -.01f);	
+		glVertex3f(2.0f, 0, -.01f);
+		glVertex3f(1.7f, .7f, -.01f);
+		glVertex3f(-1.7f, .7f, -.01f);
+
+		glVertex3f(-2.0f, 0, -.01f);	
+		glVertex3f(2.0f, 0, -.01f);
+		glVertex3f(1.7f, -.7f, -.01f);
+		glVertex3f(-1.7f, -.7f, -.01f);
+	glEnd();
+
+	glBegin(GL_TRIANGLES);
+		for (int i=20; i<160; i+=4)
+		{
+			float degInRad = i*DEG2RAD;
+			float radius = 1.0f;
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .3f, -.001f);
+
+			degInRad = (i+4)*DEG2RAD;
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .3f, -.001f);
+
+			glVertex3f(0, .3f, -.001f);
+		}
+	glEnd();
+
+	glColor3f(1, 1, 1);
+
+	glBegin(GL_LINE_STRIP);
+		for (int i=20; i<160; i+=4)
+		{
+			float degInRad = i*DEG2RAD;
+			float radius = 1.0f;
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .3f, -.001f);
+
+			degInRad = (i+4)*DEG2RAD;
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .3f, -.001f);
+		}
+	glEnd();
+
+	glBegin(GL_LINE_STRIP);
+		for (int i=20; i<160; i+=4)
+		{
+			float degInRad = i*DEG2RAD;
+			float radius = 1.0f;
+			glVertex3f(cos(degInRad) * radius, -.2f * sin(degInRad) * radius + .7f, -.001f);
+
+			degInRad = (i+4)*DEG2RAD;
+			glVertex3f(cos(degInRad) * radius, -.2f * sin(degInRad) * radius + .7f, -.001f);
+		}
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(-2.0f, 0, -.01f);	
+		glVertex3f(2.0f, 0, -.01f);
+		glVertex3f(1.7f, .7f, -.01f);
+		glVertex3f(-1.7f, .7f, -.01f);
+
+		glVertex3f(-2.0f, 0, -.01f);	
+		glVertex3f(2.0f, 0, -.01f);
+		glVertex3f(1.7f, -.7f, -.01f);
+		glVertex3f(-1.7f, -.7f, -.01f);
+	glEnd();
+
+	glPopMatrix();
+
+#ifdef COLLISION_DEBUG
+	glPushMatrix();
+
+	//Draw collision spheres for debug
+	float radius;
+	for(unsigned int i=0; i<collisionSpheres.size(); i++)
+	{
+		radius = collisionSpheres[i]->radius * scale[1];
+		glColor3f(1, 1, 0);
+		glBegin(GL_LINE_LOOP);
+			for (int j=0; j<360; j++)
+			{
+				float degInRad = j*DEG2RAD;
+				glVertex3f(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0] ,sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
+			}
+		glEnd();
+	}
+
+	glPopMatrix();
+#endif
+}
+
+bool CMothership::CanDestroy(int destroyerType)
+{
+	if(destroyerType == TYPE_NUKE)
+		return true;
+	else
+		return false;
 }

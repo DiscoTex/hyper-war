@@ -12,8 +12,10 @@
 #include "CAudioRenderer.h"
 #include "CEffects.h"
 #include "RawMouse.h"
+#include "glfont2.h"
 
 using namespace std;
+using namespace glfont;
 
 #pragma comment( lib, "opengl32.lib" )							// Search For OpenGL32.lib While Linking
 #pragma comment( lib, "glu32.lib" )								// Search For GLu32.lib While Linkings
@@ -37,9 +39,7 @@ public:
 
 	void SetHyperLevel(int newLevel);
 	int  GetHyperLevel() {return hyperLevel;}
-	void GenerateWave(int waveNumber);
-	int  GetCurrentWaveNumber() {return currentWaveNumber;}
-
+	void NextWave();
 
 private:
 	GL_Window*	g_window;
@@ -65,6 +65,13 @@ private:
 	//hyper level
 	int							hyperLevel;
 	//wave number for single player
-	int							currentWaveNumber;
-
+	int							waveNumber;
+	//total number of waves
+	int							totalWaves;
+	int							blueCityCount;
+	int							greenCityCount;
+	bool						greenWins;
+	bool						blueWins;
+	GLFont						font;
+	GLuint						fontTex;
 };

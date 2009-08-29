@@ -38,7 +38,7 @@
 #include <windows.h>								// Header File For Windows
 #include <math.h>
 #include <vector>
-
+#include <GL/gl.h>
 
 typedef struct {									// Structure For Keyboard Stuff
 	BOOL keyDown [256];								// Holds TRUE / FALSE For Each Key
