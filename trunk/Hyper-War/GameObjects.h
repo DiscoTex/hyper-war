@@ -20,6 +20,12 @@ const float DEG2RAD = 3.1415f/180;
 using namespace std;
 
 enum{
+	SIDE_NONE,
+	SIDE_BLUE,
+	SIDE_GREEN
+};
+
+enum{
 	TYPE_GENERIC,
 	TYPE_PLANET,
 	TYPE_NUKE,
@@ -27,7 +33,8 @@ enum{
 	TYPE_MISSILEBASE,
 	TYPE_CITY,
 	TYPE_FLAKCANNON,
-	TYPE_PROJECTILE
+	TYPE_PROJECTILE,
+	TYPE_MOSHIP
 };
 
 enum{
@@ -93,7 +100,8 @@ public:
 	void SetColor(float r, float g, float b);
 	void SetMotionVector(float x, float y, float z);
 	void SetAngularVelocity(float x, float y, float z);
-	//void SetGameParams(sGameParams *newGameParams);
+	void SetSide(int newSide) {mySide = newSide;}
+	int  GetSide() {return mySide;}
 
 	float* GetScale();
 	float* GetRotation();
@@ -119,6 +127,8 @@ protected:
 	float rotation[3];
 	float translation[3];
 	float color[3];
+
+	int   mySide;
 
 	sGameParams *gameParams;
 
@@ -275,4 +285,20 @@ public:
 private:
 	float origin[3];
 	int		timeToLive;
+};
+
+class CMothership : public CGameObject
+{
+public:
+	CMothership(sGameParams *newGameParams);
+	~CMothership();
+
+	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells) {}
+	int	 GetType() {return TYPE_MOSHIP;}
+	bool CanDestroy(int destroyerType);
+
+	void Draw();
+
+private:
+
 };

@@ -349,6 +349,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\glfont2.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\RawMouse.cpp"
 				>
 			</File>
@@ -376,6 +380,10 @@
 			</File>
 			<File
 				RelativePath=".\glBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\glfont2.h"
 				>
 			</File>
 			<File

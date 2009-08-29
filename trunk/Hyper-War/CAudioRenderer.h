@@ -15,10 +15,10 @@
 using namespace std;
 
 // Maximum data buffers we will need.
-#define NUM_BUFFERS 4
+#define NUM_BUFFERS 5
 
 // Maximum emissions we will need.
-#define NUM_SOURCES 4
+#define NUM_SOURCES 5
 
 #define AUDIO_RENDER_FREQ_MS  67  //67 == 15 times per seconds
 
@@ -27,7 +27,8 @@ typedef enum TYPE_SOUND
 	SOUND_EXPLOSION,
 	SOUND_SHOOT,
 	SOUND_INTRO,
-	SOUND_MISSILE_EXPL
+	SOUND_MISSILE_EXPL,
+	SOUND_SPMUSIC
 };
 
 class CAudioRenderer
