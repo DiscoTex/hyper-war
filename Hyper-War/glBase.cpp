@@ -200,9 +200,14 @@ BOOL CreateWindowGL (GL_Window* window)									// This Code Creates Our OpenGL 
 
 	window->lastTickCount = GetTickCount ();							// Get Tick Count
 
-	return TRUE;														// Window Creating Was A Success
-																		// Initialization Will Be Done In WM_CREATE
+	if(!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS))
+	{
+		SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+	}
+
+	return TRUE;														// Window Creating Was A Success																	// Initialization Will Be Done In WM_CREATE
 }
+
 
 BOOL DestroyWindowGL (GL_Window* window)								// Destroy The OpenGL Window & Release Resources
 {

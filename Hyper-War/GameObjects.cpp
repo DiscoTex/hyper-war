@@ -1945,43 +1945,50 @@ void CMothership::Draw()
 	glScalef(scale[0], scale[1], scale[2]);
 	glColor3f(color[0], color[1], color[2]);
 
-	glBegin(GL_QUADS);
-		glVertex3f(-2.0f, 0, -.01f);	
-		glVertex3f(2.0f, 0, -.01f);
-		glVertex3f(1.7f, .7f, -.01f);
-		glVertex3f(-1.7f, .7f, -.01f);
+	glBegin(GL_TRIANGLES);
+		for (int i=0; i<360; i+=4)
+		{
+			float degInRad = i*DEG2RAD;
+			float radius = 1.0f;
 
-		glVertex3f(-2.0f, 0, -.01f);	
-		glVertex3f(2.0f, 0, -.01f);
-		glVertex3f(1.7f, -.7f, -.01f);
-		glVertex3f(-1.7f, -.7f, -.01f);
+			glColor3f(color[0], color[1], color[2]);
+			glVertex3f(cos(degInRad) * radius * 2, sin(degInRad) * radius/2.0f + .1f, -.001f);
+
+			degInRad = (i+4)*DEG2RAD;
+			glVertex3f(cos(degInRad) * radius * 2, sin(degInRad) * radius/2.0f + .1f, -.001f);
+
+			glColor3f(color[0]*.1f, color[1]*1.f, color[2]*.1f);
+			glVertex3f(0, .1f, -.001f);
+		}
 	glEnd();
 
+	
+	glColor3f(color[0], color[1], color[2]);
 	glBegin(GL_TRIANGLES);
 		for (int i=20; i<160; i+=4)
 		{
 			float degInRad = i*DEG2RAD;
 			float radius = 1.0f;
-			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .3f, -.001f);
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .2f, -.002f);
 
 			degInRad = (i+4)*DEG2RAD;
-			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .3f, -.001f);
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .2f, -.002f);
 
-			glVertex3f(0, .3f, -.001f);
+			glVertex3f(0, .2f, -.001f);
 		}
 	glEnd();
 
 	glColor3f(1, 1, 1);
 
 	glBegin(GL_LINE_STRIP);
-		for (int i=20; i<160; i+=4)
+		for (int i=0; i<360; i+=4)
 		{
 			float degInRad = i*DEG2RAD;
 			float radius = 1.0f;
-			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .3f, -.001f);
+			glVertex3f(cos(degInRad) * radius * 2, sin(degInRad) * radius/2.0f + .1f, -.001f);
 
 			degInRad = (i+4)*DEG2RAD;
-			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .3f, -.001f);
+			glVertex3f(cos(degInRad) * radius * 2, sin(degInRad) * radius/2.0f + .1f, -.001f);
 		}
 	glEnd();
 
@@ -1990,23 +1997,11 @@ void CMothership::Draw()
 		{
 			float degInRad = i*DEG2RAD;
 			float radius = 1.0f;
-			glVertex3f(cos(degInRad) * radius, -.2f * sin(degInRad) * radius + .7f, -.001f);
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .2f, -.001f);
 
 			degInRad = (i+4)*DEG2RAD;
-			glVertex3f(cos(degInRad) * radius, -.2f * sin(degInRad) * radius + .7f, -.001f);
+			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .2f, -.001f);
 		}
-	glEnd();
-
-	glBegin(GL_LINE_LOOP);
-		glVertex3f(-2.0f, 0, -.01f);	
-		glVertex3f(2.0f, 0, -.01f);
-		glVertex3f(1.7f, .7f, -.01f);
-		glVertex3f(-1.7f, .7f, -.01f);
-
-		glVertex3f(-2.0f, 0, -.01f);	
-		glVertex3f(2.0f, 0, -.01f);
-		glVertex3f(1.7f, -.7f, -.01f);
-		glVertex3f(-1.7f, -.7f, -.01f);
 	glEnd();
 
 	glPopMatrix();
