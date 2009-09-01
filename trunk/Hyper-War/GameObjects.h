@@ -70,6 +70,8 @@ struct sGameParams
 	int mouse2Index;
 	int randoms[1024];
 	unsigned long int	randIndex;
+	int	greenPoints;
+	int	bluePoints;
 };
 
 struct sGravityWell

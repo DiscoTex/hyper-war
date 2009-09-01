@@ -36,6 +36,7 @@ public:
 	void Update (DWORD milliseconds);					// Perform Motion Updates Here
 	void DrawCursors();
 	void Draw();										// Draw the current frame
+	void DrawHUD();
 
 	void SetHyperLevel(int newLevel);
 	int  GetHyperLevel() {return hyperLevel;}
@@ -74,4 +75,5 @@ private:
 	bool						blueWins;
 	GLFont						font;
 	GLuint						fontTex;
+	int							pointMultiplier;
 };

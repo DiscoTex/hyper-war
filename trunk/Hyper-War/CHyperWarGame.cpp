@@ -24,8 +24,11 @@ CHyperWarGame::CHyperWarGame()
 	gameParams.flakDebrisFactor = 6;
 	gameParams.mouse1Index = 3;
 	gameParams.mouse2Index = 2;
-	gameParams.gameMode = MODE_SINGLE;
-	gameParams.waveTime = 10000;
+	gameParams.gameMode = MODE_VS;
+	gameParams.waveTime = 5000;
+	gameParams.greenPoints = 0;
+	gameParams.bluePoints = 0;
+	pointMultiplier = 1;
 
 	waveNumber = 0;
 	totalWaves = 0;
@@ -34,7 +37,7 @@ CHyperWarGame::CHyperWarGame()
 	blueWins = false;
 	greenWins = false;
 
-	for(int i=0; i<512; i++)
+	for(int i=0; i<1024; i++)
 	{
 		gameParams.randoms[i] = rand();
 	}
@@ -79,6 +82,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		glGenTextures(1, &fontTex);
 		font.Create("font.glf", fontTex);
 
+		gameObjects.reserve(1000);
 
 		if(gameParams.gameMode == MODE_VS)
 		{
@@ -439,6 +443,15 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				nuke->SetMotionVector(nukeVector[0], nukeVector[1], nukeVector[2]);
 				nuke->SetThrust(thrust);
 				gameObjects.push_back(nuke);
+
+				switch(gameObjects[i]->GetSide())
+				{
+				case SIDE_GREEN:
+					gameParams.greenPoints += 10 * pointMultiplier;
+					break;
+				case SIDE_BLUE:
+					gameParams.bluePoints += 10 * pointMultiplier;
+				}
 			}
 		}
 
@@ -479,8 +492,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			{
 				for(int k=0; k<gameParams.debrisAmount*gameParams.flakDebrisFactor; k++)
 				{
-					int heading = gameParams.randoms[gameParams.randIndex++%512]%360;
-					float velocity = (float)((gameParams.randoms[gameParams.randIndex++%512]%100-50) / 250.0f);
+					int heading = gameParams.randoms[gameParams.randIndex++%1024]%360;
+					float velocity = (float)((gameParams.randoms[gameParams.randIndex++%1024]%100-50) / 250.0f);
 
 					debris = new CDebris(&gameParams);
 					debris->SetMotionVector(
@@ -535,8 +548,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -548,10 +561,18 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+						switch(gameObjects[i]->GetSide())
+						{
+						case SIDE_BLUE:
+							gameParams.greenPoints += 500 * pointMultiplier;
+							break;
+						case SIDE_GREEN:
+							gameParams.bluePoints += 500 * pointMultiplier;
+						}
 					}
 					else if(iType == TYPE_CITY)
 					{
@@ -560,9 +581,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 						case SIDE_BLUE:
 							blueCityCount--;
+							gameParams.greenPoints += 500 * pointMultiplier;
 							break;
 						case SIDE_GREEN:
 							greenCityCount--;
+							gameParams.bluePoints += 500 * pointMultiplier;
 							break;
 						}
 						for(int k=0; k<gameParams.debrisAmount*16; k++)
@@ -570,8 +593,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -583,7 +606,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -595,8 +618,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
-								float(gameObjects[i]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
-								float(gameObjects[i]->GetMotionVector()[1]+ (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
+								float(gameObjects[i]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
+								float(gameObjects[i]->GetMotionVector()[1]+ (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
 								0);
 							debris->SetTranslation(
 								float(gameObjects[i]->GetTranslation()[0]),
@@ -605,8 +628,28 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							debris->SetScale(.1f, .1f, .1f);
 							gameObjects.push_back(debris);
 						}
+
+						switch(gameObjects[i]->GetSide())
+						{
+						case SIDE_BLUE:
+							gameParams.greenPoints += 200 * pointMultiplier;
+							break;
+						case SIDE_GREEN:
+							gameParams.bluePoints += 200 * pointMultiplier;
+							break;
+						}
 					}
+
 					gameObjects.erase(gameObjects.begin() + i);
+					switch(gameObjects[i]->GetSide())
+					{
+					case SIDE_BLUE:
+						gameParams.greenPoints += 200 * pointMultiplier;
+						break;
+					case SIDE_GREEN:
+						gameParams.bluePoints += 200 * pointMultiplier;
+						break;
+					}
 				}
 				if(gameObjects[objIndex]->CanDestroy(iType))
 				{
@@ -620,8 +663,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -633,10 +676,19 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+						switch(gameObjects[objIndex]->GetSide())
+						{
+						case SIDE_BLUE:
+							gameParams.greenPoints += 500 * pointMultiplier;
+							break;
+						case SIDE_GREEN:
+							gameParams.bluePoints += 500 * pointMultiplier;
+							break;
+						}
 					}
 					else if(objIndexType == TYPE_CITY)
 					{
@@ -644,9 +696,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 						case SIDE_BLUE:
 							blueCityCount--;
+							gameParams.greenPoints += 500 * pointMultiplier;
 							break;
 						case SIDE_GREEN:
 							greenCityCount--;
+							gameParams.bluePoints += 500 * pointMultiplier;
 							break;
 						}
 						hyperModeTimer = 0;
@@ -655,8 +709,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[objIndex]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[objIndex]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -668,7 +722,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[objIndex]->GetTranslation()[1]),
 								float(gameObjects[objIndex]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -680,8 +734,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
-								float(gameObjects[objIndex]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
-								float(gameObjects[objIndex]->GetMotionVector()[1]+ (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
+								float(gameObjects[objIndex]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
+								float(gameObjects[objIndex]->GetMotionVector()[1]+ (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
 								0);
 							debris->SetTranslation(
 								float(gameObjects[objIndex]->GetTranslation()[0]),
@@ -689,6 +743,15 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[objIndex]->GetTranslation()[2]));
 							debris->SetScale(.1f, .1f, .1f);
 							gameObjects.push_back(debris);
+						}
+						switch(gameObjects[objIndex]->GetSide())
+						{
+						case SIDE_BLUE:
+							gameParams.greenPoints += 200 * pointMultiplier;
+							break;
+						case SIDE_GREEN:
+							gameParams.bluePoints += 200 * pointMultiplier;
+							break;
 						}
 					}
 					gameObjects.erase(gameObjects.begin() + objIndex);
@@ -708,8 +771,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -721,10 +784,18 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+						switch(gameObjects[objIndex]->GetSide())
+						{
+						case SIDE_BLUE:
+							gameParams.greenPoints += 500 * pointMultiplier;
+							break;
+						case SIDE_GREEN:
+							gameParams.bluePoints += 500 * pointMultiplier;
+						}
 					}
 					else if(objIndexType == TYPE_CITY)
 					{
@@ -732,9 +803,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 						case SIDE_BLUE:
 							blueCityCount--;
+							gameParams.greenPoints += 500 * pointMultiplier;
 							break;
 						case SIDE_GREEN:
 							greenCityCount--;
+							gameParams.bluePoints += 500 * pointMultiplier;
 							break;
 						}
 						hyperModeTimer = 0;
@@ -743,8 +816,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[objIndex]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[objIndex]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -756,7 +829,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[objIndex]->GetTranslation()[1]),
 								float(gameObjects[objIndex]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -768,8 +841,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
-								float(gameObjects[objIndex]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0),
-								float(gameObjects[objIndex]->GetMotionVector()[1] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0),
+								float(gameObjects[objIndex]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0),
+								float(gameObjects[objIndex]->GetMotionVector()[1] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0),
 								0);
 							debris->SetTranslation(
 								float(gameObjects[objIndex]->GetTranslation()[0]),
@@ -777,6 +850,16 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[objIndex]->GetTranslation()[2]));
 							debris->SetScale(.1f, .1f, .1f);
 							gameObjects.push_back(debris);
+
+						}
+						switch(gameObjects[objIndex]->GetSide())
+						{
+						case SIDE_BLUE:
+							gameParams.greenPoints += 200 * pointMultiplier;
+							break;
+						case SIDE_GREEN:
+							gameParams.bluePoints += 200 * pointMultiplier;
+							break;
 						}
 					}
 					gameObjects.erase(gameObjects.begin() + objIndex);
@@ -793,8 +876,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -806,10 +889,18 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+						switch(gameObjects[i]->GetSide())
+						{
+						case SIDE_BLUE:
+							gameParams.greenPoints += 500 * pointMultiplier;
+							break;
+						case SIDE_GREEN:
+							gameParams.bluePoints += 500 * pointMultiplier;
+						}
 					}
 					else if(iType == TYPE_CITY)
 					{
@@ -817,9 +908,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 						case SIDE_BLUE:
 							blueCityCount--;
+							gameParams.greenPoints += 500 * pointMultiplier;
 							break;
 						case SIDE_GREEN:
 							greenCityCount--;
+							gameParams.bluePoints += 500 * pointMultiplier;
 							break;
 						}
 						hyperModeTimer = 0;
@@ -828,8 +921,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							float  debrisAngle;
 							float  debrisSize;							
 
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%512] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%512]%100) / 100.0f) * .2f;
+							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
+							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
@@ -841,7 +934,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%512]%5000);
+							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -853,8 +946,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						{
 							debris = new CDebris(&gameParams);
 							debris->SetMotionVector(
-								float(gameObjects[i]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
-								float(gameObjects[i]->GetMotionVector()[1] + (gameParams.randoms[gameParams.randIndex++%512]%100-50)/100.0), 
+								float(gameObjects[i]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
+								float(gameObjects[i]->GetMotionVector()[1] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
 								0);
 							debris->SetTranslation(
 								float(gameObjects[i]->GetTranslation()[0]),
@@ -862,6 +955,15 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(.1f, .1f, .1f);
 							gameObjects.push_back(debris);
+						}
+						switch(gameObjects[i]->GetSide())
+						{
+						case SIDE_BLUE:
+							gameParams.greenPoints += 200 * pointMultiplier;
+							break;
+						case SIDE_GREEN:
+							gameParams.bluePoints += 200 * pointMultiplier;
+							break;
 						}
 					}
 					gameObjects.erase(gameObjects.begin() + i);
@@ -976,6 +1078,8 @@ void CHyperWarGame::Draw (void)
 		}		
 
 		DrawCursors();
+		
+		DrawHUD();
 	}
 	else
 	{
@@ -983,6 +1087,8 @@ void CHyperWarGame::Draw (void)
 		//font.Begin();
 
 		glPushMatrix();
+
+		glRotatef(-90, 0, 0, 1);
 
 		glScalef(.01, .01, .01);
 		glEnable(GL_TEXTURE_2D);
@@ -1006,6 +1112,61 @@ void CHyperWarGame::Draw (void)
 	glFlush ();													// Flush The GL Rendering Pipeline
 }
 
+void CHyperWarGame::DrawHUD()
+{
+	char pointsString[16];
+	int width = 0;
+	int height = 0;
+	
+	glPushMatrix();
+
+	glColor3f(1, 1, 1);
+	glTranslatef(-2.1f, 0, 0);
+	glRotatef(-90, 0, 0, 1);
+
+	glScalef(.005, .005, .005);
+	glEnable(GL_TEXTURE_2D);
+
+	sprintf_s(pointsString, 16, "%d", gameParams.greenPoints);
+
+	for(int i=0; i<strnlen(pointsString, 16); i++)
+	{
+		width += font.GetCharWidthA(pointsString[i]);
+	}
+
+	height = font.GetCharHeight('8');
+
+	glTranslatef(-width/2.0f, height/2.0f, 0);
+	font.DrawString(pointsString, 0, 0);
+
+	glPopMatrix();
+
+	glPushMatrix();
+
+	glColor3f(1, 1, 1);
+	glTranslatef(2.1f, 0, 0);
+	glRotatef(90, 0, 0, 1);
+
+	glScalef(.005, .005, .005);
+	glEnable(GL_TEXTURE_2D);
+
+	sprintf_s(pointsString, 16, "%d", gameParams.bluePoints);
+
+	for(int i=0; i<strnlen(pointsString, 16); i++)
+	{
+		width += font.GetCharWidthA(pointsString[i]);
+	}
+
+	height = font.GetCharHeight('8');
+
+	glTranslatef(-width/2.0f, height/2.0f, 0);
+	font.DrawString(pointsString, 0, 0);
+
+	glDisable(GL_TEXTURE_2D);
+
+	glPopMatrix();
+}
+
 void CHyperWarGame::SetHyperLevel(int newLevel)
 {
 	hyperLevel = newLevel;
@@ -1013,6 +1174,9 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 
 	if(hyperLevel < 1)
 		hyperLevel = 1;
+
+	if(gameParams.gameMode ==  MODE_VS);
+		pointMultiplier = hyperLevel;
 
 	switch(hyperLevel)
 	{
@@ -1041,7 +1205,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
+		gameParams.nukeSpeedDivider = 13000.0f;			//min 1000
 		gameParams.nukeReloadTime = 2000;				//min 150
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 25000;
@@ -1056,7 +1220,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.nukeSpeedDivider = 8000.0f;			//min 1000
+		gameParams.nukeSpeedDivider = 10000.0f;			//min 1000
 		gameParams.nukeReloadTime = 1000;				//min 150
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 20000;
@@ -1071,7 +1235,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+		gameParams.nukeSpeedDivider = 7000.0f;			//min 1000
 		gameParams.nukeReloadTime = 500;				//min 150
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 15000;
@@ -1086,7 +1250,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.nukeSpeedDivider = 2000.0f;			//min 1000
+		gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
 		gameParams.nukeReloadTime = 200;				//min 150
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 60000;
@@ -1105,6 +1269,8 @@ void CHyperWarGame::NextWave()
 	waveNumber++;
 	totalWaves++;
 
+	pointMultiplier = totalWaves/4.0f + 1;
+
 	for(int i=0; i<waveNumber && i < 7; i++)
 	{
 		//Use layers for x location between 2.7 and 7.7
@@ -1112,8 +1278,8 @@ void CHyperWarGame::NextWave()
 		nuke = new CNuke(&gameParams);
 		nuke->SetColor(0, 0, .8f);
 		nuke->SetScale(.1f, .1f, .1f);
-		nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX) * -1.7f, 0);
-		nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX - .5f), 0);
+		nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX) * -1.7f, 0);
+		nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
 		nuke->SetThrust(.025f * waveNumber);
 		nuke->SetSide(SIDE_BLUE);
 		gameObjects.push_back(nuke);
@@ -1121,8 +1287,8 @@ void CHyperWarGame::NextWave()
 		nuke = new CNuke(&gameParams);
 		nuke->SetColor(0, 0, .8f);
 		nuke->SetScale(.1f, .1f, .1f);
-		nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX) * 1.7f, 0);
-		nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX - .5f), 0);
+		nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX) * 1.7f, 0);
+		nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
 		nuke->SetThrust(.025f * waveNumber);
 		nuke->SetSide(SIDE_BLUE);
 		gameObjects.push_back(nuke);
@@ -1148,9 +1314,9 @@ void CHyperWarGame::NextWave()
 		/*
 		//Add a random gravity well
 		sGravityWell *gw = new sGravityWell();
-		gw->mass = gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX * 2;
-		gw->translation[0] = (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX - .5f) * 5.5f;
-		gw->translation[1] = (gameParams.randoms[gameParams.randIndex++%512]/(float)RAND_MAX - .5f) * 3.5f;
+		gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 2;
+		gw->translation[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 5.5f;
+		gw->translation[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 3.5f;
 		gw->translation[2] = 0;
 		gravityWells.push_back(gw);
 		*/
