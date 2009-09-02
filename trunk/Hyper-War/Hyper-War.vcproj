@@ -390,10 +390,6 @@
 				RelativePath=".\RawMouse.h"
 				>
 			</File>
-			<File
-				RelativePath=".\stdafx.h"
-				>
-			</File>
 			<Filter
 				Name="Resource Files"
 				Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
