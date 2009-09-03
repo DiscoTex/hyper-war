@@ -37,10 +37,12 @@ public:
 	void DrawCursors();
 	void Draw();										// Draw the current frame
 	void DrawHUD();
+	void DrawAttract();
 
 	void SetHyperLevel(int newLevel);
 	int  GetHyperLevel() {return hyperLevel;}
 	void NextWave();
+	void RunAttractMode();
 
 private:
 	GL_Window*	g_window;
@@ -73,7 +75,14 @@ private:
 	int							greenCityCount;
 	bool						greenWins;
 	bool						blueWins;
-	GLFont						font;
-	GLuint						fontTex;
+	bool						attractMode;
+	GLFont						*titleFont;
+	GLuint						titleFontTex;
+	GLFont						*storyFont;
+	GLuint						storyFontTex;
+	GLFont						*scoreFont;
+	GLuint						scoreFontTex;
 	int							pointMultiplier;
+	bool						playingStory;
+	bool						playingIntro;
 };

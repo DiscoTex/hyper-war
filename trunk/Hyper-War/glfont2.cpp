@@ -179,8 +179,15 @@ int GLFont::GetCharWidth (int c)
 		GLFontChar *glfont_char;
 		
 		//Retrieve character width
+		if(c == ' ')
+		{
+			glfont_char = &header.chars['i' - header.start_char];
+			return (int)(glfont_char->dx * header.tex_width);
+		}
+		
 		glfont_char = &header.chars[c - header.start_char];
 		return (int)(glfont_char->dx * header.tex_width);
+		
 	}
 }
 //*******************************************************************
