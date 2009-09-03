@@ -85,4 +85,9 @@ private:
 	int							pointMultiplier;
 	bool						playingStory;
 	bool						playingIntro;
+	bool						exploded;
+	bool						nukesLaunched;
+	bool						nukesLaunched2;
+	bool						nukesLaunched3;
+	bool						nukesLaunched4;
 };

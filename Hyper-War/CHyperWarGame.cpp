@@ -24,7 +24,7 @@ CHyperWarGame::CHyperWarGame()
 	gameParams.flakDebrisFactor = 6;
 	gameParams.mouse1Index = 3;
 	gameParams.mouse2Index = 2;
-	gameParams.gameMode = MODE_VS;
+	gameParams.gameMode = MODE_ATTRACT;
 	gameParams.waveTime = 5000;
 	gameParams.greenPoints = 0;
 	gameParams.bluePoints = 0;
@@ -38,6 +38,11 @@ CHyperWarGame::CHyperWarGame()
 	greenWins = false;
 	playingStory = false;
 	playingIntro = false;
+	exploded = false;
+	nukesLaunched = false;
+	nukesLaunched2 = false;
+	nukesLaunched3 = false;
+	nukesLaunched4 = false;
 
 	for(int i=0; i<1024; i++)
 	{
@@ -69,9 +74,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	{
 		//Store keys array and window info
 		g_window	= window;
-		g_keys		= keys;
-
-		hyperModeTimer = 0;
+		g_keys		= keys;		
 
 		//Set up initial rendering environment
 		glClearColor (0.0f, 0.0f, 0.0f, 0.5f);						// Black Background
@@ -93,7 +96,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		titleFont = new GLFont();
 		storyFont = new GLFont();
 		
-		titleFont->Create("titleFont.glf", titleFontTex);				
+		titleFont->Create("titleFont.glf", titleFontTex);
 		storyFont->Create("storyFont.glf", storyFontTex);
 		scoreFont->Create("scoreFont.glf", scoreFontTex);
 
@@ -102,6 +105,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	}
 
 	gameObjects.clear();
+	hyperModeTimer = 0;
 
 	if(gameParams.gameMode == MODE_VS)
 	{
@@ -1039,10 +1043,175 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 void CHyperWarGame::RunAttractMode()
 {
+	float trans[3];
+
 	if(hyperModeTimer > 4000 && !playingStory)
 	{
 		audioRenderer.PlaySound(SOUND_STORY, 0, 0);
 		playingStory = true;
+	}
+
+	if(hyperModeTimer > 39000 && !exploded)
+	{
+		exploded = true;
+		for(int k=0; k<gameParams.debrisAmount*16; k++)
+		{
+			float  debrisAngle;
+			float  debrisSize;							
+
+			debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 360;
+			debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
+
+			CDebris *debris = new CDebris(&gameParams);
+			debris->SetMotionVector(
+				float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+				float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+				0);
+			debris->SetTranslation(
+				float(0),
+				float(0),
+				float(-.01f));
+			debris->SetScale(debrisSize, debrisSize, debrisSize);
+			debris->SetTTL(10000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+			gameObjects.push_back(debris);
+		}
+		for(int k=0; k<gameParams.debrisAmount*16; k++)
+		{
+			float  debrisAngle;
+			float  debrisSize;							
+
+			debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 360;
+			debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
+
+			CDebris *debris = new CDebris(&gameParams);
+			debris->SetMotionVector(
+				float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+				float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+				0);
+			debris->SetTranslation(
+				float(.1f),
+				float(0),
+				float(-.01f));
+			debris->SetScale(debrisSize, debrisSize, debrisSize);
+			debris->SetTTL(10000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+			gameObjects.push_back(debris);
+		}
+		for(int k=0; k<gameParams.debrisAmount*16; k++)
+		{
+			float  debrisAngle;
+			float  debrisSize;							
+
+			debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 360;
+			debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
+
+			CDebris *debris = new CDebris(&gameParams);
+			debris->SetMotionVector(
+				float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+				float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+				0);
+			debris->SetTranslation(
+				float(-.1f),
+				float(0),
+				float(-.01f));
+			debris->SetScale(debrisSize, debrisSize, debrisSize);
+			debris->SetTTL(10000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+			gameObjects.push_back(debris);
+		}
+	}
+
+	if(hyperModeTimer > 44000 && !nukesLaunched)
+	{
+		nukesLaunched = true;
+
+		//Add some random gravity wells
+		for(int i=0; i<8; i++)
+		{			
+			sGravityWell *gw = new sGravityWell();
+			gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 2;
+			gw->translation[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 4.5f;
+			gw->translation[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 2.5f;
+			gw->translation[2] = 0;
+			gravityWells.push_back(gw);
+		}
+	}
+
+	
+	if(hyperModeTimer > 49000 && !nukesLaunched2)
+	{
+		nukesLaunched2 = true;
+		gameParams.nukeGravityImmunityTime = 0;		
+		gameParams.nukeSpeedDivider = 8000;
+
+		for(int i = 0; i<30; i++)
+		{
+			CNuke *nuke = new CNuke(&gameParams);
+			nuke->SetScale(.1f, .1f, .1f);
+
+			trans[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 4.5f;
+			trans[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 2.5f;
+			trans[2] = 0;
+			nuke->SetTranslation(trans[0], trans[1], trans[2]);
+			trans[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 25.0f;
+			trans[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 25.0f;
+			trans[2] = 0;
+			nuke->SetMotionVector(trans[0], trans[1], trans[2]);
+			if(i<8)
+				nuke->SetColor(0, 1, 0);
+			else
+				nuke->SetColor(0, 0, 1);
+			gameObjects.push_back(nuke);
+		}
+	}
+
+	if(hyperModeTimer > 60000 && !nukesLaunched3)
+	{
+		nukesLaunched3 = true;
+		for(int i = 0; i<30; i++)
+		{
+			CNuke *nuke = new CNuke(&gameParams);
+			nuke->SetScale(.1f, .1f, .1f);
+			trans[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 4.5f;
+			trans[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 2.5f;
+			trans[2] = 0;
+			nuke->SetTranslation(trans[0], trans[1], trans[2]);
+			trans[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 25.0f;
+			trans[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 25.0f;
+			trans[2] = 0;
+			nuke->SetMotionVector(trans[0], trans[1], trans[2]);
+			if(i<10)
+				nuke->SetColor(0, 1, 0);
+			else
+				nuke->SetColor(0, 0, 1);
+			gameObjects.push_back(nuke);
+		}
+	}
+
+	if(hyperModeTimer > 70000 && !nukesLaunched4)
+	{
+		nukesLaunched4 = true;
+		for(int i = 0; i<30; i++)
+		{
+			CNuke *nuke = new CNuke(&gameParams);
+			nuke->SetScale(.1f, .1f, .1f);
+			trans[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 4.5f;
+			trans[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 2.5f;
+			trans[2] = 0;
+			nuke->SetTranslation(trans[0], trans[1], trans[2]);
+			trans[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 25.0f;
+			trans[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 25.0f;
+			trans[2] = 0;
+			nuke->SetMotionVector(trans[0], trans[1], trans[2]);
+			if(i<15)
+				nuke->SetColor(0, 1, 0);
+			else
+				nuke->SetColor(0, 0, 1);
+			gameObjects.push_back(nuke);
+		}
+	}
+
+	if(hyperModeTimer > 82000)
+	{
+		Initialize(g_window, g_keys);
 	}
 }
 
@@ -1121,6 +1290,10 @@ void CHyperWarGame::Draw (void)
 
 	case MODE_ATTRACT:
 		DrawAttract();
+		for(unsigned int i=0; i<gameObjects.size(); i++)
+		{
+			gameObjects[i]->Draw();
+		}	
 		break;
 	case MODE_GAMEOVER:
 		//Draw GAME OVER screen
@@ -1135,9 +1308,11 @@ void CHyperWarGame::Draw (void)
 		int height = titleFont->GetCharHeight('G');
 
 		glTranslatef(-width/2.0f, height/2.0f, 0);
+		titleFont->Begin();
 		titleFont->DrawString("Game", 0, 0);		
 		width = titleFont->GetCharWidthA('G') + titleFont->GetCharWidthA('a') + titleFont->GetCharWidthA('m') + titleFont->GetCharWidthA('e') + titleFont->GetCharWidthA('g');
 		glTranslatef((float)width, 0, 0);
+		titleFont->Begin();
 		titleFont->DrawString("Over", 0, 0);		
 		glDisable(GL_TEXTURE_2D);
 
@@ -1175,6 +1350,8 @@ void CHyperWarGame::DrawHUD()
 	height = scoreFont->GetCharHeight('8');
 	
 	glTranslatef(-width/2.0f, height/2.0f, 0);
+	scoreFont->Begin();
+	glColor3f(1, 1, 1);
 	scoreFont->DrawString(pointsString, 0, 0);
 
 	glPopMatrix();
@@ -1186,7 +1363,7 @@ void CHyperWarGame::DrawHUD()
 
 		glPushMatrix();
 
-		glColor3f(1, 1, 1);
+
 		glTranslatef(2.1f, 0, 0);
 		glRotatef(90, 0, 0, 1);
 
@@ -1203,6 +1380,7 @@ void CHyperWarGame::DrawHUD()
 		height = scoreFont->GetCharHeight('8');
 		
 		glTranslatef(-width/2.0f, height/2.0f, 0);
+		scoreFont->Begin();
 		scoreFont->DrawString(pointsString, 0, 0);
 
 		glPopMatrix();
@@ -1219,16 +1397,17 @@ void CHyperWarGame::DrawAttract()
 	int height = 0;
 	
 	glEnable(GL_TEXTURE_2D);
+	storyFont->Begin();
 
 	glPushMatrix();	
+	glColor3f(1, .8f, .8f);
 
 	if(hyperModeTimer < 39000)
 	{
 		glTranslatef(0, hyperModeTimer / 11000.0f - 1.0f, 0);
 		if(hyperModeTimer > 4000)
 		{
-			glPushMatrix();
-			glColor3f(1, 1, 1);
+			glPushMatrix();			
 			glScalef(.001f, .001f, .001f);
 			sprintf_s(storyLine, 64, "Deep in the Perseus Arm of the Milky Way, two");
 			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
@@ -1434,7 +1613,7 @@ void CHyperWarGame::DrawAttract()
 				width += storyFont->GetCharWidthA(storyLine[i]);
 			}
 			height = storyFont->GetCharHeight('D');
-			glTranslatef(-width/2.0f, height/2.0f - 24*height, 0);
+			glTranslatef(-width/2.0f, height/2.0f - 24*height, 0);			
 			storyFont->DrawString(storyLine, 0, 0);
 			glPopMatrix();
 		}
@@ -1444,22 +1623,27 @@ void CHyperWarGame::DrawAttract()
 		width = 0;
 		height = 0;
 
-		glPushMatrix();
+		glPushMatrix();		
+		glScalef(.006f, .006f, .006f);
 		glColor3f(1, 1, 1);
-		glScalef(.0045f, .0045f, .0045f);
 		sprintf_s(storyLine, 64, "HYPERWAR");
 		for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
 		{
-			width += storyFont->GetCharWidthA(storyLine[i]);
+			width += titleFont->GetCharWidthA(storyLine[i]);
 		}
-		height = storyFont->GetCharHeight('D');
-		glTranslatef(-width/2.0f, height/2.0f, 0);
-		storyFont->DrawString(storyLine, 0, 0);
+		height = titleFont->GetCharHeight('D');
+		if(hyperModeTimer > 44000)
+			glTranslatef(-width/2.0f, height/2.0f, -(hyperModeTimer - 44000)/5.0f);
+		else
+			glTranslatef(-width/2.0f, height/2.0f, 0);
+		titleFont->Begin();
+		titleFont->DrawString(storyLine, 0, 0);
 		glPopMatrix();
 	}
 
 	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
+
 }
 
 void CHyperWarGame::SetHyperLevel(int newLevel)
