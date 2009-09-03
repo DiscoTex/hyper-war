@@ -164,6 +164,12 @@ public:
 			//Get width and height
 			width = glfont_char->dx * header.tex_width;
 			height = glfont_char->dy * header.tex_height;
+
+			if(*i == ' ')
+			{				
+				width = header.chars['i' - header.start_char].dx * header.tex_width;
+				height = header.chars['i' - header.start_char].dy * header.tex_height;
+			}
 			
 			//Specify vertices and texture coordinates
 			glTexCoord2f(glfont_char->tx1, glfont_char->ty1);

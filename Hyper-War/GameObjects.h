@@ -40,7 +40,9 @@ enum{
 enum{
 	MODE_VS,
 	MODE_SINGLE,
-	MODE_COOP
+	MODE_COOP,
+	MODE_ATTRACT,
+	MODE_GAMEOVER
 };
 
 enum{

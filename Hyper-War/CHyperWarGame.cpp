@@ -36,6 +36,8 @@ CHyperWarGame::CHyperWarGame()
 	greenCityCount = 4;
 	blueWins = false;
 	greenWins = false;
+	playingStory = false;
+	playingIntro = false;
 
 	for(int i=0; i<1024; i++)
 	{
@@ -55,6 +57,10 @@ CHyperWarGame::~CHyperWarGame()
 		delete gravityWells[i];
 	}
 	rawMouse.destroy_raw_mouse();
+
+	glDeleteTextures(1, &scoreFontTex);
+	glDeleteTextures(1, &titleFontTex);
+	glDeleteTextures(1, &storyFontTex);
 }
 
 BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Init Code & User Initialiazation Goes Here
@@ -78,260 +84,274 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		//Create font
-		glGenTextures(1, &fontTex);
-		font.Create("font.glf", fontTex);
+		//Create fonts
+		glGenTextures(1, &scoreFontTex);
+		glGenTextures(1, &titleFontTex);
+		glGenTextures(1, &storyFontTex);
+		
+		scoreFont = new GLFont();
+		titleFont = new GLFont();
+		storyFont = new GLFont();
+		
+		titleFont->Create("titleFont.glf", titleFontTex);				
+		storyFont->Create("storyFont.glf", storyFontTex);
+		scoreFont->Create("scoreFont.glf", scoreFontTex);
 
 		gameObjects.reserve(1000);
-
-		if(gameParams.gameMode == MODE_VS)
-		{
-			//** Create game objects
-			//Create a green planet
-			CPlanet *planet = new CPlanet(&gameParams);
-			planet->SetSide(SIDE_GREEN);
-			planet->SetColor(0.0f, 0.1f, 0.0f);
-			planet->SetTranslation(-12, 0, 0);
-			planet->SetScale(10, 10, 10);
-			gameObjects.push_back(planet);
-
-			//Create a blue planet
-			planet = new CPlanet(&gameParams);
-			planet->SetSide(SIDE_BLUE);
-			planet->SetColor(0.0f, 0.0f, 0.1f);
-			planet->SetTranslation(12, 0, 0);
-			planet->SetScale(10, 10, 10);
-			gameObjects.push_back(planet);
-
-			//Create a gravity well for the green planet
-			sGravityWell *gw = new sGravityWell();
-			gw->mass = 100;
-			gw->translation[0] = -12;
-			gw->translation[1] = 0;
-			gw->translation[2] = 0;
-			gravityWells.push_back(gw);
-
-			//Gravity well for blue
-			gw = new sGravityWell();
-			gw->mass = 100;
-			gw->translation[0] = 12;
-			gw->translation[1] = 0;
-			gw->translation[2] = 0;
-			gravityWells.push_back(gw);
-
-			//Create missle bases
-			CMissileBase *mb = new CMissileBase(&gameParams);
-			mb->SetColor(0, .8f, 0);
-			mb->SetSide(SIDE_GREEN);
-			mb->SetScale(.1f, .1f, .1f);
-			mb->SetRotation(0, 0, -84);
-			mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
-			mb->SetLaunchKey('A');
-			mb->SetCursorPointer(mousePos[0]);
-			gameObjects.push_back(mb);
-
-			mb = new CMissileBase(&gameParams);
-			mb->SetColor(0, .8f, 0);
-			mb->SetSide(SIDE_GREEN);
-			mb->SetScale(.1f, .1f, .1f);
-			mb->SetRotation(0, 0, -96);
-			mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
-			mb->SetLaunchKey('D');
-			mb->SetCursorPointer(mousePos[0]);
-			gameObjects.push_back(mb);
-
-			mb = new CMissileBase(&gameParams);
-			mb->SetColor(0, 0, .8f);
-			mb->SetSide(SIDE_BLUE);
-			mb->SetScale(.1f, .1f, .1f);
-			mb->SetRotation(0, 0, 96);
-			mb->SetTranslation(10 * cos(186*DEG2RAD) + 12.01f, 10 * sin(186*DEG2RAD), -.001f);
-			mb->SetLaunchKey('J');
-			mb->SetCursorPointer(mousePos[1]);
-			gameObjects.push_back(mb);
-
-			mb = new CMissileBase(&gameParams);
-			mb->SetColor(0, 0, .8f);
-			mb->SetSide(SIDE_BLUE);
-			mb->SetScale(.1f, .1f, .1f);
-			mb->SetRotation(0, 0, 84);
-			mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01f, 10 * sin(174*DEG2RAD), -.001f);
-			mb->SetLaunchKey('L');
-			mb->SetCursorPointer(mousePos[1]);
-			gameObjects.push_back(mb);
-
-			CCity *city = new CCity(&gameParams);
-			city->SetColor(0, 0, .8f);
-			city->SetSide(SIDE_BLUE);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, 82);
-			city->SetTranslation(10 * cos(172*DEG2RAD) + 12.01f, 10 * sin(172*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			city = new CCity(&gameParams);
-			city->SetColor(0, 0, .8f);
-			city->SetSide(SIDE_BLUE);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, 87);
-			city->SetTranslation(10 * cos(177*DEG2RAD) + 12.01f, 10 * sin(177*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			city = new CCity(&gameParams);
-			city->SetColor(0, 0, .8f);
-			city->SetSide(SIDE_BLUE);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, 93);
-			city->SetTranslation(10 * cos(183*DEG2RAD) + 12.01f, 10 * sin(183*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			city = new CCity(&gameParams);
-			city->SetColor(0, 0, .8f);
-			city->SetSide(SIDE_BLUE);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, 98);
-			city->SetTranslation(10 * cos(188*DEG2RAD) + 12.01f, 10 * sin(188*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			city = new CCity(&gameParams);
-			city->SetColor(0, .8f, 0);
-			city->SetSide(SIDE_GREEN);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, -98);
-			city->SetTranslation(10 * cos(-8*DEG2RAD) - 12.01f, 10 * sin(-8*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			city = new CCity(&gameParams);
-			city->SetColor(0, .8f, 0);
-			city->SetSide(SIDE_GREEN);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, -93);
-			city->SetTranslation(10 * cos(-3*DEG2RAD) - 12.01f, 10 * sin(-3*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			city = new CCity(&gameParams);
-			city->SetColor(0, .8f, 0);
-			city->SetSide(SIDE_GREEN);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, -87);
-			city->SetTranslation(10 * cos(3*DEG2RAD) - 12.01f, 10 * sin(3*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			city = new CCity(&gameParams);
-			city->SetColor(0, .8f, 0);
-			city->SetSide(SIDE_GREEN);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, -82);
-			city->SetTranslation(10 * cos(8*DEG2RAD) - 12.01f, 10 * sin(8*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			CFlakCannon *cannon = new CFlakCannon(&gameParams);
-			cannon->SetColor(0, .8f, 0);
-			cannon->SetSide(SIDE_GREEN);
-			cannon->SetScale(.1f, .1f, .1f);
-			cannon->SetRotation(0, 0, -90);
-			cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
-			cannon->SetCursorPointer(mousePos[0]);
-			cannon->SetFireKey('S');
-			gameObjects.push_back(cannon);
-
-			cannon = new CFlakCannon(&gameParams);
-			cannon->SetColor(0, 0, .8f);
-			cannon->SetSide(SIDE_BLUE);
-			cannon->SetScale(.1f, .1f, .1f);
-			cannon->SetRotation(0, 0, 90);
-			cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
-			cannon->SetCursorPointer(mousePos[1]);
-			cannon->SetFireKey('K');
-			gameObjects.push_back(cannon);
-		}
-		else if(gameParams.gameMode == MODE_SINGLE)
-		{
-			audioRenderer.PlaySound(SOUND_SPMUSIC, 0, 0);
-
-			//Create a green planet
-			CPlanet *planet = new CPlanet(&gameParams);
-			planet->SetColor(0.0f, 0.1f, 0.0f);
-			planet->SetSide(SIDE_GREEN);
-			planet->SetTranslation(-12, 0, 0);
-			planet->SetScale(10, 10, 10);
-			gameObjects.push_back(planet);
-
-			//Create a gravity well for the green planet
-			sGravityWell *gw = new sGravityWell();
-			gw->mass = 30;
-			gw->translation[0] = -12;
-			gw->translation[1] = 0;
-			gw->translation[2] = 0;
-			gravityWells.push_back(gw);
-
-			CMissileBase *mb = new CMissileBase(&gameParams);
-			mb->SetColor(0, .8f, 0);
-			mb->SetSide(SIDE_GREEN);
-			mb->SetScale(.1f, .1f, .1f);
-			mb->SetRotation(0, 0, -84);
-			mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
-			mb->SetLaunchKey('A');
-			mb->SetCursorPointer(mousePos[0]);
-			gameObjects.push_back(mb);
-
-			mb = new CMissileBase(&gameParams);
-			mb->SetColor(0, .8f, 0);
-			mb->SetSide(SIDE_GREEN);
-			mb->SetScale(.1f, .1f, .1f);
-			mb->SetRotation(0, 0, -96);
-			mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
-			mb->SetLaunchKey('D');
-			mb->SetCursorPointer(mousePos[0]);
-			gameObjects.push_back(mb);
-
-			CCity *city = new CCity(&gameParams);
-			city->SetColor(0, .8f, 0);
-			city->SetSide(SIDE_GREEN);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, -98);
-			city->SetTranslation(10 * cos(-8*DEG2RAD) - 12.01f, 10 * sin(-8*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			city = new CCity(&gameParams);
-			city->SetColor(0, .8f, 0);
-			city->SetSide(SIDE_GREEN);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, -93);
-			city->SetTranslation(10 * cos(-3*DEG2RAD) - 12.01f, 10 * sin(-3*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			city = new CCity(&gameParams);
-			city->SetColor(0, .8f, 0);
-			city->SetSide(SIDE_GREEN);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, -87);
-			city->SetTranslation(10 * cos(3*DEG2RAD) - 12.01f, 10 * sin(3*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			city = new CCity(&gameParams);
-			city->SetColor(0, .8f, 0);
-			city->SetSide(SIDE_GREEN);
-			city->SetScale(.1f, .1f, .1f);
-			city->SetRotation(0, 0, -82);
-			city->SetTranslation(10 * cos(8*DEG2RAD) - 12.01f, 10 * sin(8*DEG2RAD), -.001f);
-			gameObjects.push_back(city);
-
-			CFlakCannon *cannon = new CFlakCannon(&gameParams);
-			cannon->SetColor(0, .8f, 0);
-			cannon->SetSide(SIDE_GREEN);
-			cannon->SetScale(.1f, .1f, .1f);
-			cannon->SetRotation(0, 0, -90);
-			cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
-			cannon->SetCursorPointer(mousePos[0]);
-			cannon->SetFireKey('S');
-			gameObjects.push_back(cannon);
-
-			NextWave();
-		}
+		initialized = true;
 	}
 
+	gameObjects.clear();
 
-	initialized = true;
+	if(gameParams.gameMode == MODE_VS)
+	{
+		//** Create game objects
+		//Create a green planet
+		CPlanet *planet = new CPlanet(&gameParams);
+		planet->SetSide(SIDE_GREEN);
+		planet->SetColor(0.0f, 0.1f, 0.0f);
+		planet->SetTranslation(-12, 0, 0);
+		planet->SetScale(10, 10, 10);
+		gameObjects.push_back(planet);
+
+		//Create a blue planet
+		planet = new CPlanet(&gameParams);
+		planet->SetSide(SIDE_BLUE);
+		planet->SetColor(0.0f, 0.0f, 0.1f);
+		planet->SetTranslation(12, 0, 0);
+		planet->SetScale(10, 10, 10);
+		gameObjects.push_back(planet);
+
+		//Create a gravity well for the green planet
+		sGravityWell *gw = new sGravityWell();
+		gw->mass = 100;
+		gw->translation[0] = -12;
+		gw->translation[1] = 0;
+		gw->translation[2] = 0;
+		gravityWells.push_back(gw);
+
+		//Gravity well for blue
+		gw = new sGravityWell();
+		gw->mass = 100;
+		gw->translation[0] = 12;
+		gw->translation[1] = 0;
+		gw->translation[2] = 0;
+		gravityWells.push_back(gw);
+
+		//Create missle bases
+		CMissileBase *mb = new CMissileBase(&gameParams);
+		mb->SetColor(0, .8f, 0);
+		mb->SetSide(SIDE_GREEN);
+		mb->SetScale(.1f, .1f, .1f);
+		mb->SetRotation(0, 0, -84);
+		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
+		mb->SetLaunchKey('A');
+		mb->SetCursorPointer(mousePos[0]);
+		gameObjects.push_back(mb);
+
+		mb = new CMissileBase(&gameParams);
+		mb->SetColor(0, .8f, 0);
+		mb->SetSide(SIDE_GREEN);
+		mb->SetScale(.1f, .1f, .1f);
+		mb->SetRotation(0, 0, -96);
+		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
+		mb->SetLaunchKey('D');
+		mb->SetCursorPointer(mousePos[0]);
+		gameObjects.push_back(mb);
+
+		mb = new CMissileBase(&gameParams);
+		mb->SetColor(0, 0, .8f);
+		mb->SetSide(SIDE_BLUE);
+		mb->SetScale(.1f, .1f, .1f);
+		mb->SetRotation(0, 0, 96);
+		mb->SetTranslation(10 * cos(186*DEG2RAD) + 12.01f, 10 * sin(186*DEG2RAD), -.001f);
+		mb->SetLaunchKey('J');
+		mb->SetCursorPointer(mousePos[1]);
+		gameObjects.push_back(mb);
+
+		mb = new CMissileBase(&gameParams);
+		mb->SetColor(0, 0, .8f);
+		mb->SetSide(SIDE_BLUE);
+		mb->SetScale(.1f, .1f, .1f);
+		mb->SetRotation(0, 0, 84);
+		mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01f, 10 * sin(174*DEG2RAD), -.001f);
+		mb->SetLaunchKey('L');
+		mb->SetCursorPointer(mousePos[1]);
+		gameObjects.push_back(mb);
+
+		CCity *city = new CCity(&gameParams);
+		city->SetColor(0, 0, .8f);
+		city->SetSide(SIDE_BLUE);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, 82);
+		city->SetTranslation(10 * cos(172*DEG2RAD) + 12.01f, 10 * sin(172*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		city = new CCity(&gameParams);
+		city->SetColor(0, 0, .8f);
+		city->SetSide(SIDE_BLUE);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, 87);
+		city->SetTranslation(10 * cos(177*DEG2RAD) + 12.01f, 10 * sin(177*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		city = new CCity(&gameParams);
+		city->SetColor(0, 0, .8f);
+		city->SetSide(SIDE_BLUE);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, 93);
+		city->SetTranslation(10 * cos(183*DEG2RAD) + 12.01f, 10 * sin(183*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		city = new CCity(&gameParams);
+		city->SetColor(0, 0, .8f);
+		city->SetSide(SIDE_BLUE);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, 98);
+		city->SetTranslation(10 * cos(188*DEG2RAD) + 12.01f, 10 * sin(188*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		city = new CCity(&gameParams);
+		city->SetColor(0, .8f, 0);
+		city->SetSide(SIDE_GREEN);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -98);
+		city->SetTranslation(10 * cos(-8*DEG2RAD) - 12.01f, 10 * sin(-8*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		city = new CCity(&gameParams);
+		city->SetColor(0, .8f, 0);
+		city->SetSide(SIDE_GREEN);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -93);
+		city->SetTranslation(10 * cos(-3*DEG2RAD) - 12.01f, 10 * sin(-3*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		city = new CCity(&gameParams);
+		city->SetColor(0, .8f, 0);
+		city->SetSide(SIDE_GREEN);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -87);
+		city->SetTranslation(10 * cos(3*DEG2RAD) - 12.01f, 10 * sin(3*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		city = new CCity(&gameParams);
+		city->SetColor(0, .8f, 0);
+		city->SetSide(SIDE_GREEN);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -82);
+		city->SetTranslation(10 * cos(8*DEG2RAD) - 12.01f, 10 * sin(8*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		CFlakCannon *cannon = new CFlakCannon(&gameParams);
+		cannon->SetColor(0, .8f, 0);
+		cannon->SetSide(SIDE_GREEN);
+		cannon->SetScale(.1f, .1f, .1f);
+		cannon->SetRotation(0, 0, -90);
+		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
+		cannon->SetCursorPointer(mousePos[0]);
+		cannon->SetFireKey('S');
+		gameObjects.push_back(cannon);
+
+		cannon = new CFlakCannon(&gameParams);
+		cannon->SetColor(0, 0, .8f);
+		cannon->SetSide(SIDE_BLUE);
+		cannon->SetScale(.1f, .1f, .1f);
+		cannon->SetRotation(0, 0, 90);
+		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
+		cannon->SetCursorPointer(mousePos[1]);
+		cannon->SetFireKey('K');
+		gameObjects.push_back(cannon);
+	}
+	else if(gameParams.gameMode == MODE_SINGLE)
+	{
+		audioRenderer.PlaySound(SOUND_SPMUSIC, 0, 0);
+
+		//Create a green planet
+		CPlanet *planet = new CPlanet(&gameParams);
+		planet->SetColor(0.0f, 0.1f, 0.0f);
+		planet->SetSide(SIDE_GREEN);
+		planet->SetTranslation(-12, 0, 0);
+		planet->SetScale(10, 10, 10);
+		gameObjects.push_back(planet);
+
+		//Create a gravity well for the green planet
+		sGravityWell *gw = new sGravityWell();
+		gw->mass = 30;
+		gw->translation[0] = -12;
+		gw->translation[1] = 0;
+		gw->translation[2] = 0;
+		gravityWells.push_back(gw);
+
+		CMissileBase *mb = new CMissileBase(&gameParams);
+		mb->SetColor(0, .8f, 0);
+		mb->SetSide(SIDE_GREEN);
+		mb->SetScale(.1f, .1f, .1f);
+		mb->SetRotation(0, 0, -84);
+		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
+		mb->SetLaunchKey('A');
+		mb->SetCursorPointer(mousePos[0]);
+		gameObjects.push_back(mb);
+
+		mb = new CMissileBase(&gameParams);
+		mb->SetColor(0, .8f, 0);
+		mb->SetSide(SIDE_GREEN);
+		mb->SetScale(.1f, .1f, .1f);
+		mb->SetRotation(0, 0, -96);
+		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
+		mb->SetLaunchKey('D');
+		mb->SetCursorPointer(mousePos[0]);
+		gameObjects.push_back(mb);
+
+		CCity *city = new CCity(&gameParams);
+		city->SetColor(0, .8f, 0);
+		city->SetSide(SIDE_GREEN);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -98);
+		city->SetTranslation(10 * cos(-8*DEG2RAD) - 12.01f, 10 * sin(-8*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		city = new CCity(&gameParams);
+		city->SetColor(0, .8f, 0);
+		city->SetSide(SIDE_GREEN);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -93);
+		city->SetTranslation(10 * cos(-3*DEG2RAD) - 12.01f, 10 * sin(-3*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		city = new CCity(&gameParams);
+		city->SetColor(0, .8f, 0);
+		city->SetSide(SIDE_GREEN);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -87);
+		city->SetTranslation(10 * cos(3*DEG2RAD) - 12.01f, 10 * sin(3*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		city = new CCity(&gameParams);
+		city->SetColor(0, .8f, 0);
+		city->SetSide(SIDE_GREEN);
+		city->SetScale(.1f, .1f, .1f);
+		city->SetRotation(0, 0, -82);
+		city->SetTranslation(10 * cos(8*DEG2RAD) - 12.01f, 10 * sin(8*DEG2RAD), -.001f);
+		gameObjects.push_back(city);
+
+		CFlakCannon *cannon = new CFlakCannon(&gameParams);
+		cannon->SetColor(0, .8f, 0);
+		cannon->SetSide(SIDE_GREEN);
+		cannon->SetScale(.1f, .1f, .1f);
+		cannon->SetRotation(0, 0, -90);
+		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
+		cannon->SetCursorPointer(mousePos[0]);
+		cannon->SetFireKey('S');
+		gameObjects.push_back(cannon);
+
+		NextWave();
+	}	
+
+	else if(gameParams.gameMode == MODE_ATTRACT)
+	{
+		audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+	}
 
 	return TRUE;												// Return TRUE (Initialization Successful)
 }
@@ -973,7 +993,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	}
 
 	hyperModeTimer += milliseconds;
-	if(hyperModeTimer > gameParams.hyperModeDelay && gameParams.gameMode != MODE_SINGLE)
+
+	if(hyperModeTimer > gameParams.hyperModeDelay && gameParams.gameMode == MODE_VS)
 	{
 		//increase hyper level
 		SetHyperLevel(GetHyperLevel() + 1);
@@ -982,6 +1003,10 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	{
 		NextWave();
 		hyperModeTimer = 0;
+	}
+	else if(gameParams.gameMode == MODE_ATTRACT)
+	{
+		RunAttractMode();
 	}
 
 	//Update starfield position
@@ -996,6 +1021,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		//Green wins
 		gameObjects.clear();
 		greenWins = true;
+		gameParams.gameMode = MODE_GAMEOVER;
 
 		//play game over sounds
 
@@ -1005,8 +1031,18 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		//Blue wins
 		gameObjects.clear();
 		blueWins = true;
+		gameParams.gameMode = MODE_GAMEOVER;
 
 		//play game over sounds
+	}
+}
+
+void CHyperWarGame::RunAttractMode()
+{
+	if(hyperModeTimer > 4000 && !playingStory)
+	{
+		audioRenderer.PlaySound(SOUND_STORY, 0, 0);
+		playingStory = true;
 	}
 }
 
@@ -1069,42 +1105,44 @@ void CHyperWarGame::Draw (void)
 	glTranslatef (0.0f, 0.0f, -1.0f);
 	glScalef(.25f, .25f, 1);
 
-	if(!(blueWins || greenWins) )
+	switch(gameParams.gameMode)
 	{
+	case MODE_SINGLE:
+	case MODE_VS:
+	case MODE_COOP:
 		//Draw all objects in the game at their current positions
 		for(unsigned int i=0; i<gameObjects.size(); i++)
 		{
 			gameObjects[i]->Draw();
 		}		
-
-		DrawCursors();
-		
+		DrawCursors();		
 		DrawHUD();
-	}
-	else
-	{
-		//Draw GAME OVER screen
-		//font.Begin();
+		break;
 
+	case MODE_ATTRACT:
+		DrawAttract();
+		break;
+	case MODE_GAMEOVER:
+		//Draw GAME OVER screen
 		glPushMatrix();
 
 		glRotatef(-90, 0, 0, 1);
 
-		glScalef(.01, .01, .01);
+		glScalef(.01f, .01f, .01f);
 		glEnable(GL_TEXTURE_2D);
-		int width = font.GetCharWidthA('G') + font.GetCharWidthA('a') + font.GetCharWidthA('m') + font.GetCharWidthA('e') +
-			font.GetCharWidthA('g') + font.GetCharWidthA('O') + font.GetCharWidthA('v') + font.GetCharWidthA('e') + font.GetCharWidthA('r');
-		int height = font.GetCharHeight('G');
+		int width = titleFont->GetCharWidthA('G') + titleFont->GetCharWidthA('a') + titleFont->GetCharWidthA('m') + titleFont->GetCharWidthA('e') +
+			titleFont->GetCharWidthA('g') + titleFont->GetCharWidthA('O') + titleFont->GetCharWidthA('v') + titleFont->GetCharWidthA('e') + titleFont->GetCharWidthA('r');
+		int height = titleFont->GetCharHeight('G');
 
 		glTranslatef(-width/2.0f, height/2.0f, 0);
-		font.DrawString("Game", 0, 0);		
-		width = font.GetCharWidthA('G') + font.GetCharWidthA('a') + font.GetCharWidthA('m') + font.GetCharWidthA('e') + font.GetCharWidthA('g');
-		glTranslatef(width, 0, 0);
-		font.DrawString("Over", 0, 0);		
+		titleFont->DrawString("Game", 0, 0);		
+		width = titleFont->GetCharWidthA('G') + titleFont->GetCharWidthA('a') + titleFont->GetCharWidthA('m') + titleFont->GetCharWidthA('e') + titleFont->GetCharWidthA('g');
+		glTranslatef((float)width, 0, 0);
+		titleFont->DrawString("Over", 0, 0);		
 		glDisable(GL_TEXTURE_2D);
 
 		glPopMatrix();
-		
+		break;
 	}
 
 	globalEffects.DrawStarfield();
@@ -1124,46 +1162,303 @@ void CHyperWarGame::DrawHUD()
 	glTranslatef(-2.1f, 0, 0);
 	glRotatef(-90, 0, 0, 1);
 
-	glScalef(.005, .005, .005);
+	glScalef(.001f, .001f, .001f);
 	glEnable(GL_TEXTURE_2D);
 
 	sprintf_s(pointsString, 16, "%d", gameParams.greenPoints);
 
-	for(int i=0; i<strnlen(pointsString, 16); i++)
+	for(unsigned int i=0; i<strnlen(pointsString, 16); i++)
 	{
-		width += font.GetCharWidthA(pointsString[i]);
+		width += scoreFont->GetCharWidthA(pointsString[i]);
 	}
 
-	height = font.GetCharHeight('8');
-
+	height = scoreFont->GetCharHeight('8');
+	
 	glTranslatef(-width/2.0f, height/2.0f, 0);
-	font.DrawString(pointsString, 0, 0);
+	scoreFont->DrawString(pointsString, 0, 0);
 
 	glPopMatrix();
 
-	glPushMatrix();
-
-	glColor3f(1, 1, 1);
-	glTranslatef(2.1f, 0, 0);
-	glRotatef(90, 0, 0, 1);
-
-	glScalef(.005, .005, .005);
-	glEnable(GL_TEXTURE_2D);
-
-	sprintf_s(pointsString, 16, "%d", gameParams.bluePoints);
-
-	for(int i=0; i<strnlen(pointsString, 16); i++)
+	if(gameParams.gameMode != MODE_SINGLE)
 	{
-		width += font.GetCharWidthA(pointsString[i]);
+		width = 0;
+		height = 0;
+
+		glPushMatrix();
+
+		glColor3f(1, 1, 1);
+		glTranslatef(2.1f, 0, 0);
+		glRotatef(90, 0, 0, 1);
+
+		glScalef(.001f, .001f, .001f);
+		glEnable(GL_TEXTURE_2D);
+
+		sprintf_s(pointsString, 16, "%d", gameParams.bluePoints);
+
+		for(unsigned int i=0; i<strnlen(pointsString, 16); i++)
+		{
+			width += scoreFont->GetCharWidthA(pointsString[i]);
+		}
+
+		height = scoreFont->GetCharHeight('8');
+		
+		glTranslatef(-width/2.0f, height/2.0f, 0);
+		scoreFont->DrawString(pointsString, 0, 0);
+
+		glPopMatrix();
 	}
 
-	height = font.GetCharHeight('8');
+	glDisable(GL_TEXTURE_2D);
+}
 
-	glTranslatef(-width/2.0f, height/2.0f, 0);
-	font.DrawString(pointsString, 0, 0);
+void CHyperWarGame::DrawAttract()
+{
+
+	char storyLine[64];
+	int width = 0;
+	int height = 0;
+	
+	glEnable(GL_TEXTURE_2D);
+
+	glPushMatrix();	
+
+	if(hyperModeTimer < 39000)
+	{
+		glTranslatef(0, hyperModeTimer / 11000.0f - 1.0f, 0);
+		if(hyperModeTimer > 4000)
+		{
+			glPushMatrix();
+			glColor3f(1, 1, 1);
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "Deep in the Perseus Arm of the Milky Way, two");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 7000)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "opposing civilizations have been locked in a");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 2*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 10000)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "bitter war of attrition for 9,000 years.  The blue");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 4*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 14000)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "ocean planet of Tantusiouswui and the green");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 6*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 17000)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "forest planet of Varelyykesbri each believe that");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 8*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 20000)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "the other is responsible for starting this horrific");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 10*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 23500)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "conflict.");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 12*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 24500)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "Now, with the  recent creation of the first");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 16*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 27500)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "Interplanetary Nuclear Missile, YOU must be");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 18*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 30500)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "the one to end it! Use your nukes to wipe your");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 20*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 33500)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "opponent's homeworld clean of their filthy");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 22*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+
+		if(hyperModeTimer > 36500)
+		{
+			width = 0;
+			height = 0;
+
+			glPushMatrix();
+			glScalef(.001f, .001f, .001f);
+			sprintf_s(storyLine, 64, "cities.  So begins....");
+			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+			{
+				width += storyFont->GetCharWidthA(storyLine[i]);
+			}
+			height = storyFont->GetCharHeight('D');
+			glTranslatef(-width/2.0f, height/2.0f - 24*height, 0);
+			storyFont->DrawString(storyLine, 0, 0);
+			glPopMatrix();
+		}
+	}
+	else
+	{
+		width = 0;
+		height = 0;
+
+		glPushMatrix();
+		glColor3f(1, 1, 1);
+		glScalef(.0045f, .0045f, .0045f);
+		sprintf_s(storyLine, 64, "HYPERWAR");
+		for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
+		{
+			width += storyFont->GetCharWidthA(storyLine[i]);
+		}
+		height = storyFont->GetCharHeight('D');
+		glTranslatef(-width/2.0f, height/2.0f, 0);
+		storyFont->DrawString(storyLine, 0, 0);
+		glPopMatrix();
+	}
 
 	glDisable(GL_TEXTURE_2D);
-
 	glPopMatrix();
 }
 
@@ -1175,14 +1470,14 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 	if(hyperLevel < 1)
 		hyperLevel = 1;
 
-	if(gameParams.gameMode ==  MODE_VS);
+	if(gameParams.gameMode == MODE_VS)
 		pointMultiplier = hyperLevel;
 
 	switch(hyperLevel)
 	{
 	case 1:
 		//Play sound indicating new hyper level
-		audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+		//audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
 		gameParams.chargeRateDivider = 5000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1197,7 +1492,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		break;
 	case 2:
 		//Play sound indicating new hyper level
-		audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+		//audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
 		gameParams.chargeRateDivider = 3000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1212,7 +1507,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		break;
 	case 3:
 		//Play sound indicating new hyper level
-		audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+		//audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
 		gameParams.chargeRateDivider = 2000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1227,7 +1522,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		break;
 	case 4:
 		//Play sound indicating new hyper level
-		audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+		//audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
 		gameParams.chargeRateDivider = 1000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1242,7 +1537,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		break;
 	case 5:
 		//Play sound indicating new hyper level
-		audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+		//audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
 		gameParams.chargeRateDivider = 500.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1269,7 +1564,7 @@ void CHyperWarGame::NextWave()
 	waveNumber++;
 	totalWaves++;
 
-	pointMultiplier = totalWaves/4.0f + 1;
+	pointMultiplier = (int)(totalWaves/4.0f + 1);
 
 	for(int i=0; i<waveNumber && i < 7; i++)
 	{
@@ -1303,7 +1598,7 @@ void CHyperWarGame::NextWave()
 		moship->SetSide(SIDE_BLUE);
 		moship->SetScale(.07f, .07f, .07f);
 		moship->SetRotation(0, 0, -90);
-		moship->SetMotionVector(0, .2, 0);
+		moship->SetMotionVector(0, .2f, 0);
 		moship->SetTranslation(1, -1, 0);
 		gameObjects.push_back(moship);
 	}

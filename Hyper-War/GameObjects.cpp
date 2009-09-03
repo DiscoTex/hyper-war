@@ -399,7 +399,7 @@ void CPlanet::Draw()
 
 	float radius = 1;
 	glBegin(GL_TRIANGLES);
-		for (int i=0; i<360; i+=4)
+		for (int i=0; i<361; i+=4)
 		{
 			float degInRad = i*DEG2RAD;
 			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
@@ -413,7 +413,7 @@ void CPlanet::Draw()
 
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_LINE_LOOP);
-		for (int i=0; i<360; i+=4)
+		for (int i=0; i<361; i+=4)
 		{
 			float degInRad = (i+4)*DEG2RAD;
 			glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius, 0);
