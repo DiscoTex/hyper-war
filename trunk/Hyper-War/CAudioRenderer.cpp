@@ -155,3 +155,9 @@ void CAudioRenderer::RenderAudio(DWORD milliseconds, vector< CGameObject* > gObj
 		//Loop through entire gObjects vector and render sounds for each object
 	}
 }
+
+void CAudioRenderer::StopAll()
+{
+	for(int i=0; i<NUM_SOURCES; i++)
+		alSourceStop(Sources[i]);
+}

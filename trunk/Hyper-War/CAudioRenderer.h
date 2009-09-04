@@ -44,6 +44,8 @@ public:
 	//Render/update OpenAL audio rendering
 	void RenderAudio(DWORD milliseconds, vector< CGameObject* > gObjects);
 	void PlaySound(TYPE_SOUND soundIndex, float xpos, float ypos) {alSourcePlay(Sources[soundIndex]);}
+
+	void StopAll();
 private:
 
 	//Audio rendering data

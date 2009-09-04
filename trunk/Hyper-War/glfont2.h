@@ -147,6 +147,11 @@ public:
 		const T *i;
 		GLFontChar *glfont_char;
 		float width, height;
+        //GLboolean depthMask;
+
+		//glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+
+		//glDepthMask(GL_FALSE);
 		
 		//Begin rendering quads
 		glBegin(GL_QUADS);
@@ -187,6 +192,7 @@ public:
 
 		//Stop rendering quads
 		glEnd();
+		//glDepthMask(depthMask);
 	}
 
 	//Template function to draw a std::basic_string
