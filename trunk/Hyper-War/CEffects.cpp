@@ -29,8 +29,8 @@ CEffects::CEffects()
 		newStar.ypos = (((float)rand() / (float)RAND_MAX) - 1.0f) * 1000;
 		newStar.zpos = (((float)rand() / (float)RAND_MAX) -  1.0f) * 50.0f - 1;
 		newStar.color1 = 1; 
-		newStar.color2 = 1; 
-		newStar.color3 = 1; 
+		newStar.color2 = .7f; 
+		newStar.color3 = .7f; 
 		newStar.scale = .2;
 		newStar.rotation = (rand()%360)+1;
 		stars.push_back(newStar);
@@ -67,6 +67,7 @@ CEffects::CEffects()
 CEffects::~CEffects()
 {
 }
+
 void CEffects::SetTranslation(float x, float y, float z)
 {
 	translation[0] = x;
