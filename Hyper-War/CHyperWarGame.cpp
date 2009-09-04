@@ -20,29 +20,7 @@ CHyperWarGame::CHyperWarGame()
 
 	SetHyperLevel(1);
 
-	gameParams.debrisAmount = 6;
-	gameParams.flakDebrisFactor = 6;
-	gameParams.mouse1Index = 3;
-	gameParams.mouse2Index = 2;
-	gameParams.gameMode = MODE_ATTRACT;
-	gameParams.waveTime = 5000;
-	gameParams.greenPoints = 0;
-	gameParams.bluePoints = 0;
-	pointMultiplier = 1;
-
-	waveNumber = 0;
-	totalWaves = 0;
-	blueCityCount = 4;
-	greenCityCount = 4;
-	blueWins = false;
-	greenWins = false;
-	playingStory = false;
-	playingIntro = false;
-	exploded = false;
-	nukesLaunched = false;
-	nukesLaunched2 = false;
-	nukesLaunched3 = false;
-	nukesLaunched4 = false;
+	gameParams.gameMode = MODE_GAMEOVER;
 
 	for(int i=0; i<1024; i++)
 	{
@@ -84,8 +62,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		glShadeModel (GL_SMOOTH);									// Select Smooth Shading
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);			// Set Perspective Calculations To Most Accurate
 
-		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
 
 		//Create fonts
 		glGenTextures(1, &scoreFontTex);
@@ -105,7 +83,30 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	}
 
 	gameObjects.clear();
+	gravityWells.clear();
 	hyperModeTimer = 0;
+	waveNumber = 0;
+	totalWaves = 0;
+	blueCityCount = 4;
+	greenCityCount = 4;
+	blueWins = false;
+	greenWins = false;
+	playingStory = false;
+	playingIntro = false;
+	exploded = false;
+	nukesLaunched = false;
+	nukesLaunched2 = false;
+	nukesLaunched3 = false;
+	nukesLaunched4 = false;
+	gameParams.waveTime = 5000;
+	gameParams.greenPoints = 0;
+	gameParams.bluePoints = 0;
+	gameParams.debrisAmount = 6;
+	gameParams.flakDebrisFactor = 6;
+	gameParams.mouse1Index = 3;
+	gameParams.mouse2Index = 2;
+	pointMultiplier = 1;
+	audioRenderer.StopAll();
 
 	if(gameParams.gameMode == MODE_VS)
 	{
@@ -355,6 +356,12 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	else if(gameParams.gameMode == MODE_ATTRACT)
 	{
 		playingStory = false;
+		playingIntro = false;
+		exploded = false;
+		nukesLaunched = false;
+		nukesLaunched2 = false;
+		nukesLaunched3 = false;
+		nukesLaunched4 = false;
 		audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
 	}
 
@@ -1213,6 +1220,20 @@ void CHyperWarGame::RunAttractMode()
 	{
 		Initialize(g_window, g_keys);
 	}
+
+	if(g_keys->keyDown['1'])
+	{
+		gameParams.gameMode = MODE_SINGLE;
+		Initialize(g_window, g_keys);
+	}
+
+	if(g_keys->keyDown['2'])
+	{
+		gameParams.gameMode = MODE_VS;
+		Initialize(g_window, g_keys);
+	}
+
+
 }
 
 void CHyperWarGame::DrawCursors()
@@ -1267,12 +1288,17 @@ void CHyperWarGame::DrawCursors()
 
 void CHyperWarGame::Draw (void)
 {
+	char tempStr[64];
+	int width, height;
+
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// Clear Screen And Depth Buffer
 	glLoadIdentity ();											// Reset The Modelview Matrix
 	
 	//Set up the global rendering coordinate system
 	glTranslatef (0.0f, 0.0f, -1.0f);
 	glScalef(.25f, .25f, 1);
+
+	globalEffects.DrawStarfield();
 
 	switch(gameParams.gameMode)
 	{
@@ -1288,39 +1314,86 @@ void CHyperWarGame::Draw (void)
 		DrawHUD();
 		break;
 
-	case MODE_ATTRACT:
-		DrawAttract();
+	case MODE_ATTRACT:		
 		for(unsigned int i=0; i<gameObjects.size(); i++)
 		{
 			gameObjects[i]->Draw();
 		}	
+		DrawAttract();
 		break;
 	case MODE_GAMEOVER:
 		//Draw GAME OVER screen
 		glPushMatrix();
+		if(blueWins)
+		{
+			glRotatef(-90, 0, 0, 1);
+			glTranslatef(0, -.2f, 0);
+		}
+		else
+		{
+			glRotatef(90, 0, 0, 1);
+			glTranslatef(0, .2f, 0);
+		}
 
-		glRotatef(-90, 0, 0, 1);
-
-		glScalef(.01f, .01f, .01f);
+		glPushMatrix();		
 		glEnable(GL_TEXTURE_2D);
-		int width = titleFont->GetCharWidthA('G') + titleFont->GetCharWidthA('a') + titleFont->GetCharWidthA('m') + titleFont->GetCharWidthA('e') +
+
+		width = 0;
+		height = 0;
+		sprintf_s(tempStr, 64, "GAME OVER");
+		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
+		{
+			width += titleFont->GetCharWidthA(tempStr[i]);
+		}
+		height = titleFont->GetCharHeight('D');
+		glScalef(.005f, .005f, .005f);
+		glTranslatef(-width/2.0f, 0, 0);	
+		titleFont->Begin();
+		titleFont->DrawString(tempStr, 0, 0);	
+
+		/*
+		width = titleFont->GetCharWidthA('G') + titleFont->GetCharWidthA('A') + titleFont->GetCharWidthA('m') + titleFont->GetCharWidthA('e') +
 			titleFont->GetCharWidthA('g') + titleFont->GetCharWidthA('O') + titleFont->GetCharWidthA('v') + titleFont->GetCharWidthA('e') + titleFont->GetCharWidthA('r');
-		int height = titleFont->GetCharHeight('G');
+		height = titleFont->GetCharHeight('G');
 
 		glTranslatef(-width/2.0f, height/2.0f, 0);
 		titleFont->Begin();
-		titleFont->DrawString("Game", 0, 0);		
+		titleFont->DrawString("GAME", 0, 0);		
 		width = titleFont->GetCharWidthA('G') + titleFont->GetCharWidthA('a') + titleFont->GetCharWidthA('m') + titleFont->GetCharWidthA('e') + titleFont->GetCharWidthA('g');
 		glTranslatef((float)width, 0, 0);
 		titleFont->Begin();
-		titleFont->DrawString("Over", 0, 0);		
-		glDisable(GL_TEXTURE_2D);
-
+		titleFont->DrawString("OVER", 0, 0);	
+		*/
+		
 		glPopMatrix();
-		break;
-	}
 
-	globalEffects.DrawStarfield();
+		width = 0;
+		height = 0;
+		if(greenWins)
+			sprintf_s(tempStr, 64, "Tantusiouswui has fallen.");
+		else if(blueWins)
+			sprintf_s(tempStr, 64, "Varelyykesbri has fallen.");
+		else
+			sprintf_s(tempStr, 64, "");
+		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
+		{
+			width += titleFont->GetCharWidthA(tempStr[i]);
+		}
+		height = titleFont->GetCharHeight('D');
+		glScalef(.0025f, .0025f, .0025f);
+		glTranslatef(-width/2.0f, -150, 0);		
+		titleFont->DrawString(tempStr, 0, 0);
+		
+		glDisable(GL_TEXTURE_2D);		
+		glPopMatrix();
+
+		if(g_keys->keyDown[' '])
+		{
+			gameParams.gameMode = MODE_ATTRACT;
+			this->Initialize(g_window, g_keys);
+		}
+		break;
+	}	
 
 	glFlush ();													// Flush The GL Rendering Pipeline
 }
@@ -1398,6 +1471,7 @@ void CHyperWarGame::DrawAttract()
 	
 	glEnable(GL_TEXTURE_2D);
 	storyFont->Begin();
+	
 
 	glPushMatrix();	
 	glColor3f(1, .8f, .8f);
@@ -1499,7 +1573,7 @@ void CHyperWarGame::DrawAttract()
 
 			glPushMatrix();
 			glScalef(.001f, .001f, .001f);
-			sprintf_s(storyLine, 64, "the other is responsible for starting this horrific");
+			sprintf_s(storyLine, 64, "the other is responsible for starting this horrific conflict.");
 			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
 			{
 				width += storyFont->GetCharWidthA(storyLine[i]);
@@ -1510,6 +1584,7 @@ void CHyperWarGame::DrawAttract()
 			glPopMatrix();
 		}
 
+		/*
 		if(hyperModeTimer > 23500)
 		{
 			width = 0;
@@ -1527,6 +1602,7 @@ void CHyperWarGame::DrawAttract()
 			storyFont->DrawString(storyLine, 0, 0);
 			glPopMatrix();
 		}
+		*/
 
 		if(hyperModeTimer > 24500)
 		{
@@ -1535,13 +1611,13 @@ void CHyperWarGame::DrawAttract()
 
 			glPushMatrix();
 			glScalef(.001f, .001f, .001f);
-			sprintf_s(storyLine, 64, "Now, with the  recent creation of the first");
+			sprintf_s(storyLine, 64, "Now, with the recent creation of the first");
 			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
 			{
 				width += storyFont->GetCharWidthA(storyLine[i]);
 			}
 			height = storyFont->GetCharHeight('D');
-			glTranslatef(-width/2.0f, height/2.0f - 16*height, 0);
+			glTranslatef(-width/2.0f, height/2.0f - 14*height, 0);
 			storyFont->DrawString(storyLine, 0, 0);
 			glPopMatrix();
 		}
@@ -1559,7 +1635,7 @@ void CHyperWarGame::DrawAttract()
 				width += storyFont->GetCharWidthA(storyLine[i]);
 			}
 			height = storyFont->GetCharHeight('D');
-			glTranslatef(-width/2.0f, height/2.0f - 18*height, 0);
+			glTranslatef(-width/2.0f, height/2.0f - 16*height, 0);
 			storyFont->DrawString(storyLine, 0, 0);
 			glPopMatrix();
 		}
@@ -1577,7 +1653,7 @@ void CHyperWarGame::DrawAttract()
 				width += storyFont->GetCharWidthA(storyLine[i]);
 			}
 			height = storyFont->GetCharHeight('D');
-			glTranslatef(-width/2.0f, height/2.0f - 20*height, 0);
+			glTranslatef(-width/2.0f, height/2.0f - 18*height, 0);
 			storyFont->DrawString(storyLine, 0, 0);
 			glPopMatrix();
 		}
@@ -1595,7 +1671,7 @@ void CHyperWarGame::DrawAttract()
 				width += storyFont->GetCharWidthA(storyLine[i]);
 			}
 			height = storyFont->GetCharHeight('D');
-			glTranslatef(-width/2.0f, height/2.0f - 22*height, 0);
+			glTranslatef(-width/2.0f, height/2.0f - 20*height, 0);
 			storyFont->DrawString(storyLine, 0, 0);
 			glPopMatrix();
 		}
@@ -1613,7 +1689,7 @@ void CHyperWarGame::DrawAttract()
 				width += storyFont->GetCharWidthA(storyLine[i]);
 			}
 			height = storyFont->GetCharHeight('D');
-			glTranslatef(-width/2.0f, height/2.0f - 24*height, 0);			
+			glTranslatef(-width/2.0f, height/2.0f - 22*height, 0);			
 			storyFont->DrawString(storyLine, 0, 0);
 			glPopMatrix();
 		}
@@ -1638,6 +1714,7 @@ void CHyperWarGame::DrawAttract()
 			glTranslatef(-width/2.0f, height/2.0f, -6000/50.0f);
 		else
 			glTranslatef(-width/2.0f, height/2.0f, 0);
+		glEnable(GL_BLEND);
 		titleFont->Begin();
 		titleFont->DrawString(storyLine, 0, 0);
 		glPopMatrix();
