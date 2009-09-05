@@ -16,11 +16,9 @@ CHyperWarGame::CHyperWarGame()
 	mousePos[0][0] = 0;
 	mousePos[0][1] = 0;
 	mousePos[1][0] = 0;
-	mousePos[1][1] = 0;
+	mousePos[1][1] = 0;	
 
-	SetHyperLevel(1);
-
-	gameParams.gameMode = MODE_GAMEOVER;
+	gameParams.gameMode = MODE_ATTRACT;
 
 	for(int i=0; i<1024; i++)
 	{
@@ -267,6 +265,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetCursorPointer(mousePos[1]);
 		cannon->SetFireKey('K');
 		gameObjects.push_back(cannon);
+
+		SetHyperLevel(1);
 	}
 	else if(gameParams.gameMode == MODE_SINGLE)
 	{
@@ -350,6 +350,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetFireKey('S');
 		gameObjects.push_back(cannon);
 
+		SetHyperLevel(1);
 		NextWave();
 	}	
 
@@ -1036,6 +1037,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		gameParams.gameMode = MODE_GAMEOVER;
 
 		//play game over sounds
+		audioRenderer.PlaySound(SOUND_GAMEOVER, 0, 0);
 
 	}
 	else if(greenCityCount < 1)
@@ -1046,6 +1048,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		gameParams.gameMode = MODE_GAMEOVER;
 
 		//play game over sounds
+		audioRenderer.PlaySound(SOUND_GAMEOVER, 0, 0);
 	}
 }
 
@@ -1323,20 +1326,9 @@ void CHyperWarGame::Draw (void)
 		break;
 	case MODE_GAMEOVER:
 		//Draw GAME OVER screen
-		glPushMatrix();
-		if(blueWins)
-		{
-			glRotatef(-90, 0, 0, 1);
-			glTranslatef(0, -.2f, 0);
-		}
-		else
-		{
-			glRotatef(90, 0, 0, 1);
-			glTranslatef(0, .2f, 0);
-		}
-
 		glPushMatrix();		
 		glEnable(GL_TEXTURE_2D);
+		glRotatef(-90, 0, 0, 1);
 
 		width = 0;
 		height = 0;
@@ -1349,28 +1341,17 @@ void CHyperWarGame::Draw (void)
 		glScalef(.005f, .005f, .005f);
 		glTranslatef(-width/2.0f, 0, 0);	
 		titleFont->Begin();
-		titleFont->DrawString(tempStr, 0, 0);	
-
-		/*
-		width = titleFont->GetCharWidthA('G') + titleFont->GetCharWidthA('A') + titleFont->GetCharWidthA('m') + titleFont->GetCharWidthA('e') +
-			titleFont->GetCharWidthA('g') + titleFont->GetCharWidthA('O') + titleFont->GetCharWidthA('v') + titleFont->GetCharWidthA('e') + titleFont->GetCharWidthA('r');
-		height = titleFont->GetCharHeight('G');
-
-		glTranslatef(-width/2.0f, height/2.0f, 0);
-		titleFont->Begin();
-		titleFont->DrawString("GAME", 0, 0);		
-		width = titleFont->GetCharWidthA('G') + titleFont->GetCharWidthA('a') + titleFont->GetCharWidthA('m') + titleFont->GetCharWidthA('e') + titleFont->GetCharWidthA('g');
-		glTranslatef((float)width, 0, 0);
-		titleFont->Begin();
-		titleFont->DrawString("OVER", 0, 0);	
-		*/
-		
+		titleFont->DrawString(tempStr, 0, 0);
+		glTranslatef(width/2.0f, 0, 0);
 		glPopMatrix();
 
+
+		glPushMatrix();
+		glRotatef(-90, 0, 0, 1);
 		width = 0;
 		height = 0;
 		if(greenWins)
-			sprintf_s(tempStr, 64, "Tantusiouswui has fallen.");
+			sprintf_s(tempStr, 64, "Varelyykesbri has prevailed.");
 		else if(blueWins)
 			sprintf_s(tempStr, 64, "Varelyykesbri has fallen.");
 		else
@@ -1379,13 +1360,56 @@ void CHyperWarGame::Draw (void)
 		{
 			width += titleFont->GetCharWidthA(tempStr[i]);
 		}
+		glScalef(.0025f, .0025f, .0025f);
+		glTranslatef(-width/2.0f, -200, 0);	
+		titleFont->Begin();
+		titleFont->DrawString(tempStr, 0, 0);
+		glTranslatef(width/2.0f, 0, 0);
+		glPopMatrix();
+
+
+		glPushMatrix();		
+		glEnable(GL_TEXTURE_2D);
+		glRotatef(90, 0, 0, 1);
+
+		width = 0;
+		height = 0;
+		sprintf_s(tempStr, 64, "GAME OVER");
+		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
+		{
+			width += titleFont->GetCharWidthA(tempStr[i]);
+		}
+		height = titleFont->GetCharHeight('D');
+		glScalef(.005f, .005f, .005f);
+		glTranslatef(-width/2.0f, 0, 0);	
+		titleFont->Begin();
+		titleFont->DrawString(tempStr, 0, 0);			
+		glTranslatef(width/2.0f, 0, 0);
+		glPopMatrix();
+
+		glPushMatrix();
+		glRotatef(90, 0, 0, 1);
+		width = 0;
+		height = 0;
+		if(greenWins)
+			sprintf_s(tempStr, 64, "Tantusiouswui has fallen.");
+		else if(blueWins)
+			sprintf_s(tempStr, 64, "Tantusiouswui has prevailed.");
+		else
+			sprintf_s(tempStr, 64, "");
+		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
+		{
+			width += titleFont->GetCharWidthA(tempStr[i]);
+		}
 		height = titleFont->GetCharHeight('D');
 		glScalef(.0025f, .0025f, .0025f);
-		glTranslatef(-width/2.0f, -150, 0);		
+		glTranslatef(-width/2.0f, -200, 0);	
+		titleFont->Begin();
 		titleFont->DrawString(tempStr, 0, 0);
-		
-		glDisable(GL_TEXTURE_2D);		
+		glTranslatef(width/2.0f, 0, 0);
 		glPopMatrix();
+
+		DrawHUD();
 
 		if(g_keys->keyDown[' '])
 		{
@@ -1740,7 +1764,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 	{
 	case 1:
 		//Play sound indicating new hyper level
-		//audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+		audioRenderer.PlaySound(SOUND_LEVEL1, 0, 0);
 		gameParams.chargeRateDivider = 5000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1755,7 +1779,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		break;
 	case 2:
 		//Play sound indicating new hyper level
-		//audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+		audioRenderer.PlaySound(SOUND_LEVEL2, 0, 0);
 		gameParams.chargeRateDivider = 3000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1770,7 +1794,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		break;
 	case 3:
 		//Play sound indicating new hyper level
-		//audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+		audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
 		gameParams.chargeRateDivider = 2000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1785,7 +1809,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		break;
 	case 4:
 		//Play sound indicating new hyper level
-		//audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+		audioRenderer.PlaySound(SOUND_LEVEL4, 0, 0);
 		gameParams.chargeRateDivider = 1000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1800,7 +1824,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		break;
 	case 5:
 		//Play sound indicating new hyper level
-		//audioRenderer.PlaySound(SOUND_INTRO, 0, 0);
+		audioRenderer.PlaySound(SOUND_LEVEL5, 0, 0);
 		gameParams.chargeRateDivider = 500.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
