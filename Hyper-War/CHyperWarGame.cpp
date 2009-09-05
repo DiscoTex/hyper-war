@@ -42,6 +42,8 @@ CHyperWarGame::~CHyperWarGame()
 	glDeleteTextures(1, &scoreFontTex);
 	glDeleteTextures(1, &titleFontTex);
 	glDeleteTextures(1, &storyFontTex);
+
+	hsList->SaveScores();
 }
 
 BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Init Code & User Initialiazation Goes Here
@@ -76,13 +78,26 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		storyFont->Create("storyFont.glf", storyFontTex);
 		scoreFont->Create("scoreFont.glf", scoreFontTex);
 
+		hsList = new CHighScoreList(titleFont);
+		hsList->ReadScores();
+
 		gameObjects.reserve(1000);
 		initialized = true;
 	}
 
+	gameParams.chargeRateDivider = 5000.0f;			//min 500
+	gameParams.maxThrust = 1.0f;					//max 500
+	gameParams.minThrust = 1.0f;
+	gameParams.maxGravityForce = 10.0f;
+	gameParams.nukeGravityImmunityTime = 1000;		//min 200
+	gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
+	gameParams.nukeReloadTime = 4000;				//min 150
+	gameParams.flakReloadTime = 10;	
+	gameParams.hyperModeDelay = 30000;
+
 	gameObjects.clear();
 	gravityWells.clear();
-	hyperModeTimer = 0;
+	hyperModeTimer = 35000;
 	waveNumber = 0;
 	totalWaves = 0;
 	blueCityCount = 4;
@@ -390,6 +405,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	float *nukeVector;
 	float projVector[3];
 	int TTL;
+	char name[16];
 
 	if (g_keys->keyDown [VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
 	{
@@ -484,6 +500,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 					break;
 				case SIDE_BLUE:
 					gameParams.bluePoints += 10 * pointMultiplier;
+					break;
 				}
 			}
 		}
@@ -662,14 +679,17 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							gameObjects.push_back(debris);
 						}
 
-						switch(gameObjects[i]->GetSide())
+						if(objIndexType == TYPE_DEBRIS)
 						{
-						case SIDE_BLUE:
-							gameParams.greenPoints += 200 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.bluePoints += 200 * pointMultiplier;
-							break;
+							switch(gameObjects[i]->GetSide())
+							{
+							case SIDE_BLUE:
+								gameParams.greenPoints += 200 * pointMultiplier;
+								break;
+							case SIDE_GREEN:
+								gameParams.bluePoints += 200 * pointMultiplier;
+								break;
+							}
 						}
 					}
 
@@ -777,14 +797,17 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							debris->SetScale(.1f, .1f, .1f);
 							gameObjects.push_back(debris);
 						}
-						switch(gameObjects[objIndex]->GetSide())
+						if(iType == TYPE_DEBRIS)
 						{
-						case SIDE_BLUE:
-							gameParams.greenPoints += 200 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.bluePoints += 200 * pointMultiplier;
-							break;
+							switch(gameObjects[objIndex]->GetSide())
+							{
+							case SIDE_BLUE:
+								gameParams.greenPoints += 200 * pointMultiplier;
+								break;
+							case SIDE_GREEN:
+								gameParams.bluePoints += 200 * pointMultiplier;
+								break;
+							}
 						}
 					}
 					gameObjects.erase(gameObjects.begin() + objIndex);
@@ -885,14 +908,17 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							gameObjects.push_back(debris);
 
 						}
-						switch(gameObjects[objIndex]->GetSide())
+						if(iType == TYPE_DEBRIS)
 						{
-						case SIDE_BLUE:
-							gameParams.greenPoints += 200 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.bluePoints += 200 * pointMultiplier;
-							break;
+							switch(gameObjects[objIndex]->GetSide())
+							{
+							case SIDE_BLUE:
+								gameParams.greenPoints += 200 * pointMultiplier;
+								break;
+							case SIDE_GREEN:
+								gameParams.bluePoints += 200 * pointMultiplier;
+								break;
+							}
 						}
 					}
 					gameObjects.erase(gameObjects.begin() + objIndex);
@@ -989,14 +1015,17 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 							debris->SetScale(.1f, .1f, .1f);
 							gameObjects.push_back(debris);
 						}
-						switch(gameObjects[i]->GetSide())
+						if(objIndexType == TYPE_DEBRIS)
 						{
-						case SIDE_BLUE:
-							gameParams.greenPoints += 200 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.bluePoints += 200 * pointMultiplier;
-							break;
+							switch(gameObjects[i]->GetSide())
+							{
+							case SIDE_BLUE:
+								gameParams.greenPoints += 200 * pointMultiplier;
+								break;
+							case SIDE_GREEN:
+								gameParams.bluePoints += 200 * pointMultiplier;
+								break;
+							}
 						}
 					}
 					gameObjects.erase(gameObjects.begin() + i);
@@ -1029,22 +1058,42 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
 
 	//check for game over
-	if(blueCityCount < 1)
+	if(blueCityCount < 1 && gameParams.gameMode != MODE_GAMEOVER)
 	{
 		//Green wins
 		gameObjects.clear();
 		greenWins = true;
+
+		if(gameParams.gameMode != MODE_SINGLE)
+		{
+			sprintf_s(name, 16, "Blue Guy");
+			hsList->AddScore(name, gameParams.bluePoints);
+		}
+
+		sprintf_s(name, 16, "Green Guy");
+		hsList->AddScore(name, gameParams.greenPoints);
+
 		gameParams.gameMode = MODE_GAMEOVER;
 
 		//play game over sounds
 		audioRenderer.PlaySound(SOUND_GAMEOVER, 0, 0);
 
 	}
-	else if(greenCityCount < 1)
+	else if(greenCityCount < 1 && gameParams.gameMode != MODE_GAMEOVER)
 	{
 		//Blue wins
 		gameObjects.clear();
-		blueWins = true;
+		blueWins = true;		
+
+		if(gameParams.gameMode != MODE_SINGLE)
+		{
+			sprintf_s(name, 16, "Blue Guy");
+			hsList->AddScore(name, gameParams.bluePoints);
+		}
+
+		sprintf_s(name, 16, "Green Guy");
+		hsList->AddScore(name, gameParams.greenPoints);
+
 		gameParams.gameMode = MODE_GAMEOVER;
 
 		//play game over sounds
@@ -1070,7 +1119,7 @@ void CHyperWarGame::RunAttractMode()
 			float  debrisAngle;
 			float  debrisSize;							
 
-			debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 360;
+			debrisAngle = (float)(gameParams.randoms[gameParams.randIndex++%1024] % 360);
 			debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 			CDebris *debris = new CDebris(&gameParams);
@@ -1091,7 +1140,7 @@ void CHyperWarGame::RunAttractMode()
 			float  debrisAngle;
 			float  debrisSize;							
 
-			debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 360;
+			debrisAngle = (float)(gameParams.randoms[gameParams.randIndex++%1024] % 360);
 			debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 			CDebris *debris = new CDebris(&gameParams);
@@ -1112,7 +1161,7 @@ void CHyperWarGame::RunAttractMode()
 			float  debrisAngle;
 			float  debrisSize;							
 
-			debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 360;
+			debrisAngle = (float)(gameParams.randoms[gameParams.randIndex++%1024] % 360);
 			debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
 
 			CDebris *debris = new CDebris(&gameParams);
@@ -1145,7 +1194,6 @@ void CHyperWarGame::RunAttractMode()
 			gravityWells.push_back(gw);
 		}
 	}
-
 	
 	if(hyperModeTimer > 47000 && !nukesLaunched2)
 	{
@@ -1219,7 +1267,7 @@ void CHyperWarGame::RunAttractMode()
 		}
 	}
 
-	if(hyperModeTimer > 65000)
+	if(hyperModeTimer > 72000)
 	{
 		Initialize(g_window, g_keys);
 	}
@@ -1384,7 +1432,6 @@ void CHyperWarGame::Draw (void)
 		glTranslatef(-width/2.0f, 0, 0);	
 		titleFont->Begin();
 		titleFont->DrawString(tempStr, 0, 0);			
-		glTranslatef(width/2.0f, 0, 0);
 		glPopMatrix();
 
 		glPushMatrix();
@@ -1406,7 +1453,6 @@ void CHyperWarGame::Draw (void)
 		glTranslatef(-width/2.0f, -200, 0);	
 		titleFont->Begin();
 		titleFont->DrawString(tempStr, 0, 0);
-		glTranslatef(width/2.0f, 0, 0);
 		glPopMatrix();
 
 		DrawHUD();
@@ -1496,7 +1542,6 @@ void CHyperWarGame::DrawAttract()
 	glEnable(GL_TEXTURE_2D);
 	storyFont->Begin();
 	
-
 	glPushMatrix();	
 	glColor3f(1, .8f, .8f);
 
@@ -1608,26 +1653,6 @@ void CHyperWarGame::DrawAttract()
 			glPopMatrix();
 		}
 
-		/*
-		if(hyperModeTimer > 23500)
-		{
-			width = 0;
-			height = 0;
-
-			glPushMatrix();
-			glScalef(.001f, .001f, .001f);
-			sprintf_s(storyLine, 64, "conflict.");
-			for(unsigned int i=0; i<strnlen(storyLine, 64); i++)
-			{
-				width += storyFont->GetCharWidthA(storyLine[i]);
-			}
-			height = storyFont->GetCharHeight('D');
-			glTranslatef(-width/2.0f, height/2.0f - 12*height, 0);
-			storyFont->DrawString(storyLine, 0, 0);
-			glPopMatrix();
-		}
-		*/
-
 		if(hyperModeTimer > 24500)
 		{
 			width = 0;
@@ -1718,7 +1743,7 @@ void CHyperWarGame::DrawAttract()
 			glPopMatrix();
 		}
 	}
-	else
+	else if(hyperModeTimer < 65000)
 	{
 		width = 0;
 		height = 0;
@@ -1732,16 +1757,20 @@ void CHyperWarGame::DrawAttract()
 			width += titleFont->GetCharWidthA(storyLine[i]);
 		}
 		height = titleFont->GetCharHeight('D');
-		if(hyperModeTimer > 44000 && hyperModeTimer  < 50000)
+		if(hyperModeTimer > 44000 && hyperModeTimer  < 48000)
 			glTranslatef(-width/2.0f, height/2.0f, -(hyperModeTimer - 44000)/50.0f);
-		else if(hyperModeTimer > 50000)
-			glTranslatef(-width/2.0f, height/2.0f, -6000/50.0f);
+		else if(hyperModeTimer > 48000)
+			glTranslatef(-width/2.0f, height/2.0f, -4000/50.0f);
 		else
 			glTranslatef(-width/2.0f, height/2.0f, 0);
 		glEnable(GL_BLEND);
 		titleFont->Begin();
 		titleFont->DrawString(storyLine, 0, 0);
 		glPopMatrix();
+	}
+	else
+	{
+		hsList->Draw(false);
 	}
 
 	glDisable(GL_TEXTURE_2D);

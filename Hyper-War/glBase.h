@@ -39,6 +39,7 @@
 #include <math.h>
 #include <vector>
 #include <GL/gl.h>
+#include "glfont2.h"
 
 typedef struct {									// Structure For Keyboard Stuff
 	BOOL keyDown [256];								// Holds TRUE / FALSE For Each Key

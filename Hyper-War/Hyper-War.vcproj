@@ -337,6 +337,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CHighScoreList.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CHyperWarGame.cpp"
 				>
 			</File>
@@ -368,6 +372,10 @@
 			</File>
 			<File
 				RelativePath=".\CEffects.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CHighScoreList.h"
 				>
 			</File>
 			<File
