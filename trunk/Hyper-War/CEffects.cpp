@@ -18,7 +18,7 @@ CEffects::CEffects()
 		newStar.color1 = 1; 
 		newStar.color2 = 1; 
 		newStar.color3 = 1; 
-		newStar.scale = .03;
+		newStar.scale = .03f;
 		newStar.rotation = (rand()%360)+1;
 		stars.push_back(newStar);
 	}
@@ -31,7 +31,7 @@ CEffects::CEffects()
 		newStar.color1 = 1; 
 		newStar.color2 = .7f; 
 		newStar.color3 = .7f; 
-		newStar.scale = .2;
+		newStar.scale = .2f;
 		newStar.rotation = (rand()%360)+1;
 		stars.push_back(newStar);
 	}
@@ -42,9 +42,9 @@ CEffects::CEffects()
 		newStar.ypos = (((float)rand() / (float)RAND_MAX) - 1.0f) * 1000;
 		newStar.zpos = (((float)rand() / (float)RAND_MAX) -  2.0f) * 50.0f - 1;
 		newStar.color1 = 1; 
-		newStar.color2 = .7; 
-		newStar.color3 = .7; 
-		newStar.scale = .2;
+		newStar.color2 = .7f; 
+		newStar.color3 = .7f; 
+		newStar.scale = .2f;
 		newStar.rotation = (rand()%360)+1;
 		stars.push_back(newStar);
 	}
@@ -54,10 +54,10 @@ CEffects::CEffects()
 		newStar.xpos = (((float)rand() / (float)RAND_MAX) - .5f) * 10000;
 		newStar.ypos = (((float)rand() / (float)RAND_MAX) - .5f) * 10000;
 		newStar.zpos = (((float)rand() / (float)RAND_MAX) -  1.0f) * 50.0f - 1;
-		newStar.color1 = .7; 
-		newStar.color2 = 0.7;
+		newStar.color1 = .7f; 
+		newStar.color2 = 0.7f;
 		newStar.color3 = 1; 
-		newStar.scale = .03;
+		newStar.scale = .03f;
 		newStar.rotation = (rand()%360)+1;
 		stars.push_back(newStar);
 	}
@@ -107,15 +107,15 @@ void CEffects::DrawStar(Star inStar)
 }
 void CEffects::DrawStarfield()
 {	
-	float tmp = starFieldPosition / 400.0;
+	float tmp = starFieldPosition / 400.0f;
 	double color[3] = {1, 1, 1};
-	for(int i=0; i<stars.size(); i++)
+	for(unsigned int i=0; i<stars.size(); i++)
 	{
 		glPushMatrix();		
 		if (stars[i].ypos > 1000)
 			stars[i].ypos = -1000;
 		glScalef(stars[i].scale,stars[i].scale,1);
-		glRotatef(stars[i].rotation, 0, 0, 1);
+		glRotatef((float)stars[i].rotation, 0, 0, 1);
 		glTranslatef(stars[i].xpos, stars[i].ypos+tmp, stars[i].zpos);
 		glRotatef(stars[i].xpos*tmp/2, 0, 0, 1);
 		DrawStar((Star)stars[i]);

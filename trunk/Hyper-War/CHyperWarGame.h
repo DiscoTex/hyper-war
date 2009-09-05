@@ -12,7 +12,8 @@
 #include "CAudioRenderer.h"
 #include "CEffects.h"
 #include "RawMouse.h"
-#include "glfont2.h"
+//#include "glfont2.h"
+#include "CHighScoreList.h"
 
 using namespace std;
 using namespace glfont;
@@ -61,6 +62,8 @@ private:
 	CAudioRenderer				audioRenderer;
 	//Raw Input Reader
 	CRawMouse					rawMouse;
+	//High score list
+	CHighScoreList				*hsList;
 	//Game speed parameters
 	sGameParams					gameParams;
 	//hypermode timer
