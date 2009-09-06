@@ -97,7 +97,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 
 	gameObjects.clear();
 	gravityWells.clear();
-	hyperModeTimer = 35000;
+	hyperModeTimer = 0;
 	waveNumber = 0;
 	totalWaves = 0;
 	blueCityCount = 4;
