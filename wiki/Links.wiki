@@ -1,4 +1,4 @@
-#summary Usefull sites.
+#summary Useful sites.
 == SDK's ==
 [http://connect.creativelabs.com/openal/default.aspx OpenAL] SDK
 
