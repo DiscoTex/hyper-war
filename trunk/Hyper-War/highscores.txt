@@ -1,5 +1,7 @@
 Green Guy
 266940
+Green Guy
+214400
 Aaron
 168200
 Green Guy
@@ -16,5 +18,3 @@ Aaron
 90000
 Aaron
 80000
-Green Guy
-75360

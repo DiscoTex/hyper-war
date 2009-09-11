@@ -169,10 +169,10 @@ void CGameObject::ProcessMotion(DWORD milliseconds, Keys* keys)
 
 	if(GetType() !=  TYPE_PLANET)
 	{
-		if(translation[1] > 1.75)
-			translation[1] = -1.75;
-		else if(translation[1] < -1.75)
-			translation[1] = 1.75;
+		if(translation[1] > 1.70)
+			translation[1] = -1.70;
+		else if(translation[1] < -1.70)
+			translation[1] = 1.70;
 
 		if(translation[0] > 7.5)
 			translation[0] = -2.75;
@@ -751,10 +751,10 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
 
-	if(translation[1] > 1.75)
-		translation[1] = -1.75;
-	else if(translation[1] < -1.75)
-		translation[1] = 1.75;
+	if(translation[1] > 1.70)
+		translation[1] = -1.70;
+	else if(translation[1] < -1.70)
+		translation[1] = 1.70;
 
 	if(translation[0] > 7.5)
 		translation[0] = -2.75;
