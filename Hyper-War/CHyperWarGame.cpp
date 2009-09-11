@@ -92,6 +92,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	gameParams.nukeGravityImmunityTime = 1000;		//min 200
 	gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
 	gameParams.nukeReloadTime = 4000;				//min 150
+	gameParams.flakVelocityDivider = 150.0;
 	gameParams.flakReloadTime = 10;	
 	gameParams.hyperModeDelay = 30000;
 
@@ -114,10 +115,10 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	gameParams.waveTime = 5000;
 	gameParams.greenPoints = 0;
 	gameParams.bluePoints = 0;
-	gameParams.debrisAmount = 6;
+	gameParams.debrisAmount = 3;
 	gameParams.flakDebrisFactor = 6;
-	gameParams.mouse1Index = 3;
-	gameParams.mouse2Index = 2;
+	gameParams.mouse1Index = 0;
+	gameParams.mouse2Index = 3;
 	pointMultiplier = 1;
 	audioRenderer.StopAll();
 
@@ -543,7 +544,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				for(int k=0; k<gameParams.debrisAmount*gameParams.flakDebrisFactor; k++)
 				{
 					int heading = gameParams.randoms[gameParams.randIndex++%1024]%360;
-					float velocity = (float)((gameParams.randoms[gameParams.randIndex++%1024]%100-50) / 250.0f);
+					float velocity = (float)((gameParams.randoms[gameParams.randIndex++%1024]%100-50) / gameParams.flakVelocityDivider);
 
 					debris = new CDebris(&gameParams);
 					debris->SetMotionVector(

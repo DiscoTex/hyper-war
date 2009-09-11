@@ -200,10 +200,7 @@ BOOL CreateWindowGL (GL_Window* window)									// This Code Creates Our OpenGL 
 
 	window->lastTickCount = GetTickCount ();							// Get Tick Count
 
-	if(!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS))
-	{
-		SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-	}
+	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 
 	return TRUE;														// Window Creating Was A Success																	// Initialization Will Be Done In WM_CREATE
 }
@@ -377,7 +374,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	window.init.width			= GetSystemMetrics(SM_CXSCREEN);		// Window Width
 	window.init.height			= GetSystemMetrics(SM_CYSCREEN);		// Window Height
 	window.init.bitsPerPixel	= 16;									// Bits Per Pixel
-	window.init.isFullScreen	= FALSE;									// Fullscreen? (Set To TRUE)
+	window.init.isFullScreen	= TRUE;									// Fullscreen? (Set To TRUE)
 
 	ZeroMemory (&keys, sizeof (Keys));									// Zero keys Structure
 

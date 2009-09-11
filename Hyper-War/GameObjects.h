@@ -74,6 +74,7 @@ struct sGameParams
 	unsigned long int	randIndex;
 	int	greenPoints;
 	int	bluePoints;
+	float flakVelocityDivider;
 };
 
 struct sGravityWell
