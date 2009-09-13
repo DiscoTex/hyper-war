@@ -1,23 +1,4 @@
-<<<<<<< .mine
-/* 
-	hello world how many raw input does system have.
-	code to see how many raw input we have on the system.
 
-
-
-d.p.nielsen@gmail.com
-Aug 2009
-
-*/
-#include <stdio.h>
-#include <conio.h>			//  Provides getch()
-#include <windows.h>		//  Provides rawinput
-
-main()
-{
-	
-	UINT nDevices;
-=======
 /* 
 	hello world how many raw input does system have.
 	code to see how many raw input we have on the system.
@@ -36,24 +17,8 @@ main()
 {
 	
 	UINT nDevices,i;
->>>>>>> .r23
+
 	PRAWINPUTDEVICELIST pRawInputDeviceList;
-<<<<<<< .mine
-
-	// 1st call to GetRawInputDeviceList: Pass NULL to get the size of the list.
-	//function enumerates the raw input devices attached to the system
-	if (GetRawInputDeviceList(NULL, &nDevices, sizeof(RAWINPUTDEVICELIST)) != 0) return 0; 
-	printf("Number of raw input devices: %i\n\n", nDevices);
-	// todo list them out
-
-	printf("Press any key...");
-	getch();
-
-	return 1;
-}
-
-
-=======
 	RID_DEVICE_INFO devinfomouse = { sizeof devinfomouse, }; 
 	UINT sz = sizeof devinfomouse; 
 	// 1st call to GetRawInputDeviceList: Pass NULL to get the size of the list.
@@ -108,4 +73,3 @@ main()
 
 	return 1;
 }
->>>>>>> .r23
