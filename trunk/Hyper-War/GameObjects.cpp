@@ -1112,7 +1112,7 @@ bool CMissileBase::CanDestroy(int destroyerType)
 	if(destroyerType == TYPE_NUKE)
 	{
 		destroyed = true;
-		timeToRebuild = 10000;
+		timeToRebuild = 40000;
 	}
 	
 	//if(destroyerType != TYPE_NUKE)
@@ -1705,7 +1705,7 @@ bool CFlakCannon::CanDestroy(int destroyerType)
 {
 	if(destroyerType == TYPE_NUKE)
 	{
-		timeToRebuild = 10000;
+		timeToRebuild = 40000;
 		destroyed = true;
 	}
 
