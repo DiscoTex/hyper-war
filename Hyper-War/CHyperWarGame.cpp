@@ -25,6 +25,11 @@ CHyperWarGame::CHyperWarGame()
 		gameParams.randoms[i] = rand();
 	}
 	gameParams.randIndex = 0;
+
+	memset(highScoreName, 0, 64);
+	currentLetter = 65;
+	nameIndex = 0;
+	listTime = false;
 }
 
 CHyperWarGame::~CHyperWarGame()
@@ -406,14 +411,13 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	float *nukeVector;
 	float projVector[3];
 	int TTL;
-	char name[16];
 
 	if (g_keys->keyDown [VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
 	{
 		TerminateApplication (g_window);						// Terminate The Program
 	}
 
-	if (g_keys->keyDown [VK_F1] == TRUE)						// Is F1 Being Pressed?
+   	if (g_keys->keyDown [VK_F1] == TRUE)						// Is F1 Being Pressed?
 	{
 		ToggleFullscreen (g_window);							// Toggle Fullscreen Mode
 	}
@@ -1051,6 +1055,10 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	{
 		RunAttractMode();
 	}
+	else if(gameParams.gameMode == MODE_HIGHSCORE)
+	{
+		RunHighScoreEntry();
+	}
 
 	//Update starfield position
 	//Starfield position should be moved as a function of time
@@ -1059,46 +1067,112 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
 
 	//check for game over
-	if(blueCityCount < 1 && gameParams.gameMode != MODE_GAMEOVER)
+	if(blueCityCount < 1 && gameParams.gameMode != MODE_GAMEOVER && gameParams.gameMode != MODE_HIGHSCORE)
 	{
 		//Green wins
 		gameObjects.clear();
 		greenWins = true;
 
-		if(gameParams.gameMode != MODE_SINGLE)
-		{
-			sprintf_s(name, 16, "Blue Guy");
-			hsList->AddScore(name, gameParams.bluePoints);
-		}
-
-		sprintf_s(name, 16, "Green Guy");
-		hsList->AddScore(name, gameParams.greenPoints);
-
 		gameParams.gameMode = MODE_GAMEOVER;
+		hyperModeTimer = 0;
 
 		//play game over sounds
+		audioRenderer.StopAll();
 		audioRenderer.PlaySound(SOUND_GAMEOVER, 0, 0);
-
 	}
-	else if(greenCityCount < 1 && gameParams.gameMode != MODE_GAMEOVER)
+	else if(greenCityCount < 1 && gameParams.gameMode != MODE_GAMEOVER && gameParams.gameMode != MODE_HIGHSCORE)
 	{
 		//Blue wins
 		gameObjects.clear();
 		blueWins = true;		
 
-		if(gameParams.gameMode != MODE_SINGLE)
+		if(hsList->CheckScore(gameParams.greenPoints))
 		{
-			sprintf_s(name, 16, "Blue Guy");
-			hsList->AddScore(name, gameParams.bluePoints);
+			memset(highScoreName, 0, 64);
+			nameIndex = 0;
+			currentLetter = 65;
+			gameParams.gameMode = MODE_HIGHSCORE;
+			listTime = false;
+			hyperModeTimer = 0;
+
+			audioRenderer.StopAll();
+			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+			//Play high score music?
+		}
+		else
+		{
+			gameParams.gameMode = MODE_GAMEOVER;
+			hyperModeTimer = 0;
+
+			//play game over sounds
+			audioRenderer.StopAll();
+			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+			audioRenderer.PlaySound(SOUND_GAMEOVER, 0, 0);
+		}
+	}
+}
+
+void CHyperWarGame::RunHighScoreEntry()
+{
+	//sprintf_s(highScoreName, 64, "High score dude");
+	char charLetter;
+
+	if(!listTime)
+	{
+		currentLetter = (currentLetter + rawMouse.get_x_delta(0) / 32.0);
+
+		if(currentLetter < ' ')
+			currentLetter = ' ';
+		else if(currentLetter > '~')
+			currentLetter = '~';
+
+		charLetter = (char)currentLetter % 128;
+
+		//Disallow some unfriendly characters
+		if(charLetter == '\\')
+			charLetter++;
+		if(charLetter == '\'')
+			charLetter++;
+		if(charLetter == '\"')
+			charLetter++;
+
+		if(charLetter == 127)
+		{
+			//Let's call this the 'enter' character
 		}
 
-		sprintf_s(name, 16, "Green Guy");
-		hsList->AddScore(name, gameParams.greenPoints);
+		highScoreName[nameIndex] = charLetter;
 
-		gameParams.gameMode = MODE_GAMEOVER;
+		if((g_keys->keyDown['S'] || g_keys->keyDown['s']) && hyperModeTimer > 150 && nameIndex < 63)
+		{
+			hyperModeTimer = 0;
+			nameIndex++;
+		}
+		else if((g_keys->keyDown['A'] || g_keys->keyDown['a']) && hyperModeTimer > 150 && nameIndex > 0)
+		{
+			hyperModeTimer = 0;
+			highScoreName[nameIndex] = '\0';
+			nameIndex--;
+		}
+		else if((g_keys->keyDown['D'] || g_keys->keyDown['d'] && hyperModeTimer > 500 && nameIndex > 0))
+		{
+			highScoreName[nameIndex] = '\0';
+			hsList->AddScore(highScoreName, gameParams.greenPoints);
+			listTime = true;
+			hyperModeTimer = 0;
+		}
+	}
+	else
+	{
+		if(hyperModeTimer > 7000)
+		{
+			gameParams.gameMode = MODE_GAMEOVER;
+			hyperModeTimer = 0;
 
-		//play game over sounds
-		audioRenderer.PlaySound(SOUND_GAMEOVER, 0, 0);
+			//play game over sounds
+			audioRenderer.StopAll();
+			audioRenderer.PlaySound(SOUND_GAMEOVER, 0, 0);
+		}
 	}
 }
 
@@ -1115,7 +1189,7 @@ void CHyperWarGame::RunAttractMode()
 	if(hyperModeTimer > 39000 && !exploded)
 	{
 		exploded = true;
-		for(int k=0; k<gameParams.debrisAmount*16; k++)
+		for(int k=0; k<gameParams.debrisAmount*64; k++)
 		{
 			float  debrisAngle;
 			float  debrisSize;							
@@ -1136,7 +1210,7 @@ void CHyperWarGame::RunAttractMode()
 			debris->SetTTL(10000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 			gameObjects.push_back(debris);
 		}
-		for(int k=0; k<gameParams.debrisAmount*16; k++)
+		for(int k=0; k<gameParams.debrisAmount*64; k++)
 		{
 			float  debrisAngle;
 			float  debrisSize;							
@@ -1157,7 +1231,7 @@ void CHyperWarGame::RunAttractMode()
 			debris->SetTTL(8000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 			gameObjects.push_back(debris);
 		}
-		for(int k=0; k<gameParams.debrisAmount*16; k++)
+		for(int k=0; k<gameParams.debrisAmount*64; k++)
 		{
 			float  debrisAngle;
 			float  debrisSize;							
@@ -1373,6 +1447,9 @@ void CHyperWarGame::Draw (void)
 		}	
 		DrawAttract();
 		break;
+	case MODE_HIGHSCORE:
+		DrawHighScoreEntry();
+		break;
 	case MODE_GAMEOVER:
 		//Draw GAME OVER screen
 		glPushMatrix();		
@@ -1391,9 +1468,7 @@ void CHyperWarGame::Draw (void)
 		glTranslatef(-width/2.0f, 0, 0);	
 		titleFont->Begin();
 		titleFont->DrawString(tempStr, 0, 0);
-		glTranslatef(width/2.0f, 0, 0);
 		glPopMatrix();
-
 
 		glPushMatrix();
 		glRotatef(-90, 0, 0, 1);
@@ -1413,9 +1488,7 @@ void CHyperWarGame::Draw (void)
 		glTranslatef(-width/2.0f, -200, 0);	
 		titleFont->Begin();
 		titleFont->DrawString(tempStr, 0, 0);
-		glTranslatef(width/2.0f, 0, 0);
 		glPopMatrix();
-
 
 		glPushMatrix();		
 		glEnable(GL_TEXTURE_2D);
@@ -1458,7 +1531,7 @@ void CHyperWarGame::Draw (void)
 
 		DrawHUD();
 
-		if(g_keys->keyDown[' '])
+		if(hyperModeTimer > 7000)
 		{
 			gameParams.gameMode = MODE_ATTRACT;
 			this->Initialize(g_window, g_keys);
@@ -1776,7 +1849,106 @@ void CHyperWarGame::DrawAttract()
 
 	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
+}
 
+void CHyperWarGame::DrawHighScoreEntry()
+{
+	int width, height;
+	char tempStr[64];
+	unsigned int i=0;
+
+	if(!listTime)
+	{
+		glPushMatrix();		
+		glEnable(GL_TEXTURE_2D);
+
+		glRotatef(-90, 0, 0, 1);
+
+		width = 0;
+		height = 0;
+		sprintf_s(tempStr, 64, "CONGRATUALTIONS.");
+		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
+		{
+			width += titleFont->GetCharWidthA(tempStr[i]);
+		}
+		height = titleFont->GetCharHeight('D');
+		glScalef(.003f, .003f, .003f);
+		glTranslatef(-width/2.0f, 700, 0);	
+		titleFont->Begin();
+		titleFont->DrawString(tempStr, 0, 0);
+		glPopMatrix();
+
+		glPushMatrix();
+		glRotatef(-90, 0, 0, 1);
+		width = 0;
+		height = 0;
+		sprintf_s(tempStr, 64, "You are a Hero of Intergalactic Peace.");
+		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
+		{
+			width += titleFont->GetCharWidthA(tempStr[i]);
+		}
+		glScalef(.0018f, .0018f, .0018f);
+		glTranslatef(-width/2.0f, 950, 0);	
+		titleFont->Begin();
+		titleFont->DrawString(tempStr, 0, 0);
+		glPopMatrix();
+
+		glPushMatrix();
+		glRotatef(-90, 0, 0, 1);
+		width = 0;
+		height = 0;
+		sprintf_s(tempStr, 64, "Mark this historic triumph:");
+		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
+		{
+			width += titleFont->GetCharWidthA(tempStr[i]);
+		}
+		glScalef(.0018f, .0018f, .0018f);
+		glTranslatef(-width/2.0f, 850, 0);	
+		titleFont->Begin();
+		titleFont->DrawString(tempStr, 0, 0);
+		glPopMatrix();
+
+		//Draw the name string
+		glPushMatrix();
+		glRotatef(-90, 0, 0, 1);
+		width = 0;
+		height = 0;
+
+		for(unsigned int i=0; i<strnlen(highScoreName, 64); i++)
+		{
+			width += titleFont->GetCharWidthA(highScoreName[i]);
+		}
+		glScalef(.0018f, .0018f, .0018f);
+		glTranslatef(-width/2.0f, 250, 0);	
+		glColor3f(1.0, 0.0, 0.0);
+		titleFont->Begin();
+		titleFont->DrawString(highScoreName, 0, 0);
+		glTranslatef((float)width - titleFont->GetCharWidthA((char)currentLetter % 128), 0, 0);
+		titleFont->DrawString("_", 0, 0);
+		glPopMatrix();
+
+		glPushMatrix();
+		glRotatef(-90, 0, 0, 1);
+		width = 0;
+		height = 0;
+		sprintf_s(tempStr, 64, "Missile 1 = BACKSPACE      Cannon = NEXT      Missile 2 = DONE");
+		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
+		{
+			width += titleFont->GetCharWidthA(tempStr[i]);
+		}
+		glScalef(.001f, .001f, .001f);
+		glTranslatef(-width/2.0f, -1600, 0);	
+		titleFont->Begin();
+		glColor3f(.8, .8, 1.0);
+		titleFont->DrawString(tempStr, 0, 0);
+		glPopMatrix();
+	}
+	else
+	{
+		hsList->Draw(true);
+	}
+
+	glDisable(GL_TEXTURE_2D);
 }
 
 void CHyperWarGame::SetHyperLevel(int newLevel)
