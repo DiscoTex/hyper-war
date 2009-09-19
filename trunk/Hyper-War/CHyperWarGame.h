@@ -76,8 +76,6 @@ private:
 	int							waveNumber;
 	//total number of waves
 	int							totalWaves;
-	int							blueCityCount;
-	int							greenCityCount;
 	bool						greenWins;
 	bool						blueWins;
 	bool						attractMode;

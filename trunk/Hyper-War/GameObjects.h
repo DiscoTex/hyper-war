@@ -76,6 +76,8 @@ struct sGameParams
 	int	greenPoints;
 	int	bluePoints;
 	float flakVelocityDivider;
+	int numGreenCities;
+	int numBlueCities;
 };
 
 struct sGravityWell
@@ -209,7 +211,7 @@ public:
 	int	 GetType();
 	void SetLaunchKey(char key) {launchKey = key;}
 	char GetLaunchKey() {return launchKey;}
-	bool IsLoaded() {return loaded;}
+	bool IsLoaded() {return loaded && !destroyed;}
 	int  Launch();
 	bool LaunchReady() {return launchReady;}
 	void AddCharge(DWORD milliseconds) {charge += milliseconds; launchReady = true;}
@@ -227,6 +229,8 @@ private:
 	float*	pCursorPos;
 	float rotatedNuke[3];
 	float nukeVector[3];
+	bool destroyed;
+	int	 timeToRebuild;
 };
 
 class CCity : public CGameObject
@@ -258,7 +262,7 @@ public:
 	void SetFireKey(char key) {fireKey = key;}
 	char GetFireKey() {return fireKey;}
 	int	 GetType();
-	bool IsLoaded() {return loaded;}
+	bool IsLoaded() {return loaded && !destroyed;}
 	void Fire();
 	void GetProjVector(int* TTL, float* projVector);
 	float* GetProjTranslation();
@@ -271,6 +275,8 @@ private:
 	bool   loaded;
 	int	   timeToReload;
 	float  projTranslation[3];
+	bool   destroyed;
+	int    timeToRebuild;
 };
 
 class CProjectile : public CGameObject
