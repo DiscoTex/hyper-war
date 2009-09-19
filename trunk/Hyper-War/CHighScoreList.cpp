@@ -70,12 +70,25 @@ bool CHighScoreList::AddScore(char* name, int score)
 
 	if(addIndex != -1)
 	{
-		strncpy_s(entry.name, 16, name, 16);
+		strncpy_s(entry.name, 64, name, 64);
 		entry.score = score;
 		HSList.push_back(entry);
 	}
 
 	std::sort(HSList.begin(), HSList.end(), SortFunc);
+
+	return (addIndex != -1);
+}
+
+bool CHighScoreList::CheckScore(int score)
+{
+	addIndex = -1;
+
+	for(unsigned int i=0; i<10 && addIndex == -1; i++)
+	{
+		if(score > HSList[i].score)
+			addIndex = i;
+	}
 
 	return (addIndex != -1);
 }
@@ -86,28 +99,51 @@ void CHighScoreList::Draw(bool highlightRecent)
 	unsigned int i;
 	char tempStr[64];
 
-	glPushMatrix();
+	glColor3f(.8f, .8f, 1.0f);
 
-	glTranslatef(0, 1.5, 0);
+	glEnable(GL_TEXTURE_2D);
+
+	glPushMatrix();
 
 	glPushMatrix();
 	width = 0;
 	height = 0;
-	sprintf_s(tempStr, 64, "HIGH SCORES");
+	sprintf_s(tempStr, 64, "Heroes of");
 	for(i=0; i<strnlen(tempStr, 64); i++)
 	{
 		width += hsFont->GetCharWidthA(tempStr[i]);
 	}
 	height = hsFont->GetCharHeight('D');
-	glScalef(.006f, .006f, .006f);
+	glScalef(.005f, .005f, .005f);
 	hsFont->Begin();
-	glTranslatef(-width/2.0f, 0, 0);	
+	glTranslatef(-width/2.0f, 300, 0);	
 	hsFont->DrawString(tempStr, 0, 0);
 	glPopMatrix();
 
+	glPushMatrix();
+	width = 0;
+	height = 0;
+	sprintf_s(tempStr, 64, "Intergalactic Peace");
+	for(i=0; i<strnlen(tempStr, 64); i++)
+	{
+		width += hsFont->GetCharWidthA(tempStr[i]);
+	}
+	height = hsFont->GetCharHeight('D');
+	glScalef(.005f, .005f, .005f);
+	hsFont->Begin();
+	glTranslatef(-width/2.0f, 225, 0);	
+	hsFont->DrawString(tempStr, 0, 0);
+	glPopMatrix();
+
+	glTranslatef(0, .5f, 0);
+
 	for(i=0; i<10; i++)
 	{
-		glPushMatrix();
+		if(i == addIndex && highlightRecent)
+			glColor3f(1.0f, 0, 0);
+		else
+			glColor3f(.8f, .8f, 1.0f);
+
 		width = 0;
 		height = 0;
 		sprintf(tempStr, "%s   %d", HSList[i].name, HSList[i].score);
@@ -116,14 +152,17 @@ void CHighScoreList::Draw(bool highlightRecent)
 			width += hsFont->GetCharWidthA(tempStr[j]);
 		}
 		height = hsFont->GetCharHeight('D');
-		glScalef(.0026f, .0026f, .0026f);
+		glPushMatrix();
+		glScalef(.002f, .002f, .002f);		
+		glTranslatef(-width/2.0f, i*-100.0f, 0);
 		hsFont->Begin();
-		glTranslatef(-width/2.0f, -100.0f * (i + 2), 0);	
 		hsFont->DrawString(tempStr, 0, 0);
 		glPopMatrix();
 	}
 
 	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
 }
 
 bool SortFunc(HSListEntry first, HSListEntry last)

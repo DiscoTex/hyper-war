@@ -15,7 +15,7 @@ using namespace glfont;
 
 typedef struct
 {
-	char name[16];
+	char name[64];
 	int score;
 } HSListEntry;
 
@@ -28,13 +28,14 @@ public:
 	void ReadScores();
 	void SaveScores();
 	bool AddScore(char* name, int score);
+	bool CheckScore(int score);
 
 	void Draw(bool highlightRecent);
 
 private:
 	vector<HSListEntry> HSList;
 	GLFont*				hsFont;
-	unsigned int		addIndex;
+	int					addIndex;
 };
 
 bool SortFunc(HSListEntry first, HSListEntry last);

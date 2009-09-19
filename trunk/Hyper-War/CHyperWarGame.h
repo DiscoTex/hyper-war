@@ -39,11 +39,13 @@ public:
 	void Draw();										// Draw the current frame
 	void DrawHUD();
 	void DrawAttract();
+	void DrawHighScoreEntry();
 
 	void SetHyperLevel(int newLevel);
 	int  GetHyperLevel() {return hyperLevel;}
 	void NextWave();
 	void RunAttractMode();
+	void RunHighScoreEntry();
 
 private:
 	GL_Window*	g_window;
@@ -93,4 +95,8 @@ private:
 	bool						nukesLaunched2;
 	bool						nukesLaunched3;
 	bool						nukesLaunched4;
+	char						highScoreName[64];
+	int							nameIndex;
+	double						currentLetter;
+	bool						listTime;
 };
