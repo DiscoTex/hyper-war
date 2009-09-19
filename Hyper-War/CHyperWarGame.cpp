@@ -106,8 +106,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	hyperModeTimer = 0;
 	waveNumber = 0;
 	totalWaves = 0;
-	blueCityCount = 4;
-	greenCityCount = 4;
+	gameParams.numBlueCities = 4;
+	gameParams.numGreenCities = 4;
 	blueWins = false;
 	greenWins = false;
 	playingStory = false;
@@ -616,7 +616,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+							debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -635,11 +635,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						switch(gameObjects[i]->GetSide())
 						{
 						case SIDE_BLUE:
-							blueCityCount--;
+							gameParams.numBlueCities--;
 							gameParams.greenPoints += 500 * pointMultiplier;
 							break;
 						case SIDE_GREEN:
-							greenCityCount--;
+							gameParams.numGreenCities--;
 							gameParams.bluePoints += 500 * pointMultiplier;
 							break;
 						}
@@ -734,7 +734,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+							debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -753,11 +753,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						switch(gameObjects[objIndex]->GetSide())
 						{
 						case SIDE_BLUE:
-							blueCityCount--;
+							gameParams.numBlueCities--;
 							gameParams.greenPoints += 500 * pointMultiplier;
 							break;
 						case SIDE_GREEN:
-							greenCityCount--;
+							gameParams.numGreenCities--;
 							gameParams.bluePoints += 500 * pointMultiplier;
 							break;
 						}
@@ -845,7 +845,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+							debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -863,11 +863,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						switch(gameObjects[objIndex]->GetSide())
 						{
 						case SIDE_BLUE:
-							blueCityCount--;
+							gameParams.numBlueCities--;
 							gameParams.greenPoints += 500 * pointMultiplier;
 							break;
 						case SIDE_GREEN:
-							greenCityCount--;
+							gameParams.numGreenCities--;
 							gameParams.bluePoints += 500 * pointMultiplier;
 							break;
 						}
@@ -953,7 +953,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 								float(gameObjects[i]->GetTranslation()[1]),
 								float(gameObjects[i]->GetTranslation()[2]));
 							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+							debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 							gameObjects.push_back(debris);
 						}
 						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
@@ -971,11 +971,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						switch(gameObjects[i]->GetSide())
 						{
 						case SIDE_BLUE:
-							blueCityCount--;
+							gameParams.numBlueCities--;
 							gameParams.greenPoints += 500 * pointMultiplier;
 							break;
 						case SIDE_GREEN:
-							greenCityCount--;
+							gameParams.numGreenCities--;
 							gameParams.bluePoints += 500 * pointMultiplier;
 							break;
 						}
@@ -1067,7 +1067,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
 
 	//check for game over
-	if(blueCityCount < 1 && gameParams.gameMode != MODE_GAMEOVER && gameParams.gameMode != MODE_HIGHSCORE)
+	if(gameParams.numBlueCities < 1 && gameParams.gameMode != MODE_GAMEOVER && gameParams.gameMode != MODE_HIGHSCORE)
 	{
 		//Green wins
 		gameObjects.clear();
@@ -1080,7 +1080,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		audioRenderer.StopAll();
 		audioRenderer.PlaySound(SOUND_GAMEOVER, 0, 0);
 	}
-	else if(greenCityCount < 1 && gameParams.gameMode != MODE_GAMEOVER && gameParams.gameMode != MODE_HIGHSCORE)
+	else if(gameParams.numGreenCities < 1 && gameParams.gameMode != MODE_GAMEOVER && gameParams.gameMode != MODE_HIGHSCORE)
 	{
 		//Blue wins
 		gameObjects.clear();
@@ -1966,7 +1966,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 	{
 	case 1:
 		//Play sound indicating new hyper level
-		audioRenderer.PlaySound(SOUND_LEVEL1, 0, 0);
+		
 		gameParams.chargeRateDivider = 5000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1974,14 +1974,23 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
-		gameParams.nukeReloadTime = 4000;				//min 150
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
+			gameParams.nukeReloadTime = 4000;				//min 150
+			audioRenderer.PlaySound(SOUND_LEVEL1, 0, 0);
+		}
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 30000;
 		break;
 	case 2:
 		//Play sound indicating new hyper level
-		audioRenderer.PlaySound(SOUND_LEVEL2, 0, 0);
+		
 		gameParams.chargeRateDivider = 3000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -1989,14 +1998,23 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.nukeSpeedDivider = 13000.0f;			//min 1000
-		gameParams.nukeReloadTime = 2000;				//min 150
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 13000.0f;			//min 1000
+			gameParams.nukeReloadTime = 2000;				//min 150
+			audioRenderer.PlaySound(SOUND_LEVEL2, 0, 0);
+		}
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 25000;
 		break;
 	case 3:
 		//Play sound indicating new hyper level
-		audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
+		
 		gameParams.chargeRateDivider = 2000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -2004,14 +2022,23 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.nukeSpeedDivider = 10000.0f;			//min 1000
-		gameParams.nukeReloadTime = 1000;				//min 150
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 10000.0f;			//min 1000
+			gameParams.nukeReloadTime = 1000;				//min 150
+			audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
+		}
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 20000;
 		break;
 	case 4:
 		//Play sound indicating new hyper level
-		audioRenderer.PlaySound(SOUND_LEVEL4, 0, 0);
+		
 		gameParams.chargeRateDivider = 1000.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -2019,14 +2046,23 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.nukeSpeedDivider = 7000.0f;			//min 1000
-		gameParams.nukeReloadTime = 500;				//min 150
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 7000.0f;			//min 1000
+			gameParams.nukeReloadTime = 500;				//min 150
+			audioRenderer.PlaySound(SOUND_LEVEL4, 0, 0);
+		}
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 15000;
 		break;
 	case 5:
 		//Play sound indicating new hyper level
-		audioRenderer.PlaySound(SOUND_LEVEL5, 0, 0);
+		
 		gameParams.chargeRateDivider = 500.0f;			//min 500
 		//gameParams.maxThrust = 3.0f;					//max 500
 		//gameParams.minThrust = 0.3f;
@@ -2034,10 +2070,19 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
-		gameParams.nukeReloadTime = 200;				//min 150
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 60000;
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+			audioRenderer.PlaySound(SOUND_LEVEL5, 0, 0);
+		}
 		break;
 	default:
 		hyperLevel = 5;
@@ -2055,59 +2100,78 @@ void CHyperWarGame::NextWave()
 
 	pointMultiplier = (int)(totalWaves/4.0f + 1);
 
-	for(int i=0; i<waveNumber && i < 7; i++)
+	if(totalWaves % 10 == 0)
 	{
-		//Use layers for x location between 2.7 and 7.7
+		SetHyperLevel(5);
 
-		nuke = new CNuke(&gameParams);
-		nuke->SetColor(0, 0, .8f);
-		nuke->SetScale(.1f, .1f, .1f);
-		nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX) * -1.7f, 0);
-		nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
-		nuke->SetThrust(.025f * waveNumber);
-		nuke->SetSide(SIDE_BLUE);
-		gameObjects.push_back(nuke);
-
-		nuke = new CNuke(&gameParams);
-		nuke->SetColor(0, 0, .8f);
-		nuke->SetScale(.1f, .1f, .1f);
-		nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX) * 1.7f, 0);
-		nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
-		nuke->SetThrust(.025f * waveNumber);
-		nuke->SetSide(SIDE_BLUE);
-		gameObjects.push_back(nuke);
+		for(int i=0; i<6; i++)
+		{
+			//create a mothership
+			moship = new CMothership(&gameParams);
+			moship->SetColor(0, 0, .8f);
+			moship->SetSide(SIDE_BLUE);
+			moship->SetScale(.07f, .07f, .07f);
+			moship->SetRotation(0, 0, -90);
+			moship->SetMotionVector(0, .5f * gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX, 0);
+			moship->SetTranslation(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX + .5f, -1, 0);
+			gameObjects.push_back(moship);
+		}
 	}
-
-	//Motherships	
-	if(totalWaves % 4 == 3)
+	else
 	{
-		//create a mothership
-		moship = new CMothership(&gameParams);
-		moship->SetColor(0, 0, .8f);
-		moship->SetSide(SIDE_BLUE);
-		moship->SetScale(.07f, .07f, .07f);
-		moship->SetRotation(0, 0, -90);
-		moship->SetMotionVector(0, .2f, 0);
-		moship->SetTranslation(1, -1, 0);
-		gameObjects.push_back(moship);
-	}
+		for(int i=0; i<waveNumber/2 + 1 && i < 7; i++)
+		{
+			//Use layers for x location between 2.7 and 7.7
 
-	//Random gravity wells
-	if(totalWaves % 6 == 0 && totalWaves > 18)
-	{
-		/*
-		//Add a random gravity well
-		sGravityWell *gw = new sGravityWell();
-		gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 2;
-		gw->translation[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 5.5f;
-		gw->translation[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 3.5f;
-		gw->translation[2] = 0;
-		gravityWells.push_back(gw);
-		*/
-	}
+			nuke = new CNuke(&gameParams);
+			nuke->SetColor(0, 0, .8f);
+			nuke->SetScale(.1f, .1f, .1f);
+			nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX) * -1.7f, 0);
+			nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
+			nuke->SetThrust(.025f * waveNumber);
+			nuke->SetSide(SIDE_BLUE);
+			gameObjects.push_back(nuke);
 
-	if(totalWaves % 4 == 0)
-	{
-		SetHyperLevel(GetHyperLevel() + 1);
+			nuke = new CNuke(&gameParams);
+			nuke->SetColor(0, 0, .8f);
+			nuke->SetScale(.1f, .1f, .1f);
+			nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX) * 1.7f, 0);
+			nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
+			nuke->SetThrust(.025f * waveNumber);
+			nuke->SetSide(SIDE_BLUE);
+			gameObjects.push_back(nuke);
+		}
+
+		//Motherships	
+		if(totalWaves % 4 == 3)
+		{
+			//create a mothership
+			moship = new CMothership(&gameParams);
+			moship->SetColor(0, 0, .8f);
+			moship->SetSide(SIDE_BLUE);
+			moship->SetScale(.07f, .07f, .07f);
+			moship->SetRotation(0, 0, -90);
+			moship->SetMotionVector(0, .5f * gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX, 0);
+			moship->SetTranslation(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX + .5f, -1, 0);
+			gameObjects.push_back(moship);
+		}
+
+		//Random gravity wells
+		if(totalWaves % 6 == 0 && totalWaves > 18)
+		{
+			/*
+			//Add a random gravity well
+			sGravityWell *gw = new sGravityWell();
+			gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 2;
+			gw->translation[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 5.5f;
+			gw->translation[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 3.5f;
+			gw->translation[2] = 0;
+			gravityWells.push_back(gw);
+			*/
+		}
+		if(totalWaves % 4 == 0 && gameParams.gameMode != MODE_SINGLE)
+		{
+			SetHyperLevel(GetHyperLevel() + 1);
+		}
 	}
 }

@@ -1060,6 +1060,7 @@ CMissileBase::CMissileBase(sGameParams *newGameParams) : CGameObject(newGamePara
 	launchKey = '\0';
 	launchReady = false;
 	charge = 0;
+	destroyed = false;
 }
 
 CMissileBase::~CMissileBase()
@@ -1080,16 +1081,40 @@ int CMissileBase::Launch()
 
 void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 {
+	int numCities = 0;
+
+	if(mySide == SIDE_GREEN)
+	{
+		numCities = gameParams->numGreenCities;
+	}
+	else if(mySide == SIDE_BLUE)
+	{
+		numCities = gameParams->numBlueCities;
+	}
+
 	if(timeToReload > 0)
 	{
 		timeToReload -= milliseconds;
 	}
 	else
 		loaded = true;
+
+	if(destroyed)
+	{
+		timeToRebuild -= milliseconds * numCities;
+		if(timeToRebuild < 0)
+			destroyed = false;
+	}
 }
 
 bool CMissileBase::CanDestroy(int destroyerType)
 {
+	if(destroyerType == TYPE_NUKE)
+	{
+		destroyed = true;
+		timeToRebuild = 10000;
+	}
+	
 	//if(destroyerType != TYPE_NUKE)
 		return false;
 	//else
@@ -1147,6 +1172,9 @@ void CMissileBase::Draw()
 	float offset = 0;
 	float radius;
 	float missileRotation = 0;
+
+	if(destroyed)
+		return;
 
 	glPushMatrix();
 	
@@ -1662,6 +1690,7 @@ CFlakCannon::CFlakCannon(sGameParams *newGameParams) : CGameObject(newGameParams
 	fireKey = '\0';
 	loaded = true;
 	timeToReload = 0;
+	destroyed = false;
 }
 
 CFlakCannon::~CFlakCannon()
@@ -1674,6 +1703,12 @@ void CFlakCannon::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 
 bool CFlakCannon::CanDestroy(int destroyerType)
 {
+	if(destroyerType == TYPE_NUKE)
+	{
+		timeToRebuild = 10000;
+		destroyed = true;
+	}
+
 	//if(destroyerType != TYPE_NUKE)
 		return false;
 	//else
@@ -1716,17 +1751,38 @@ float* CFlakCannon::GetProjTranslation()
 
 void CFlakCannon::AddTimeSinceFired(DWORD milliseconds)
 {
+	int numCities = 0;
+
+	if(mySide == SIDE_GREEN)
+	{
+		numCities = gameParams->numGreenCities;
+	}
+	else if(mySide == SIDE_BLUE)
+	{
+		numCities = gameParams->numBlueCities;
+	}
+
 	timeToReload -= milliseconds;
 
 	if(timeToReload < 0)
 	{
 		loaded = true; 
 	}
+
+	if(destroyed)
+	{
+		timeToRebuild -= milliseconds * numCities;
+		if(timeToRebuild < 0)
+			destroyed = false;
+	}
 }
 
 void CFlakCannon::Draw()
 {
 	float cannonRotation = 0;
+
+	if(destroyed)
+		return;
 
 	glPushMatrix();
 	
