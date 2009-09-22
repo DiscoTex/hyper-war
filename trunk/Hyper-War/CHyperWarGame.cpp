@@ -1154,9 +1154,8 @@ void CHyperWarGame::RunHighScoreEntry()
 			highScoreName[nameIndex] = '\0';
 			nameIndex--;
 		}
-		else if((g_keys->keyDown['D'] || g_keys->keyDown['d'] && hyperModeTimer > 500 && nameIndex > 0))
+		else if((g_keys->keyDown['D'] || g_keys->keyDown['d']) && hyperModeTimer > 150 && nameIndex > 0)
 		{
-			highScoreName[nameIndex] = '\0';
 			hsList->AddScore(highScoreName, gameParams.greenPoints);
 			listTime = true;
 			hyperModeTimer = 0;
