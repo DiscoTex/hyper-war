@@ -1984,6 +1984,8 @@ CMothership::CMothership(sGameParams *newGameParams) : CGameObject(newGameParams
 	cSphere->globalPosition[1] = 0;
 	cSphere->globalPosition[2] = 0;
 	collisionSpheres.push_back(cSphere);
+
+	lifeTime = 0;
 }
 
 CMothership::~CMothership()
@@ -2091,3 +2093,4 @@ bool CMothership::CanDestroy(int destroyerType)
 	else
 		return false;
 }
+

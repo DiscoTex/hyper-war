@@ -308,9 +308,11 @@ public:
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells) {}
 	int	 GetType() {return TYPE_MOSHIP;}
 	bool CanDestroy(int destroyerType);
+	int  GetLife() {return lifeTime;}
+	void SetLife(int addTime) {lifeTime += addTime;}
 
 	void Draw();
 
 private:
-
+	int lifeTime;
 };
