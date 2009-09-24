@@ -34,7 +34,8 @@ enum{
 	TYPE_CITY,
 	TYPE_FLAKCANNON,
 	TYPE_PROJECTILE,
-	TYPE_MOSHIP
+	TYPE_MOSHIP,
+	TYPE_BEAM
 };
 
 enum{
@@ -299,6 +300,30 @@ private:
 	int		timeToLive;
 };
 
+class CMothership;
+
+class CBeam : public CGameObject
+{
+public:
+	CBeam(sGameParams *newGameParams);
+	~CBeam();
+
+	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells) {}
+	int	 GetType() {return TYPE_BEAM;}
+	bool CanDestroy(int destroyerType) {return false;}
+	void AddCount(int milliseconds) {TTL -= milliseconds;}
+	long int GetTTL() {return TTL;}
+	void Kill() {TTL = -1;}
+	void SetMyParent(CMothership* myNewParent) {myParent = myNewParent;}
+
+	void Draw();
+
+	CMothership* myParent;
+private:
+	long int animVal;
+	long int TTL;	
+};
+
 class CMothership : public CGameObject
 {
 public:
@@ -308,11 +333,13 @@ public:
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells) {}
 	int	 GetType() {return TYPE_MOSHIP;}
 	bool CanDestroy(int destroyerType);
-	int  GetLife() {return lifeTime;}
-	void SetLife(int addTime) {lifeTime += addTime;}
+	void AddCount(int milliseconds) {countDown -= milliseconds;}
+	bool IsFiring();
+	void SetMyBeam(CBeam *myNewBeam) {myBeam = myNewBeam;}
 
 	void Draw();
 
 private:
-	int lifeTime;
+	int countDown;
+	CBeam* myBeam;
 };
