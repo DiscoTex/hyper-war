@@ -407,6 +407,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	CDebris *debris;
 	CNuke *nuke;
 	CProjectile *pj;
+	CBeam *beam;
 	float *position;
 	float *nukeVector;
 	float projVector[3];
@@ -574,6 +575,40 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			{
 				gameObjects.erase(gameObjects.begin() + i);
 				continue;
+			}
+		}
+		else if(gameObjects[i]->GetType() == TYPE_MOSHIP)
+		{
+			((CMothership*)(gameObjects[i]))->AddCount(milliseconds);
+			if(((CMothership*)(gameObjects[i]))->IsFiring())
+			{
+				//Do something?
+				beam = new CBeam(&gameParams);
+				beam->SetRotation(gameObjects[i]->GetRotation()[0],
+					gameObjects[i]->GetRotation()[1],
+				gameObjects[i]->GetRotation()[2]);
+				beam->SetMotionVector(gameObjects[i]->GetMotionVector()[0],
+					gameObjects[i]->GetMotionVector()[1],
+					gameObjects[i]->GetMotionVector()[2]);
+				beam->SetTranslation(
+					float(gameObjects[i]->GetTranslation()[0]),
+					float(gameObjects[i]->GetTranslation()[1]),
+					float(gameObjects[i]->GetTranslation()[2]));
+				beam->SetScale(gameObjects[i]->GetScale()[0],
+					gameObjects[i]->GetScale()[1],
+					gameObjects[i]->GetScale()[2]);
+				((CMothership*)(gameObjects[i]))->SetMyBeam(beam);
+				beam->SetMyParent(((CMothership*)(gameObjects[i])));
+				gameObjects.push_back(beam);
+			}
+		}
+		else if(gameObjects[i]->GetType() == TYPE_BEAM)
+		{
+			((CBeam*)(gameObjects[i]))->AddCount(milliseconds);
+			if(((CBeam*)(gameObjects[i]))->GetTTL() < 0)
+			{
+				((CBeam*)(gameObjects[i]))->myParent->SetMyBeam(NULL);
+				gameObjects.erase(gameObjects.begin() + i);
 			}
 		}
 
@@ -1938,7 +1973,7 @@ void CHyperWarGame::DrawHighScoreEntry()
 		glScalef(.001f, .001f, .001f);
 		glTranslatef(-width/2.0f, -1600, 0);	
 		titleFont->Begin();
-		glColor3f(.8, .8, 1.0);
+		glColor3f(.8f, .8f, 1.0);
 		titleFont->DrawString(tempStr, 0, 0);
 		glPopMatrix();
 	}

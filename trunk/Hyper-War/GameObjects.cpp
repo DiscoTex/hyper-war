@@ -169,15 +169,15 @@ void CGameObject::ProcessMotion(DWORD milliseconds, Keys* keys)
 
 	if(GetType() !=  TYPE_PLANET)
 	{
-		if(translation[1] > 1.70)
-			translation[1] = -1.70;
-		else if(translation[1] < -1.70)
-			translation[1] = 1.70;
+		if(translation[1] > 1.70f)
+			translation[1] = -1.70f;
+		else if(translation[1] < -1.70f)
+			translation[1] = 1.70f;
 
-		if(translation[0] > 7.5)
-			translation[0] = -2.75;
-		else if(translation[0] < -2.75)
-			translation[0] = 2.75;
+		if(translation[0] > 7.5f)
+			translation[0] = -2.75f;
+		else if(translation[0] < -2.75f)
+			translation[0] = 2.75f;
 	}
 
 }
@@ -751,15 +751,15 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
 
-	if(translation[1] > 1.70)
-		translation[1] = -1.70;
-	else if(translation[1] < -1.70)
-		translation[1] = 1.70;
+	if(translation[1] > 1.70f)
+		translation[1] = -1.70f;
+	else if(translation[1] < -1.70f)
+		translation[1] = 1.70f;
 
-	if(translation[0] > 7.5)
-		translation[0] = -2.75;
-	else if(translation[0] < -2.75)
-		translation[0] = 2.75;
+	if(translation[0] > 7.5f)
+		translation[0] = -2.75f;
+	else if(translation[0] < -2.75f)
+		translation[0] = 2.75f;
 
 	if(gravityImmunity > 0)
 		gravityImmunity -= milliseconds;
@@ -1985,11 +1985,23 @@ CMothership::CMothership(sGameParams *newGameParams) : CGameObject(newGameParams
 	cSphere->globalPosition[2] = 0;
 	collisionSpheres.push_back(cSphere);
 
-	lifeTime = 0;
+	countDown = 15000 - gameParams->randoms[gameParams->randIndex++%512]%5000;
+	myBeam = NULL;
 }
 
 CMothership::~CMothership()
 {
+}
+
+bool CMothership::IsFiring()
+{
+	if(countDown < 0)
+	{
+		countDown = 15000 - gameParams->randoms[gameParams->randIndex++%512]%5000;
+		return true;
+	}
+	else
+		return false;
 }
 
 void CMothership::Draw()
@@ -2015,7 +2027,7 @@ void CMothership::Draw()
 			degInRad = (i+4)*DEG2RAD;
 			glVertex3f(cos(degInRad) * radius * 2, sin(degInRad) * radius/2.0f + .1f, -.001f);
 
-			glColor3f(color[0]*.1f, color[1]*1.f, color[2]*.1f);
+			glColor3f(0, 0, 0);
 			glVertex3f(0, .1f, -.001f);
 		}
 	glEnd();
@@ -2089,8 +2101,126 @@ void CMothership::Draw()
 bool CMothership::CanDestroy(int destroyerType)
 {
 	if(destroyerType == TYPE_NUKE)
+	{
+		if(myBeam != NULL)
+			myBeam->Kill();
 		return true;
+	}
 	else
 		return false;
 }
 
+
+CBeam::CBeam(sGameParams *newGameParams) : CGameObject(newGameParams)
+{
+	sCollisionSphere *cSphere;
+	/*
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = .25;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 1.0f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = -1.1f;
+	cSphere->translation[1] = 0;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 0.8f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere  = new sCollisionSphere;
+	cSphere->translation[0] = 1.1f;
+	cSphere->translation[1] = 0;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 0.8f;
+	cSphere->globalPosition[0] = 0;
+	cSphere->globalPosition[1] = 0;
+	cSphere->globalPosition[2] = 0;
+	collisionSpheres.push_back(cSphere);
+	*/
+
+	animVal = 0;
+	TTL = 2000;
+	myParent = NULL;
+}
+
+CBeam::~CBeam()
+{
+}
+
+void CBeam::Draw()
+{
+	glPushMatrix();
+	
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	glColor3f(color[0], color[1], color[2]);
+	animVal++;
+
+	glBegin(GL_LINES);
+
+	for(int i=0; i<3; i++)
+	{
+		glColor3f(1.0, 1.0, 1.0);
+		glVertex3f(0, 0, -.002f);
+		glColor3f(animVal%6 / 6.0f * color[0], animVal%6 / 6.0f * color[1], animVal%6 / 6.0f * color[2]);
+		glVertex3f(0, -60, -.002f);
+
+		glColor3f(1.0, 1.0, 1.0);
+		glVertex3f(0, 0, -.002f);
+		glColor3f(animVal%6 / 6.0f * color[0], animVal%6 / 6.0f * color[1], animVal%6 / 6.0f * color[2]);
+		glVertex3f(((i+1)*animVal%100) / 100.0f, -60, -.002f);
+
+		glColor3f(1.0, 1.0, 1.0);
+		glVertex3f(0, 0, -.002f);
+		glColor3f(animVal%6 / 6.0f * color[0], animVal%6 / 6.0f * color[1], animVal%6 / 6.0f * color[2]);
+		glVertex3f(((i+1)*animVal%100) / -100.0f, -60, -.002f);
+
+		glColor3f(1.0, 1.0, 1.0);
+		glVertex3f(0, 0, -.002f);
+		glColor3f(animVal%6 / 6.0f * color[0], animVal%6 / 6.0f * color[1], animVal%6 / 6.0f * color[2]);
+		glVertex3f(((i+1)*animVal%100) / 200.0f, -60, -.002f);
+
+		glColor3f(1.0, 1.0, 1.0);
+		glVertex3f(0, 0, -.002f);
+		glColor3f(animVal%6 / 6.0f * color[0], animVal%6 / 6.0f * color[1], animVal%6 / 6.0f * color[2]);
+		glVertex3f(((i+1)*animVal%100) / -200.0f, -60, -.002f);
+	}
+
+	glEnd();
+
+	glPopMatrix();
+
+#ifdef COLLISION_DEBUG
+	glPushMatrix();
+
+	//Draw collision spheres for debug
+	float radius;
+	for(unsigned int i=0; i<collisionSpheres.size(); i++)
+	{
+		radius = collisionSpheres[i]->radius * scale[1];
+		glColor3f(1, 1, 0);
+		glBegin(GL_LINE_LOOP);
+			for (int j=0; j<360; j++)
+			{
+				float degInRad = j*DEG2RAD;
+				glVertex3f(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0] ,sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
+			}
+		glEnd();
+	}
+
+	glPopMatrix();
+#endif
+
+}
