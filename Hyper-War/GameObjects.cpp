@@ -248,26 +248,30 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 		switch(thisType)
 		{
 		case TYPE_DEBRIS:
-			if(otherType == TYPE_DEBRIS || otherType == TYPE_MISSILEBASE || otherType == TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP)
+			if(otherType == TYPE_DEBRIS || otherType == TYPE_MISSILEBASE || otherType == TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP || otherType == TYPE_BEAM || otherType == TYPE_PROJECTILE)
 				continue;
 			break;
 		case TYPE_PLANET:
-			if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP)
+			if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP || otherType == TYPE_BEAM || otherType == TYPE_PROJECTILE)
 				continue;
 			break;
 		case TYPE_MISSILEBASE:
-			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP)
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE)
 				continue;
 		case TYPE_CITY:
-			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP)
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE)
 				continue;
 			break;
 		case TYPE_FLAKCANNON:
-			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP)
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE)
 				continue;
 			break;
 		case TYPE_MOSHIP:
-			if(otherType != TYPE_NUKE || gObjects[i]->GetSide() == mySide)
+			if(otherType != TYPE_NUKE || gObjects[i]->GetSide() == mySide || otherType == TYPE_BEAM || otherType == TYPE_PROJECTILE)
+				continue;
+			break;
+		case TYPE_BEAM:
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE)
 				continue;
 			break;
 		}
@@ -1109,16 +1113,12 @@ void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gW
 
 bool CMissileBase::CanDestroy(int destroyerType)
 {
-	if(destroyerType == TYPE_NUKE)
+	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM)
 	{
 		destroyed = true;
 		timeToRebuild = 40000;
 	}
-	
-	//if(destroyerType != TYPE_NUKE)
-		return false;
-	//else
-	//	return true;
+	return false;
 }
 
 float* CMissileBase::GetNukeTranslation()
@@ -1525,7 +1525,7 @@ void CCity::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 
 bool CCity::CanDestroy(int destroyerType)
 {
-	if(destroyerType == TYPE_NUKE)
+	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM)
 		return true;
 	else
 		return false;
@@ -1703,16 +1703,12 @@ void CFlakCannon::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 
 bool CFlakCannon::CanDestroy(int destroyerType)
 {
-	if(destroyerType == TYPE_NUKE)
+	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM)
 	{
 		timeToRebuild = 40000;
 		destroyed = true;
 	}
-
-	//if(destroyerType != TYPE_NUKE)
-		return false;
-	//else
-	//	return true;
+	return false;
 }
 
 int	CFlakCannon::GetType()
@@ -2114,38 +2110,21 @@ bool CMothership::CanDestroy(int destroyerType)
 CBeam::CBeam(sGameParams *newGameParams) : CGameObject(newGameParams)
 {
 	sCollisionSphere *cSphere;
-	/*
+	float trans=0;
 
-	cSphere  = new sCollisionSphere;
-	cSphere->translation[0] = 0;
-	cSphere->translation[1] = .25;
-	cSphere->translation[2] = 0;
-	cSphere->radius = 1.0f;
-	cSphere->globalPosition[0] = 0;
-	cSphere->globalPosition[1] = 0;
-	cSphere->globalPosition[2] = 0;
-	collisionSpheres.push_back(cSphere);
-
-	cSphere  = new sCollisionSphere;
-	cSphere->translation[0] = -1.1f;
-	cSphere->translation[1] = 0;
-	cSphere->translation[2] = 0;
-	cSphere->radius = 0.8f;
-	cSphere->globalPosition[0] = 0;
-	cSphere->globalPosition[1] = 0;
-	cSphere->globalPosition[2] = 0;
-	collisionSpheres.push_back(cSphere);
-
-	cSphere  = new sCollisionSphere;
-	cSphere->translation[0] = 1.1f;
-	cSphere->translation[1] = 0;
-	cSphere->translation[2] = 0;
-	cSphere->radius = 0.8f;
-	cSphere->globalPosition[0] = 0;
-	cSphere->globalPosition[1] = 0;
-	cSphere->globalPosition[2] = 0;
-	collisionSpheres.push_back(cSphere);
-	*/
+	for(int i=0; i<25; i++)
+	{
+		trans -= (i/6.0f);
+		cSphere  = new sCollisionSphere;
+		cSphere->translation[0] = 0;
+		cSphere->translation[1] = trans;
+		cSphere->translation[2] = 0;
+		cSphere->radius = i / 12.0f;
+		cSphere->globalPosition[0] = 0;
+		cSphere->globalPosition[1] = 0;
+		cSphere->globalPosition[2] = 0;
+		collisionSpheres.push_back(cSphere);
+	}
 
 	animVal = 0;
 	TTL = 2000;
@@ -2154,6 +2133,7 @@ CBeam::CBeam(sGameParams *newGameParams) : CGameObject(newGameParams)
 
 CBeam::~CBeam()
 {
+
 }
 
 void CBeam::Draw()
