@@ -73,6 +73,7 @@ ALboolean CAudioRenderer::LoadALData()
 	Buffers[SOUND_LEVEL3] = alutCreateBufferFromFile ("level3.wav");
 	Buffers[SOUND_LEVEL4] = alutCreateBufferFromFile ("level4.wav");
 	Buffers[SOUND_LEVEL5] = alutCreateBufferFromFile ("level5.wav");
+	Buffers[SOUND_ZAP] = alutCreateBufferFromFile ("zap.wav");
 
 	// Bind buffers into audio sources.
 	alGenSources(NUM_SOURCES, Sources);
@@ -163,6 +164,13 @@ ALboolean CAudioRenderer::LoadALData()
 	alSourcefv(Sources[SOUND_LEVEL5], AL_POSITION, SourcesPos[SOUND_LEVEL5]);
 	alSourcefv(Sources[SOUND_LEVEL5], AL_VELOCITY, SourcesVel[SOUND_LEVEL5]);
 	alSourcei (Sources[SOUND_LEVEL5], AL_LOOPING,  AL_FALSE           );
+
+	alSourcei (Sources[SOUND_ZAP], AL_BUFFER,   Buffers[SOUND_ZAP]   );
+	alSourcef (Sources[SOUND_ZAP], AL_PITCH,    1.0f              );
+	alSourcef (Sources[SOUND_ZAP], AL_GAIN,     1.0f              );
+	alSourcefv(Sources[SOUND_ZAP], AL_POSITION, SourcesPos[SOUND_ZAP]);
+	alSourcefv(Sources[SOUND_ZAP], AL_VELOCITY, SourcesVel[SOUND_ZAP]);
+	alSourcei (Sources[SOUND_ZAP], AL_LOOPING,  AL_FALSE           );
 
 	// Do another error check and return.
 

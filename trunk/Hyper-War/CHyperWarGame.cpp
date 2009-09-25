@@ -600,6 +600,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				((CMothership*)(gameObjects[i]))->SetMyBeam(beam);
 				beam->SetMyParent(((CMothership*)(gameObjects[i])));
 				gameObjects.push_back(beam);
+				audioRenderer.PlaySound(SOUND_ZAP, 0, 0);
 			}
 		}
 		else if(gameObjects[i]->GetType() == TYPE_BEAM)
@@ -609,6 +610,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			{
 				((CBeam*)(gameObjects[i]))->myParent->SetMyBeam(NULL);
 				gameObjects.erase(gameObjects.begin() + i);
+				continue;
 			}
 		}
 
@@ -2153,7 +2155,7 @@ void CHyperWarGame::NextWave()
 	}
 	else
 	{
-		for(int i=0; i<waveNumber/2 + 1 && i < 7; i++)
+		for(int i=0; i<waveNumber/6 + 1 && i < 7; i++)
 		{
 			//Use layers for x location between 2.7 and 7.7
 
