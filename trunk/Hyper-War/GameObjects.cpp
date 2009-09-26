@@ -1117,6 +1117,7 @@ bool CMissileBase::CanDestroy(int destroyerType)
 	{
 		destroyed = true;
 		timeToRebuild = 40000;
+		return true;
 	}
 	return false;
 }
@@ -1707,6 +1708,7 @@ bool CFlakCannon::CanDestroy(int destroyerType)
 	{
 		timeToRebuild = 40000;
 		destroyed = true;
+		return true;
 	}
 	return false;
 }

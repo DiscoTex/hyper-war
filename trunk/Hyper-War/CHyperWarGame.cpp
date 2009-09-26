@@ -399,11 +399,246 @@ void CHyperWarGame::ProcessRawInput(LPARAM lParam)
 	rawMouse.process_raw_mouse((HRAWINPUT)lParam);
 }
 
+void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
+{
+	int colliderType, collideeType;
+	CDebris *debris;
+
+	//Store types
+	colliderType = gameObjects[collider]->GetType();
+	collideeType = gameObjects[collidee]->GetType();
+
+	//Special case of a weapon hit with a beam
+	//It is not destroyed, but gets a destroyed animation
+	/*
+	if((gameObjects[collider]->GetType() == TYPE_MISSILEBASE || gameObjects[collider]->GetType() == TYPE_FLAKCANNON) && (gameObjects[collidee]->GetType() == TYPE_BEAM || gameObjects[collidee]->GetType() == TYPE_NUKE))
+	{
+		if(
+		//Make some explodiness and give some points
+		hyperModeTimer = 0;
+		switch(gameObjects[collider]->GetSide())
+		{
+		case SIDE_BLUE:
+			gameParams.greenPoints += 500 * pointMultiplier;
+			break;
+		case SIDE_GREEN:
+			gameParams.bluePoints += 500 * pointMultiplier;
+			break;
+		}
+		for(int k=0; k<gameParams.debrisAmount*16; k++)
+		{
+			float  debrisAngle;
+			float  debrisSize;							
+
+			debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[collider]->GetRotation()[2];
+			debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
+
+			debris = new CDebris(&gameParams);
+			debris->SetMotionVector(
+				float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+				float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+				0);
+			debris->SetTranslation(
+				float(gameObjects[collider]->GetTranslation()[0]),
+				float(gameObjects[collider]->GetTranslation()[1]),
+				float(gameObjects[collider]->GetTranslation()[2]));
+			debris->SetScale(debrisSize, debrisSize, debrisSize);
+			debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+			gameObjects.push_back(debris);
+		}
+		audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+	}
+	*/
+	
+	//First deal with object i, then deal with objIndex
+	if(gameObjects[collider]->CanDestroy(collideeType))
+	{
+		switch(colliderType)
+		{
+		case TYPE_MOSHIP:
+
+			hyperModeTimer = 0;
+			SetHyperLevel(GetHyperLevel() - 1);
+			//waveNumber--;
+			for(int k=0; k<gameParams.debrisAmount*16; k++)
+			{
+				float  debrisAngle;
+				float  debrisSize;							
+
+				debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[collider]->GetRotation()[2];
+				debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
+
+				debris = new CDebris(&gameParams);
+				debris->SetMotionVector(
+					float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+					float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+					0);
+				debris->SetTranslation(
+					float(gameObjects[collider]->GetTranslation()[0]),
+					float(gameObjects[collider]->GetTranslation()[1]),
+					float(gameObjects[collider]->GetTranslation()[2]));
+				debris->SetScale(debrisSize, debrisSize, debrisSize);
+				debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+				gameObjects.push_back(debris);
+			}
+			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+			switch(gameObjects[collider]->GetSide())
+			{
+			case SIDE_BLUE:
+				gameParams.greenPoints += 500 * pointMultiplier;
+				break;
+			case SIDE_GREEN:
+				gameParams.bluePoints += 500 * pointMultiplier;
+			}
+			break;
+		case TYPE_CITY:
+
+			hyperModeTimer = 0;
+			switch(gameObjects[collider]->GetSide())
+			{
+			case SIDE_BLUE:
+				gameParams.numBlueCities--;
+				gameParams.greenPoints += 500 * pointMultiplier;
+				break;
+			case SIDE_GREEN:
+				gameParams.numGreenCities--;
+				gameParams.bluePoints += 500 * pointMultiplier;
+				break;
+			}
+			for(int k=0; k<gameParams.debrisAmount*16; k++)
+			{
+				float  debrisAngle;
+				float  debrisSize;							
+
+				debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[collider]->GetRotation()[2];
+				debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
+
+				debris = new CDebris(&gameParams);
+				debris->SetMotionVector(
+					float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+					float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+					0);
+				debris->SetTranslation(
+					float(gameObjects[collider]->GetTranslation()[0]),
+					float(gameObjects[collider]->GetTranslation()[1]),
+					float(gameObjects[collider]->GetTranslation()[2]));
+				debris->SetScale(debrisSize, debrisSize, debrisSize);
+				debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+				gameObjects.push_back(debris);
+			}
+			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+			break;
+
+		case TYPE_FLAKCANNON:
+		case TYPE_MISSILEBASE:
+
+			hyperModeTimer = 0;
+			switch(gameObjects[collider]->GetSide())
+			{
+			case SIDE_BLUE:
+				gameParams.greenPoints += 500 * pointMultiplier;
+				break;
+			case SIDE_GREEN:
+				gameParams.bluePoints += 500 * pointMultiplier;
+				break;
+			}
+			for(int k=0; k<gameParams.debrisAmount*16; k++)
+			{
+				float  debrisAngle;
+				float  debrisSize;							
+
+				debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[collider]->GetRotation()[2];
+				debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
+
+				debris = new CDebris(&gameParams);
+				debris->SetMotionVector(
+					float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+					float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+					0);
+				debris->SetTranslation(
+					float(gameObjects[collider]->GetTranslation()[0]),
+					float(gameObjects[collider]->GetTranslation()[1]),
+					float(gameObjects[collider]->GetTranslation()[2]));
+				debris->SetScale(debrisSize, debrisSize, debrisSize);
+				debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+				gameObjects.push_back(debris);
+			}
+			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+			break;
+		case TYPE_DEBRIS:
+			break;
+		default:
+			audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0);	
+			for(int k=0; k<gameParams.debrisAmount; k++)
+			{
+				debris = new CDebris(&gameParams);
+				debris->SetMotionVector(
+					float(gameObjects[collider]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
+					float(gameObjects[collider]->GetMotionVector()[1]+ (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
+					0);
+				debris->SetTranslation(
+					float(gameObjects[collider]->GetTranslation()[0]),
+					float(gameObjects[collider]->GetTranslation()[1]),
+					float(gameObjects[collider]->GetTranslation()[2]));
+				debris->SetScale(.1f, .1f, .1f);
+				gameObjects.push_back(debris);
+			}
+
+			if(collideeType == TYPE_DEBRIS)
+			{
+				switch(gameObjects[collider]->GetSide())
+				{
+				case SIDE_BLUE:
+					gameParams.greenPoints += 200 * pointMultiplier;
+					break;
+				case SIDE_GREEN:
+					gameParams.bluePoints += 200 * pointMultiplier;
+					break;
+				}
+			}
+			break;
+		}
+
+		//gameObjects.erase(gameObjects.begin() + i);
+		switch(gameObjects[collider]->GetSide())
+		{
+		case SIDE_BLUE:
+			gameParams.greenPoints += 200 * pointMultiplier;
+			break;
+		case SIDE_GREEN:
+			gameParams.bluePoints += 200 * pointMultiplier;
+			break;
+		}
+	}
+}
+
+void CHyperWarGame::CollideDestroyObjects(unsigned int obj1, unsigned int obj2)
+{
+	int obj1Type = gameObjects[obj1]->GetType();
+	int obj2Type = gameObjects[obj2]->GetType();
+
+	if(obj1 < obj2)
+	{
+		//Erase obj2 first
+		if(gameObjects[obj2]->CanDestroy(obj1Type))
+			gameObjects.erase(gameObjects.begin() + obj2);
+		if(gameObjects[obj1]->CanDestroy(obj2Type))
+			gameObjects.erase(gameObjects.begin() + obj1);
+	}
+	else
+	{
+		//Erase obj1 first
+		if(gameObjects[obj1]->CanDestroy(obj2Type))
+			gameObjects.erase(gameObjects.begin() + obj1);
+		if(gameObjects[obj2]->CanDestroy(obj1Type))
+			gameObjects.erase(gameObjects.begin() + obj2);
+	}
+}
+
 void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates Here
 {
 	unsigned int objIndex = -1;
 	unsigned int i=0;
-	int iType, objIndexType;
 	CDebris *debris;
 	CNuke *nuke;
 	CProjectile *pj;
@@ -620,459 +855,9 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		//If a collision occurred, handle it
 		if(objIndex != -1)
 		{
-			//Store types
-			iType = gameObjects[i]->GetType();
-			objIndexType = gameObjects[objIndex]->GetType();
-			
-			//Explode objects i and objIndex if they are the appropriate type of object
-			//You must delete them last first to maintain integrity of the indexes
-			if(i > objIndex)
-			{
-				if(gameObjects[i]->CanDestroy(objIndexType))
-				{
-					if(iType == TYPE_MOSHIP)
-					{
-						hyperModeTimer = 0;
-						SetHyperLevel(GetHyperLevel() - 1);
-						waveNumber--;
-						for(int k=0; k<gameParams.debrisAmount*16; k++)
-						{
-							float  debrisAngle;
-							float  debrisSize;							
-
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
-
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								0);
-							debris->SetTranslation(
-								float(gameObjects[i]->GetTranslation()[0]),
-								float(gameObjects[i]->GetTranslation()[1]),
-								float(gameObjects[i]->GetTranslation()[2]));
-							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
-							gameObjects.push_back(debris);
-						}
-						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
-						switch(gameObjects[i]->GetSide())
-						{
-						case SIDE_BLUE:
-							gameParams.greenPoints += 500 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.bluePoints += 500 * pointMultiplier;
-						}
-					}
-					else if(iType == TYPE_CITY)
-					{
-						hyperModeTimer = 0;
-						switch(gameObjects[i]->GetSide())
-						{
-						case SIDE_BLUE:
-							gameParams.numBlueCities--;
-							gameParams.greenPoints += 500 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.numGreenCities--;
-							gameParams.bluePoints += 500 * pointMultiplier;
-							break;
-						}
-						for(int k=0; k<gameParams.debrisAmount*16; k++)
-						{
-							float  debrisAngle;
-							float  debrisSize;							
-
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
-
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								0);
-							debris->SetTranslation(
-								float(gameObjects[i]->GetTranslation()[0]),
-								float(gameObjects[i]->GetTranslation()[1]),
-								float(gameObjects[i]->GetTranslation()[2]));
-							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
-							gameObjects.push_back(debris);
-						}
-						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
-					}
-					else if(iType != TYPE_DEBRIS)
-					{
-						audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0);	
-						for(int k=0; k<gameParams.debrisAmount; k++)
-						{
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(gameObjects[i]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
-								float(gameObjects[i]->GetMotionVector()[1]+ (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
-								0);
-							debris->SetTranslation(
-								float(gameObjects[i]->GetTranslation()[0]),
-								float(gameObjects[i]->GetTranslation()[1]),
-								float(gameObjects[i]->GetTranslation()[2]));
-							debris->SetScale(.1f, .1f, .1f);
-							gameObjects.push_back(debris);
-						}
-
-						if(objIndexType == TYPE_DEBRIS)
-						{
-							switch(gameObjects[i]->GetSide())
-							{
-							case SIDE_BLUE:
-								gameParams.greenPoints += 200 * pointMultiplier;
-								break;
-							case SIDE_GREEN:
-								gameParams.bluePoints += 200 * pointMultiplier;
-								break;
-							}
-						}
-					}
-
-					gameObjects.erase(gameObjects.begin() + i);
-					switch(gameObjects[i]->GetSide())
-					{
-					case SIDE_BLUE:
-						gameParams.greenPoints += 200 * pointMultiplier;
-						break;
-					case SIDE_GREEN:
-						gameParams.bluePoints += 200 * pointMultiplier;
-						break;
-					}
-				}
-				if(gameObjects[objIndex]->CanDestroy(iType))
-				{
-					if(objIndexType == TYPE_MOSHIP)
-					{
-						SetHyperLevel(GetHyperLevel() - 1);
-						waveNumber--;
-						hyperModeTimer = 0;
-						for(int k=0; k<gameParams.debrisAmount*16; k++)
-						{
-							float  debrisAngle;
-							float  debrisSize;							
-
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
-
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								0);
-							debris->SetTranslation(
-								float(gameObjects[i]->GetTranslation()[0]),
-								float(gameObjects[i]->GetTranslation()[1]),
-								float(gameObjects[i]->GetTranslation()[2]));
-							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
-							gameObjects.push_back(debris);
-						}
-						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
-						switch(gameObjects[objIndex]->GetSide())
-						{
-						case SIDE_BLUE:
-							gameParams.greenPoints += 500 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.bluePoints += 500 * pointMultiplier;
-							break;
-						}
-					}
-					else if(objIndexType == TYPE_CITY)
-					{
-						switch(gameObjects[objIndex]->GetSide())
-						{
-						case SIDE_BLUE:
-							gameParams.numBlueCities--;
-							gameParams.greenPoints += 500 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.numGreenCities--;
-							gameParams.bluePoints += 500 * pointMultiplier;
-							break;
-						}
-						hyperModeTimer = 0;
-						for(int k=0; k<gameParams.debrisAmount*16; k++)
-						{
-							float  debrisAngle;
-							float  debrisSize;							
-
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[objIndex]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
-
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								0);
-							debris->SetTranslation(
-								float(gameObjects[objIndex]->GetTranslation()[0]),
-								float(gameObjects[objIndex]->GetTranslation()[1]),
-								float(gameObjects[objIndex]->GetTranslation()[2]));
-							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
-							gameObjects.push_back(debris);
-						}
-						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
-					}
-					else if(objIndexType != TYPE_DEBRIS)
-					{
-						audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0);	
-						for(int k=0; k<gameParams.debrisAmount; k++)
-						{
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(gameObjects[objIndex]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
-								float(gameObjects[objIndex]->GetMotionVector()[1]+ (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
-								0);
-							debris->SetTranslation(
-								float(gameObjects[objIndex]->GetTranslation()[0]),
-								float(gameObjects[objIndex]->GetTranslation()[1]),
-								float(gameObjects[objIndex]->GetTranslation()[2]));
-							debris->SetScale(.1f, .1f, .1f);
-							gameObjects.push_back(debris);
-						}
-						if(iType == TYPE_DEBRIS)
-						{
-							switch(gameObjects[objIndex]->GetSide())
-							{
-							case SIDE_BLUE:
-								gameParams.greenPoints += 200 * pointMultiplier;
-								break;
-							case SIDE_GREEN:
-								gameParams.bluePoints += 200 * pointMultiplier;
-								break;
-							}
-						}
-					}
-					gameObjects.erase(gameObjects.begin() + objIndex);
-				}
-			}
-			else
-			{
-				if(gameObjects[objIndex]->CanDestroy(iType))
-				{
-					if(objIndexType == TYPE_MOSHIP)
-					{
-						SetHyperLevel(GetHyperLevel() - 1);
-						waveNumber--;
-						hyperModeTimer = 0;
-						for(int k=0; k<gameParams.debrisAmount*16; k++)
-						{
-							float  debrisAngle;
-							float  debrisSize;							
-
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
-
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								0);
-							debris->SetTranslation(
-								float(gameObjects[i]->GetTranslation()[0]),
-								float(gameObjects[i]->GetTranslation()[1]),
-								float(gameObjects[i]->GetTranslation()[2]));
-							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
-							gameObjects.push_back(debris);
-						}
-						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
-						switch(gameObjects[objIndex]->GetSide())
-						{
-						case SIDE_BLUE:
-							gameParams.greenPoints += 500 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.bluePoints += 500 * pointMultiplier;
-						}
-					}
-					else if(objIndexType == TYPE_CITY)
-					{
-						switch(gameObjects[objIndex]->GetSide())
-						{
-						case SIDE_BLUE:
-							gameParams.numBlueCities--;
-							gameParams.greenPoints += 500 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.numGreenCities--;
-							gameParams.bluePoints += 500 * pointMultiplier;
-							break;
-						}
-						hyperModeTimer = 0;
-						for(int k=0; k<gameParams.debrisAmount*16; k++)
-						{
-							float  debrisAngle;
-							float  debrisSize;							
-
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[objIndex]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
-
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								0);
-							debris->SetTranslation(
-								float(gameObjects[objIndex]->GetTranslation()[0]),
-								float(gameObjects[objIndex]->GetTranslation()[1]),
-								float(gameObjects[objIndex]->GetTranslation()[2]));
-							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
-							gameObjects.push_back(debris);
-						}
-						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
-					}
-					else if(objIndexType != TYPE_DEBRIS)
-					{
-						audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0);	
-						for(int k=0; k<gameParams.debrisAmount; k++)
-						{
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(gameObjects[objIndex]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0),
-								float(gameObjects[objIndex]->GetMotionVector()[1] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0),
-								0);
-							debris->SetTranslation(
-								float(gameObjects[objIndex]->GetTranslation()[0]),
-								float(gameObjects[objIndex]->GetTranslation()[1]),
-								float(gameObjects[objIndex]->GetTranslation()[2]));
-							debris->SetScale(.1f, .1f, .1f);
-							gameObjects.push_back(debris);
-
-						}
-						if(iType == TYPE_DEBRIS)
-						{
-							switch(gameObjects[objIndex]->GetSide())
-							{
-							case SIDE_BLUE:
-								gameParams.greenPoints += 200 * pointMultiplier;
-								break;
-							case SIDE_GREEN:
-								gameParams.bluePoints += 200 * pointMultiplier;
-								break;
-							}
-						}
-					}
-					gameObjects.erase(gameObjects.begin() + objIndex);
-				}
-				if(gameObjects[i]->CanDestroy(objIndexType))
-				{
-					if(iType == TYPE_MOSHIP)
-					{
-						SetHyperLevel(GetHyperLevel() - 1);
-						waveNumber--;
-						hyperModeTimer = 0;
-						for(int k=0; k<gameParams.debrisAmount*16; k++)
-						{
-							float  debrisAngle;
-							float  debrisSize;							
-
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
-
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								0);
-							debris->SetTranslation(
-								float(gameObjects[i]->GetTranslation()[0]),
-								float(gameObjects[i]->GetTranslation()[1]),
-								float(gameObjects[i]->GetTranslation()[2]));
-							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
-							gameObjects.push_back(debris);
-						}
-						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
-						switch(gameObjects[i]->GetSide())
-						{
-						case SIDE_BLUE:
-							gameParams.greenPoints += 500 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.bluePoints += 500 * pointMultiplier;
-						}
-					}
-					else if(iType == TYPE_CITY)
-					{
-						switch(gameObjects[i]->GetSide())
-						{
-						case SIDE_BLUE:
-							gameParams.numBlueCities--;
-							gameParams.greenPoints += 500 * pointMultiplier;
-							break;
-						case SIDE_GREEN:
-							gameParams.numGreenCities--;
-							gameParams.bluePoints += 500 * pointMultiplier;
-							break;
-						}
-						hyperModeTimer = 0;
-						for(int k=0; k<gameParams.debrisAmount*16; k++)
-						{
-							float  debrisAngle;
-							float  debrisSize;							
-
-							debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[i]->GetRotation()[2];
-							debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
-
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-								0);
-							debris->SetTranslation(
-								float(gameObjects[i]->GetTranslation()[0]),
-								float(gameObjects[i]->GetTranslation()[1]),
-								float(gameObjects[i]->GetTranslation()[2]));
-							debris->SetScale(debrisSize, debrisSize, debrisSize);
-							debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
-							gameObjects.push_back(debris);
-						}
-						audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
-					}
-					else if(iType != TYPE_DEBRIS)
-					{
-						audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0);	
-						for(int k=0; k<gameParams.debrisAmount; k++)
-						{
-							debris = new CDebris(&gameParams);
-							debris->SetMotionVector(
-								float(gameObjects[i]->GetMotionVector()[0] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
-								float(gameObjects[i]->GetMotionVector()[1] + (gameParams.randoms[gameParams.randIndex++%1024]%100-50)/100.0), 
-								0);
-							debris->SetTranslation(
-								float(gameObjects[i]->GetTranslation()[0]),
-								float(gameObjects[i]->GetTranslation()[1]),
-								float(gameObjects[i]->GetTranslation()[2]));
-							debris->SetScale(.1f, .1f, .1f);
-							gameObjects.push_back(debris);
-						}
-						if(objIndexType == TYPE_DEBRIS)
-						{
-							switch(gameObjects[i]->GetSide())
-							{
-							case SIDE_BLUE:
-								gameParams.greenPoints += 200 * pointMultiplier;
-								break;
-							case SIDE_GREEN:
-								gameParams.bluePoints += 200 * pointMultiplier;
-								break;
-							}
-						}
-					}
-					gameObjects.erase(gameObjects.begin() + i);
-				}
-			}
+			TryCollide(objIndex, i);
+			TryCollide(i, objIndex);
+			CollideDestroyObjects(objIndex, i);
 		}
 	}
 

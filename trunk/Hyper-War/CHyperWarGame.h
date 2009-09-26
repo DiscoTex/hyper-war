@@ -34,6 +34,8 @@ public:
 	BOOL Initialize(GL_Window* window, Keys* keys);		// Any GL Init Code & User Initialiazation Goes Here
 	void Deinitialize();								// Any User DeInitialization Goes Here
 	void ProcessRawInput(LPARAM lParam);				// Process new raw input structure
+	void TryCollide(unsigned int collider, unsigned int collidee);
+	void CollideDestroyObjects(unsigned int obj1, unsigned int obj2);
 	void Update (DWORD milliseconds);					// Perform Motion Updates Here
 	void DrawCursors();
 	void Draw();										// Draw the current frame
