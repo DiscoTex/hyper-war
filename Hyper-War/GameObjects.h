@@ -220,6 +220,7 @@ public:
 	float* GetNukeVector();
 	void  SetCursorPointer(float* newPCursorPos) {pCursorPos = newPCursorPos;}
 	void Draw();
+	bool IsDisabled() {return destroyed;}
 
 private:
 	bool loaded;
@@ -268,6 +269,7 @@ public:
 	void GetProjVector(int* TTL, float* projVector);
 	float* GetProjTranslation();
 	void AddTimeSinceFired(DWORD milliseconds);
+	bool IsDisabled() {return destroyed;}
 
 	void Draw();
 private:
