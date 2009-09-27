@@ -15,10 +15,10 @@
 using namespace std;
 
 // Maximum data buffers we will need.
-#define NUM_BUFFERS 13
+#define NUM_BUFFERS 15
 
 // Maximum emissions we will need.
-#define NUM_SOURCES 13
+#define NUM_SOURCES 16
 
 #define AUDIO_RENDER_FREQ_MS  67  //67 == 15 times per seconds
 
@@ -36,7 +36,9 @@ typedef enum TYPE_SOUND
 	SOUND_LEVEL3,
 	SOUND_LEVEL4,
 	SOUND_LEVEL5,
-	SOUND_ZAP
+	SOUND_ZAP,
+	SOUND_BOOM,
+	SOUND_UFOBLAST
 };
 
 class CAudioRenderer
@@ -50,7 +52,7 @@ public:
 
 	//Render/update OpenAL audio rendering
 	void RenderAudio(DWORD milliseconds, vector< CGameObject* > gObjects);
-	void PlaySound(TYPE_SOUND soundIndex, float xpos, float ypos) {alSourcePlay(Sources[soundIndex]);}
+	void PlaySound(TYPE_SOUND soundIndex, float xpos, float ypos, float pitch=1);
 
 	void StopAll();
 private:

@@ -1107,7 +1107,10 @@ void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gW
 	{
 		timeToRebuild -= milliseconds * numCities;
 		if(timeToRebuild < 0)
+		{
+			collisionSpheres[0]->translation[0] = .50f;
 			destroyed = false;
+		}
 	}
 }
 
@@ -1116,7 +1119,10 @@ bool CMissileBase::CanDestroy(int destroyerType)
 	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM)
 	{
 		destroyed = true;
-		timeToRebuild = 40000;
+		timeToRebuild = 30000;
+
+		collisionSpheres[0]->translation[0] = -50;
+
 		return true;
 	}
 	return false;
@@ -1706,7 +1712,8 @@ bool CFlakCannon::CanDestroy(int destroyerType)
 {
 	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM)
 	{
-		timeToRebuild = 40000;
+		collisionSpheres[0]->translation[0] = 50;
+		timeToRebuild = 30000;
 		destroyed = true;
 		return true;
 	}
@@ -1771,7 +1778,10 @@ void CFlakCannon::AddTimeSinceFired(DWORD milliseconds)
 	{
 		timeToRebuild -= milliseconds * numCities;
 		if(timeToRebuild < 0)
+		{
+			collisionSpheres[0]->translation[0] = 0;
 			destroyed = false;
+		}
 	}
 }
 
