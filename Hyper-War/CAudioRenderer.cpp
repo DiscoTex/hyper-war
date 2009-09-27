@@ -74,6 +74,9 @@ ALboolean CAudioRenderer::LoadALData()
 	Buffers[SOUND_LEVEL4] = alutCreateBufferFromFile ("level4.wav");
 	Buffers[SOUND_LEVEL5] = alutCreateBufferFromFile ("level5.wav");
 	Buffers[SOUND_ZAP] = alutCreateBufferFromFile ("zap.wav");
+	Buffers[SOUND_BOOM] = alutCreateBufferFromFile ("boom.wav");
+	Buffers[SOUND_UFOBLAST] = alutCreateBufferFromFile ("ufoblast.wav");
+
 
 	// Bind buffers into audio sources.
 	alGenSources(NUM_SOURCES, Sources);
@@ -83,28 +86,28 @@ ALboolean CAudioRenderer::LoadALData()
 
 	alSourcei (Sources[SOUND_EXPLOSION], AL_BUFFER,   Buffers[SOUND_EXPLOSION]   );
 	alSourcef (Sources[SOUND_EXPLOSION], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_EXPLOSION], AL_GAIN,     0.5f              );
+	alSourcef (Sources[SOUND_EXPLOSION], AL_GAIN,     0.75f              );
 	alSourcefv(Sources[SOUND_EXPLOSION], AL_POSITION, SourcesPos[SOUND_EXPLOSION]);
 	alSourcefv(Sources[SOUND_EXPLOSION], AL_VELOCITY, SourcesVel[SOUND_EXPLOSION]);
 	alSourcei (Sources[SOUND_EXPLOSION], AL_LOOPING,  AL_FALSE           );
 
 	alSourcei (Sources[SOUND_SHOOT], AL_BUFFER,   Buffers[SOUND_SHOOT]   );
 	alSourcef (Sources[SOUND_SHOOT], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_SHOOT], AL_GAIN,     0.5f              );
+	alSourcef (Sources[SOUND_SHOOT], AL_GAIN,     1.0f              );
 	alSourcefv(Sources[SOUND_SHOOT], AL_POSITION, SourcesPos[SOUND_SHOOT]);
 	alSourcefv(Sources[SOUND_SHOOT], AL_VELOCITY, SourcesVel[SOUND_SHOOT]);
 	alSourcei (Sources[SOUND_SHOOT], AL_LOOPING,  AL_FALSE           );
 
 	alSourcei (Sources[SOUND_INTRO], AL_BUFFER,   Buffers[SOUND_INTRO]   );
 	alSourcef (Sources[SOUND_INTRO], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_INTRO], AL_GAIN,     0.17f              );
+	alSourcef (Sources[SOUND_INTRO], AL_GAIN,     .075f              );
 	alSourcefv(Sources[SOUND_INTRO], AL_POSITION, SourcesPos[SOUND_INTRO]);
 	alSourcefv(Sources[SOUND_INTRO], AL_VELOCITY, SourcesVel[SOUND_INTRO]);
 	alSourcei (Sources[SOUND_INTRO], AL_LOOPING,  AL_FALSE           );
 
 	alSourcei (Sources[SOUND_MISSILE_EXPL], AL_BUFFER,   Buffers[SOUND_MISSILE_EXPL]   );
 	alSourcef (Sources[SOUND_MISSILE_EXPL], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_MISSILE_EXPL], AL_GAIN,     0.5f              );
+	alSourcef (Sources[SOUND_MISSILE_EXPL], AL_GAIN,     1.0f              );
 	alSourcefv(Sources[SOUND_MISSILE_EXPL], AL_POSITION, SourcesPos[SOUND_MISSILE_EXPL]);
 	alSourcefv(Sources[SOUND_MISSILE_EXPL], AL_VELOCITY, SourcesVel[SOUND_MISSILE_EXPL]);
 	alSourcei (Sources[SOUND_MISSILE_EXPL], AL_LOOPING,  AL_FALSE           );
@@ -167,10 +170,24 @@ ALboolean CAudioRenderer::LoadALData()
 
 	alSourcei (Sources[SOUND_ZAP], AL_BUFFER,   Buffers[SOUND_ZAP]   );
 	alSourcef (Sources[SOUND_ZAP], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_ZAP], AL_GAIN,     1.0f              );
+	alSourcef (Sources[SOUND_ZAP], AL_GAIN,     .5f              );
 	alSourcefv(Sources[SOUND_ZAP], AL_POSITION, SourcesPos[SOUND_ZAP]);
 	alSourcefv(Sources[SOUND_ZAP], AL_VELOCITY, SourcesVel[SOUND_ZAP]);
 	alSourcei (Sources[SOUND_ZAP], AL_LOOPING,  AL_FALSE           );
+
+	alSourcei (Sources[SOUND_BOOM], AL_BUFFER,   Buffers[SOUND_BOOM]   );
+	alSourcef (Sources[SOUND_BOOM], AL_PITCH,    1.0f              );
+	alSourcef (Sources[SOUND_BOOM], AL_GAIN,     .65f              );
+	alSourcefv(Sources[SOUND_BOOM], AL_POSITION, SourcesPos[SOUND_BOOM]);
+	alSourcefv(Sources[SOUND_BOOM], AL_VELOCITY, SourcesVel[SOUND_BOOM]);
+	alSourcei (Sources[SOUND_BOOM], AL_LOOPING,  AL_FALSE           );
+
+	alSourcei (Sources[SOUND_UFOBLAST], AL_BUFFER,   Buffers[SOUND_UFOBLAST]   );
+	alSourcef (Sources[SOUND_UFOBLAST], AL_PITCH,    1.0f              );
+	alSourcef (Sources[SOUND_UFOBLAST], AL_GAIN,     .65f              );
+	alSourcefv(Sources[SOUND_UFOBLAST], AL_POSITION, SourcesPos[SOUND_UFOBLAST]);
+	alSourcefv(Sources[SOUND_UFOBLAST], AL_VELOCITY, SourcesVel[SOUND_UFOBLAST]);
+	alSourcei (Sources[SOUND_UFOBLAST], AL_LOOPING,  AL_FALSE           );
 
 	// Do another error check and return.
 
@@ -216,4 +233,10 @@ void CAudioRenderer::StopAll()
 {
 	for(int i=0; i<NUM_SOURCES; i++)
 		alSourceStop(Sources[i]);
+}
+
+void CAudioRenderer::PlaySound(TYPE_SOUND soundIndex, float xpos, float ypos, float pitch)
+{
+	alSourcef (Sources[soundIndex], AL_PITCH, pitch);
+	alSourcePlay(Sources[soundIndex]);
 }

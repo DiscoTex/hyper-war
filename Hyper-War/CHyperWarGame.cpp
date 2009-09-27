@@ -407,48 +407,6 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 	//Store types
 	colliderType = gameObjects[collider]->GetType();
 	collideeType = gameObjects[collidee]->GetType();
-
-	//Special case of a weapon hit with a beam
-	//It is not destroyed, but gets a destroyed animation
-	/*
-	if((gameObjects[collider]->GetType() == TYPE_MISSILEBASE || gameObjects[collider]->GetType() == TYPE_FLAKCANNON) && (gameObjects[collidee]->GetType() == TYPE_BEAM || gameObjects[collidee]->GetType() == TYPE_NUKE))
-	{
-		if(
-		//Make some explodiness and give some points
-		hyperModeTimer = 0;
-		switch(gameObjects[collider]->GetSide())
-		{
-		case SIDE_BLUE:
-			gameParams.greenPoints += 500 * pointMultiplier;
-			break;
-		case SIDE_GREEN:
-			gameParams.bluePoints += 500 * pointMultiplier;
-			break;
-		}
-		for(int k=0; k<gameParams.debrisAmount*16; k++)
-		{
-			float  debrisAngle;
-			float  debrisSize;							
-
-			debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 180 + gameObjects[collider]->GetRotation()[2];
-			debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
-
-			debris = new CDebris(&gameParams);
-			debris->SetMotionVector(
-				float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-				float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
-				0);
-			debris->SetTranslation(
-				float(gameObjects[collider]->GetTranslation()[0]),
-				float(gameObjects[collider]->GetTranslation()[1]),
-				float(gameObjects[collider]->GetTranslation()[2]));
-			debris->SetScale(debrisSize, debrisSize, debrisSize);
-			debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
-			gameObjects.push_back(debris);
-		}
-		audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
-	}
-	*/
 	
 	//First deal with object i, then deal with objIndex
 	if(gameObjects[collider]->CanDestroy(collideeType))
@@ -481,7 +439,8 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 				gameObjects.push_back(debris);
 			}
-			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+			audioRenderer.PlaySound(SOUND_UFOBLAST, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
+
 			switch(gameObjects[collider]->GetSide())
 			{
 			case SIDE_BLUE:
@@ -526,7 +485,7 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 				gameObjects.push_back(debris);
 			}
-			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 200.0 + .5f);
 			break;
 
 		case TYPE_FLAKCANNON:
@@ -563,12 +522,12 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 				gameObjects.push_back(debris);
 			}
-			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
+			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 200.0 + .5f);
 			break;
 		case TYPE_DEBRIS:
 			break;
 		default:
-			audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0);	
+			audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);	
 			for(int k=0; k<gameParams.debrisAmount; k++)
 			{
 				debris = new CDebris(&gameParams);
@@ -620,17 +579,17 @@ void CHyperWarGame::CollideDestroyObjects(unsigned int obj1, unsigned int obj2)
 	if(obj1 < obj2)
 	{
 		//Erase obj2 first
-		if(gameObjects[obj2]->CanDestroy(obj1Type))
+		if(gameObjects[obj2]->CanDestroy(obj1Type) && obj2Type != TYPE_FLAKCANNON && obj2Type != TYPE_MISSILEBASE)
 			gameObjects.erase(gameObjects.begin() + obj2);
-		if(gameObjects[obj1]->CanDestroy(obj2Type))
+		if(gameObjects[obj1]->CanDestroy(obj2Type) && obj1Type != TYPE_FLAKCANNON && obj1Type != TYPE_MISSILEBASE)
 			gameObjects.erase(gameObjects.begin() + obj1);
 	}
 	else
 	{
 		//Erase obj1 first
-		if(gameObjects[obj1]->CanDestroy(obj2Type))
+		if(gameObjects[obj1]->CanDestroy(obj2Type) && obj1Type != TYPE_FLAKCANNON && obj1Type != TYPE_MISSILEBASE)
 			gameObjects.erase(gameObjects.begin() + obj1);
-		if(gameObjects[obj2]->CanDestroy(obj1Type))
+		if(gameObjects[obj2]->CanDestroy(obj1Type) && obj2Type != TYPE_FLAKCANNON && obj2Type != TYPE_MISSILEBASE)
 			gameObjects.erase(gameObjects.begin() + obj2);
 	}
 }
@@ -753,7 +712,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				//Launch projectile
 				//Set flak cannon to "just launched"
 				((CFlakCannon*)(gameObjects[i]))->Fire();
-				audioRenderer.PlaySound(SOUND_SHOOT, 0, 0);				
+				audioRenderer.PlaySound(SOUND_SHOOT, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 800.0 + .875f);
 
 				//Spawn a projectile
 				pj = new CProjectile(&gameParams);
@@ -800,6 +759,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				}
 				// Time to explode
 				gameObjects.erase(gameObjects.begin() + i);
+				audioRenderer.PlaySound(SOUND_BOOM, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 500.0 + .8f);
+				//audioRenderer.PlaySound(SOUND_BOOM, 0, 0);
 				continue;
 			}		
 		}
@@ -1925,7 +1886,7 @@ void CHyperWarGame::NextWave()
 	{
 		SetHyperLevel(5);
 
-		for(int i=0; i<6; i++)
+		for(int i=0; i<totalWaves/5; i++)
 		{
 			//create a mothership
 			moship = new CMothership(&gameParams);

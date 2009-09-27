@@ -99,4 +99,5 @@ private:
 	int							nameIndex;
 	double						currentLetter;
 	bool						listTime;
+
 };

@@ -220,7 +220,6 @@ public:
 	float* GetNukeVector();
 	void  SetCursorPointer(float* newPCursorPos) {pCursorPos = newPCursorPos;}
 	void Draw();
-	bool IsDisabled() {return destroyed;}
 
 private:
 	bool loaded;
