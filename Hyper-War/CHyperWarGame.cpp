@@ -439,7 +439,10 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 				gameObjects.push_back(debris);
 			}
-			audioRenderer.PlaySound(SOUND_UFOBLAST, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
+			audioRenderer.PlaySound(SOUND_UFOBLAST, 
+				gameObjects[collider]->GetTranslation()[0],
+				gameObjects[collider]->GetTranslation()[1],
+				gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
 
 			switch(gameObjects[collider]->GetSide())
 			{
@@ -485,7 +488,10 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 				gameObjects.push_back(debris);
 			}
-			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 200.0 + .5f);
+			audioRenderer.PlaySound(SOUND_EXPLOSION, 
+				gameObjects[collider]->GetTranslation()[0],
+				gameObjects[collider]->GetTranslation()[1],
+				gameParams.randoms[gameParams.randIndex++%1024]%100 / 200.0 + .5f);
 			break;
 
 		case TYPE_FLAKCANNON:
@@ -522,12 +528,17 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 				gameObjects.push_back(debris);
 			}
-			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 200.0 + .5f);
+			audioRenderer.PlaySound(SOUND_EXPLOSION, 
+				gameObjects[collider]->GetTranslation()[0],
+				gameObjects[collider]->GetTranslation()[1],
+				gameParams.randoms[gameParams.randIndex++%1024]%100 / 200.0 + .5f);
 			break;
 		case TYPE_DEBRIS:
 			break;
 		default:
-			audioRenderer.PlaySound(SOUND_MISSILE_EXPL, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);	
+			audioRenderer.PlaySound(SOUND_MISSILE_EXPL, gameObjects[collider]->GetTranslation()[0],
+				gameObjects[collider]->GetTranslation()[1],
+				gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);	
 			for(int k=0; k<gameParams.debrisAmount; k++)
 			{
 				debris = new CDebris(&gameParams);
@@ -712,13 +723,18 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				//Launch projectile
 				//Set flak cannon to "just launched"
 				((CFlakCannon*)(gameObjects[i]))->Fire();
-				audioRenderer.PlaySound(SOUND_SHOOT, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 800.0 + .875f);
+				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
+
+				audioRenderer.PlaySound(SOUND_SHOOT, 
+					position[0], 
+					position[1],
+					gameParams.randoms[gameParams.randIndex++%1024]%100 / 800.0 + .875f);
 
 				//Spawn a projectile
 				pj = new CProjectile(&gameParams);
 				pj->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
 				pj->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
-				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
+				
 				pj->SetTranslation(position[0], position[1], -.0010f);
 				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
 				pj->SetMotionVector(projVector[0], projVector[1], projVector[2]);
@@ -759,8 +775,10 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				}
 				// Time to explode
 				gameObjects.erase(gameObjects.begin() + i);
-				audioRenderer.PlaySound(SOUND_BOOM, 0, 0, gameParams.randoms[gameParams.randIndex++%1024]%100 / 500.0 + .8f);
-				//audioRenderer.PlaySound(SOUND_BOOM, 0, 0);
+				audioRenderer.PlaySound(SOUND_BOOM, 
+					gameObjects[i]->GetTranslation()[0],
+					gameObjects[i]->GetTranslation()[1],
+					gameParams.randoms[gameParams.randIndex++%1024]%100 / 500.0 + .8f);
 				continue;
 			}		
 		}
@@ -796,7 +814,9 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				((CMothership*)(gameObjects[i]))->SetMyBeam(beam);
 				beam->SetMyParent(((CMothership*)(gameObjects[i])));
 				gameObjects.push_back(beam);
-				audioRenderer.PlaySound(SOUND_ZAP, 0, 0);
+				audioRenderer.PlaySound(SOUND_ZAP, 
+					gameObjects[i]->GetTranslation()[0], 
+					gameObjects[i]->GetTranslation()[1]);
 			}
 		}
 		else if(gameObjects[i]->GetType() == TYPE_BEAM)
