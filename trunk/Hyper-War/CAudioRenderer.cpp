@@ -237,6 +237,13 @@ void CAudioRenderer::StopAll()
 
 void CAudioRenderer::PlaySound(TYPE_SOUND soundIndex, float xpos, float ypos, float pitch)
 {
+	ALfloat position[3];
+
+	position[0] = xpos/10.0;
+	position[1] = ypos/10.0;
+	position[2] = 0;
+
+	alSourcefv(Sources[soundIndex], AL_POSITION, position);
 	alSourcef (Sources[soundIndex], AL_PITCH, pitch);
 	alSourcePlay(Sources[soundIndex]);
 }
