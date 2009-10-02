@@ -35,7 +35,8 @@ enum{
 	TYPE_FLAKCANNON,
 	TYPE_PROJECTILE,
 	TYPE_MOSHIP,
-	TYPE_BEAM
+	TYPE_BEAM,
+	TYPE_BLACKHOLE
 };
 
 enum{
@@ -343,4 +344,27 @@ public:
 private:
 	int countDown;
 	CBeam* myBeam;
+};
+
+class CBlackHole : public CGameObject
+{
+public:
+	CBlackHole(sGameParams *newGameParams);
+	~CBlackHole();
+
+	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells) {}
+	int	 GetType() {return TYPE_BLACKHOLE;}
+	bool CanDestroy(int destroyerType) {return false;}
+	void SetMyGravity(sGravityWell *newGravity) {myGravity = newGravity;}
+	int  GetTTL() {return TTL;}
+	void KillGravity() {myGravity->mass = 0;}
+
+	void ProcessMotion(DWORD milliseconds, Keys* keys);
+
+	void Draw();
+
+private:
+	int TTL;
+	int animVal;
+	sGravityWell *myGravity;
 };
