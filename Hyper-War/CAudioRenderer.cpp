@@ -93,7 +93,7 @@ ALboolean CAudioRenderer::LoadALData()
 
 	alSourcei (Sources[SOUND_SHOOT], AL_BUFFER,   Buffers[SOUND_SHOOT]   );
 	alSourcef (Sources[SOUND_SHOOT], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_SHOOT], AL_GAIN,     1.0f              );
+	alSourcef (Sources[SOUND_SHOOT], AL_GAIN,     .33f              );
 	alSourcefv(Sources[SOUND_SHOOT], AL_POSITION, SourcesPos[SOUND_SHOOT]);
 	alSourcefv(Sources[SOUND_SHOOT], AL_VELOCITY, SourcesVel[SOUND_SHOOT]);
 	alSourcei (Sources[SOUND_SHOOT], AL_LOOPING,  AL_FALSE           );

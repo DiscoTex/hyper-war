@@ -2216,3 +2216,104 @@ void CBeam::Draw()
 #endif
 
 }
+
+CBlackHole::CBlackHole(sGameParams *newGameParams) : CGameObject(newGameParams)
+{
+	sCollisionSphere *cSphere  = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = 0;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 1;
+	cSphere->globalPosition[0] = -10;
+	cSphere->globalPosition[1] = -10;
+	cSphere->globalPosition[2] = -10;
+	collisionSpheres.push_back(cSphere);
+
+	TTL = 10000;
+	animVal = 0;
+}
+
+CBlackHole::~CBlackHole()
+{
+	myGravity->mass = 0;
+}
+
+void CBlackHole::ProcessMotion(DWORD milliseconds, Keys* keys)
+{
+	CGameObject::ProcessMotion(milliseconds, keys);
+
+	TTL -= milliseconds;
+
+	myGravity->translation[0] = translation[0];
+	myGravity->translation[1] = translation[1];
+	myGravity->translation[2] = translation[2];
+}
+
+void CBlackHole::Draw()
+{
+	glPushMatrix();
+	
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);	
+	animVal++;
+
+	//Draw a black circle
+	glColor3f(0, 0, 0);
+	glBegin(GL_TRIANGLES);
+	for (int i=0; i<360; i+=4)
+	{
+		float degInRad = i*DEG2RAD;
+		float radius = 1.0f;
+
+		glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius, -.001f);
+
+		degInRad = (i+4)*DEG2RAD;
+		glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius, -.001f);
+
+		glVertex3f(0, .1f, -.001f);
+	}
+	glEnd();
+
+	//Draw some electricity around it
+	glColor3f(color[0], color[1], color[2]);
+	glBegin(GL_LINE_STRIP);
+	for (int i=0; i<=360; i+=20)
+	{
+		float degInRad = i*DEG2RAD;
+		float radius = 1.0f;
+
+		glVertex3f(cos(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/ 4.0f,
+			sin(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/4.0f, -.001f);
+
+		degInRad = (i+4)*DEG2RAD;
+
+		glVertex3f(cos(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/ 4.0f,
+			sin(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/4.0f, -.001f);
+
+	}
+	glEnd();
+
+	//Draw some electricity around it
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINE_STRIP);
+	for (int i=0; i<=360; i+=20)
+	{
+		float degInRad = i*DEG2RAD;
+		float radius = 1.0f;
+
+		glVertex3f(cos(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/ 4.0f,
+			sin(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/4.0f, -.001f);
+
+		degInRad = (i+4)*DEG2RAD;
+
+		glVertex3f(cos(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/ 4.0f,
+			sin(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/4.0f, -.001f);
+
+	}
+	glEnd();
+
+	glPopMatrix();
+}

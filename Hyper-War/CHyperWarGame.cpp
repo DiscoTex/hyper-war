@@ -728,7 +728,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				audioRenderer.PlaySound(SOUND_SHOOT, 
 					position[0], 
 					position[1],
-					gameParams.randoms[gameParams.randIndex++%1024]%100 / 800.0 + .875f);
+					gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
 
 				//Spawn a projectile
 				pj = new CProjectile(&gameParams);
@@ -778,7 +778,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				audioRenderer.PlaySound(SOUND_BOOM, 
 					gameObjects[i]->GetTranslation()[0],
 					gameObjects[i]->GetTranslation()[1],
-					gameParams.randoms[gameParams.randIndex++%1024]%100 / 500.0 + .8f);
+					gameParams.randoms[gameParams.randIndex++%1024]%100 / 200.0 + .5f);
 				continue;
 			}		
 		}
@@ -826,6 +826,15 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			{
 				((CBeam*)(gameObjects[i]))->myParent->SetMyBeam(NULL);
 				gameObjects.erase(gameObjects.begin() + i);
+				continue;
+			}
+		}
+		else if(gameObjects[i]->GetType() == TYPE_BLACKHOLE)
+		{
+			if(((CBlackHole*)(gameObjects[i]))->GetTTL() < 0)
+			{
+				((CBlackHole*)(gameObjects[i]))->KillGravity();
+				gameObjects.erase(gameObjects.begin() + i);				
 				continue;
 			}
 		}
@@ -1961,16 +1970,25 @@ void CHyperWarGame::NextWave()
 		//Random gravity wells
 		if(totalWaves % 6 == 0 && totalWaves > 18)
 		{
-			/*
 			//Add a random gravity well
 			sGravityWell *gw = new sGravityWell();
-			gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 2;
-			gw->translation[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 5.5f;
-			gw->translation[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 3.5f;
+			gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 5;
+			gw->translation[0] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 2.5f;
+			gw->translation[1] = (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f) * 1.5f;
 			gw->translation[2] = 0;
 			gravityWells.push_back(gw);
-			*/
+			
+			CBlackHole *hole = new CBlackHole(&gameParams);
+			hole->SetColor(0, 0, .8f);
+			hole->SetScale(.1f, .1f, .1f);
+			hole->SetTranslation(gw->translation[0], gw->translation[1], gw->translation[2]);
+			hole->SetMotionVector(.1, 0, 0);
+			hole->SetSide(SIDE_BLUE);
+			hole->SetMyGravity(gw);
+
+			gameObjects.push_back(hole);
 		}
+
 		if(totalWaves % 4 == 0 && gameParams.gameMode != MODE_SINGLE)
 		{
 			SetHyperLevel(GetHyperLevel() + 1);
