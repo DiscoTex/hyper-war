@@ -122,7 +122,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	gameParams.waveTime = 5000;
 	gameParams.greenPoints = 0;
 	gameParams.bluePoints = 0;
-	gameParams.debrisAmount = 3;
+	gameParams.debrisAmount = 5;
 	gameParams.flakDebrisFactor = 6;
 	gameParams.mouse1Index = 0;
 	gameParams.mouse2Index = 3;
@@ -1255,11 +1255,12 @@ void CHyperWarGame::DrawCursors()
 
 	glTranslatef(mousePos[0][0], mousePos[0][1], 0);
 	glScalef(.05f, .05f, 1);
-	float randVal1 = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX;
-	float randVal2 = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX;
+	float randVal1 = .5f + gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX / 2.0f;
+	float randVal2 = .5f + gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX / 2.0f;
+	float randVal3 = .5f + gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX / 2.0f;
 
 	if((gameParams.greenPoints / 50000.0) > gameParams.greenSuperFires + 1)
-		glColor3f(randVal1, 1, randVal1);
+		glColor3f(randVal1, randVal2, randVal3);
 	else
 		glColor3f(0, 1, 0);
 
@@ -1287,7 +1288,7 @@ void CHyperWarGame::DrawCursors()
 		glScalef(.05f, .05f, 1);
 
 		if((gameParams.bluePoints / 50000.0) > gameParams.blueSuperFires + 1)
-			glColor3f(randVal1, 1, randVal1);
+			glColor3f(randVal1, randVal2, randVal3);
 		else
 			glColor3f(0, 1, 1);
 
@@ -2016,7 +2017,7 @@ void CHyperWarGame::NextWave()
 	}
 	else
 	{
-		for(int i=0; i<waveNumber/6 + 1 && i < 7; i++)
+		for(int i=0; i<waveNumber/10 + 1 && i < 7; i++)
 		{
 			//Use layers for x location between 2.7 and 7.7
 
@@ -2033,7 +2034,7 @@ void CHyperWarGame::NextWave()
 			nuke->SetColor(0, 0, .8f);
 			nuke->SetScale(.1f, .1f, .1f);
 			nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX) * 1.7f, 0);
-			nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
+			nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/16.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
 			nuke->SetThrust(.025f * waveNumber);
 			nuke->SetSide(SIDE_BLUE);
 			gameObjects.push_back(nuke);
@@ -2054,7 +2055,7 @@ void CHyperWarGame::NextWave()
 		}
 
 		//Random gravity wells
-		if(totalWaves % 6 == 0 && totalWaves > 18)
+		if(totalWaves % 6 == 0 && totalWaves > 24)
 		{
 			//Add a random gravity well
 			sGravityWell *gw = new sGravityWell();
@@ -2068,7 +2069,9 @@ void CHyperWarGame::NextWave()
 			hole->SetColor(0, 0, .8f);
 			hole->SetScale(.1f, .1f, .1f);
 			hole->SetTranslation(gw->translation[0], gw->translation[1], gw->translation[2]);
-			hole->SetMotionVector(.1, 0, 0);
+			hole->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX / 10.0f,
+				gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f,
+				0);
 			hole->SetSide(SIDE_BLUE);
 			hole->SetMyGravity(gw);
 
