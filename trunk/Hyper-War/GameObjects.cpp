@@ -26,6 +26,7 @@ CGameObject::CGameObject(sGameParams *newGameParams)
 	color[2] = 1;
 
 	gameParams = newGameParams;	
+	deleteMe = false;
 }
 
 CGameObject::~CGameObject()
@@ -174,10 +175,11 @@ void CGameObject::ProcessMotion(DWORD milliseconds, Keys* keys)
 		else if(translation[1] < -1.70f)
 			translation[1] = 1.70f;
 
-		if(translation[0] > 7.5f)
-			translation[0] = -2.75f;
-		else if(translation[0] < -2.75f)
-			translation[0] = 2.75f;
+		if(translation[0] > 2.75f || translation[0] < -2.75f)
+			deleteMe = true;
+		//	translation[0] = -2.75f;
+		//else if(translation[0] < -2.75f)
+		//	translation[0] = 2.75f;
 	}
 
 }
@@ -267,11 +269,11 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 				continue;
 			break;
 		case TYPE_MOSHIP:
-			if(otherType != TYPE_NUKE || gObjects[i]->GetSide() == mySide || otherType == TYPE_BEAM || otherType == TYPE_PROJECTILE)
+			if(gObjects[i]->GetSide() == mySide || otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE)
 				continue;
 			break;
 		case TYPE_BEAM:
-			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE)
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_PROJECTILE)
 				continue;
 			break;
 		}
@@ -760,10 +762,11 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 	else if(translation[1] < -1.70f)
 		translation[1] = 1.70f;
 
-	if(translation[0] > 7.5f)
-		translation[0] = -2.75f;
-	else if(translation[0] < -2.75f)
-		translation[0] = 2.75f;
+	if(translation[0] > 7.5f || translation[0] < -2.75f)
+		deleteMe = true;
+//		translation[0] = -2.75f;
+//	else if(translation[0] < -2.75f)
+//		translation[0] = 2.75f;
 
 	if(gravityImmunity > 0)
 		gravityImmunity -= milliseconds;
@@ -1030,10 +1033,11 @@ void CDebris::ProcessMotion(DWORD milliseconds, Keys* keys)
 	else if(translation[1] < -1.75)
 		translation[1] = 1.75;
 
-	if(translation[0] > 14)
-		translation[0] = -14;
-	else if(translation[0] < -14)
-		translation[0] = 14;
+	if(translation[0] > 14 || translation[0] < -14)
+		deleteMe = true;
+//		translation[0] = -14;
+//	else if(translation[0] < -14)
+//		translation[0] = 14;
 
 	TTL -= milliseconds;
 }
@@ -1116,7 +1120,7 @@ void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gW
 
 bool CMissileBase::CanDestroy(int destroyerType)
 {
-	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM)
+	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE)
 	{
 		destroyed = true;
 		timeToRebuild = 30000;
@@ -1532,7 +1536,7 @@ void CCity::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 
 bool CCity::CanDestroy(int destroyerType)
 {
-	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM)
+	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE)
 		return true;
 	else
 		return false;
@@ -1710,7 +1714,7 @@ void CFlakCannon::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 
 bool CFlakCannon::CanDestroy(int destroyerType)
 {
-	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM)
+	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE)
 	{
 		collisionSpheres[0]->translation[0] = 50;
 		timeToRebuild = 30000;
@@ -1728,7 +1732,46 @@ int	CFlakCannon::GetType()
 void CFlakCannon::Fire()
 {
 	loaded = false; 
-	timeToReload = gameParams->flakReloadTime; 
+	timeToReload = gameParams->flakReloadTime;
+}
+
+bool CFlakCannon::HasSuperWeapon()
+{
+	bool result = false;
+
+	switch(mySide)
+	{
+	case SIDE_BLUE:
+		if((gameParams->bluePoints / 50000.0) > gameParams->blueSuperFires + 1)
+			result = true;
+		else
+			result = false;
+		break;
+	case SIDE_GREEN:
+		if((gameParams->greenPoints / 50000.0) > gameParams->greenSuperFires + 1)
+			result = true;
+		else
+			result = false;
+		break;
+	}
+
+	return result;
+}
+
+void CFlakCannon::FireSuperWeapon()
+{
+	loaded = false; 
+	timeToReload = gameParams->flakReloadTime;
+
+	switch(mySide)
+	{
+	case SIDE_BLUE:
+		gameParams->blueSuperFires++;
+		break;
+	case SIDE_GREEN:
+		gameParams->greenSuperFires++;
+		break;
+	}
 }
 
 void CFlakCannon::GetProjVector(int* TTL, float* projVector)
@@ -1743,6 +1786,17 @@ void CFlakCannon::GetProjVector(int* TTL, float* projVector)
 	projVector[1] /= magnitude;
 
 	*TTL = (int)(1000 * magnitude);
+}
+
+float CFlakCannon::GetProjAngle()
+{
+	float projVector[3];
+
+	projVector[0] = (pCursorPos[0] - translation[0]);
+	projVector[1] = (pCursorPos[1] - translation[1]);
+	projVector[2] = 0;//pCursorPos[2] - translation[2]/3.0;
+
+	return atan((pCursorPos[1] - translation[1]) / (pCursorPos[0] - translation[0])) /  DEG2RAD;
 }
 
 float* CFlakCannon::GetProjTranslation()
@@ -2108,7 +2162,7 @@ void CMothership::Draw()
 
 bool CMothership::CanDestroy(int destroyerType)
 {
-	if(destroyerType == TYPE_NUKE)
+	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE)
 	{
 		if(myBeam != NULL)
 			myBeam->Kill();
@@ -2124,14 +2178,14 @@ CBeam::CBeam(sGameParams *newGameParams) : CGameObject(newGameParams)
 	sCollisionSphere *cSphere;
 	float trans=0;
 
-	for(int i=0; i<25; i++)
+	for(int i=0; i<40; i++)
 	{
-		trans -= (i/6.0f);
+		trans -= (i/16.0f);
 		cSphere  = new sCollisionSphere;
 		cSphere->translation[0] = 0;
 		cSphere->translation[1] = trans;
 		cSphere->translation[2] = 0;
-		cSphere->radius = i / 12.0f;
+		cSphere->radius = i / 48.0f;
 		cSphere->globalPosition[0] = 0;
 		cSphere->globalPosition[1] = 0;
 		cSphere->globalPosition[2] = 0;
@@ -2229,7 +2283,7 @@ CBlackHole::CBlackHole(sGameParams *newGameParams) : CGameObject(newGameParams)
 	cSphere->globalPosition[2] = -10;
 	collisionSpheres.push_back(cSphere);
 
-	TTL = 10000;
+	TTL = 30000;
 	animVal = 0;
 }
 
@@ -2247,6 +2301,20 @@ void CBlackHole::ProcessMotion(DWORD milliseconds, Keys* keys)
 	myGravity->translation[0] = translation[0];
 	myGravity->translation[1] = translation[1];
 	myGravity->translation[2] = translation[2];
+
+	if(translation[0] > 2.75f || translation[0] < -2.75f)
+		KillGravity();
+}
+
+bool CBlackHole::CanDestroy(int destroyerType)
+{
+	if(destroyerType == TYPE_MISSILEBASE || destroyerType == TYPE_CITY || destroyerType == TYPE_FLAKCANNON)
+	{
+		motionVector[0] = 0;
+		motionVector[1] = 0;
+		motionVector[2] = 0;
+	}
+	return false;
 }
 
 void CBlackHole::Draw()
@@ -2312,6 +2380,19 @@ void CBlackHole::Draw()
 		glVertex3f(cos(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/ 4.0f,
 			sin(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/4.0f, -.001f);
 
+	}
+	glEnd();
+
+	//Draw some particles flying into it
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINES);
+	for (int i=0; i<=7200; i+=163)
+	{
+		float degInRad = i*DEG2RAD;
+		float radius = (2-((animVal*i)%1000000)/1000000.0f);
+
+		glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius, -.001f);
+		glVertex3f(cos(degInRad) * radius * 0.9f, sin(degInRad) * radius * 0.9f, -.001f);
 	}
 	glEnd();
 
