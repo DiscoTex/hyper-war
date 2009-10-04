@@ -100,6 +100,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	gameParams.flakVelocityDivider = 150.0;
 	gameParams.flakReloadTime = 10;	
 	gameParams.hyperModeDelay = 30000;
+	gameParams.greenSuperFires = 0;
+	gameParams.blueSuperFires = 0;
 
 	gameObjects.clear();
 	gravityWells.clear();
@@ -275,6 +277,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[0]);
 		cannon->SetFireKey('S');
+		cannon->SetSingularityKey('Z');
+		cannon->SetBeamKey('X');
 		gameObjects.push_back(cannon);
 
 		cannon = new CFlakCannon(&gameParams);
@@ -285,6 +289,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[1]);
 		cannon->SetFireKey('K');
+		cannon->SetSingularityKey('N');
+		cannon->SetBeamKey('M');
 		gameObjects.push_back(cannon);
 
 		SetHyperLevel(1);
@@ -369,6 +375,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[0]);
 		cannon->SetFireKey('S');
+		cannon->SetSingularityKey('Z');
+		cannon->SetBeamKey('X');
 		gameObjects.push_back(cannon);
 
 		SetHyperLevel(1);
@@ -408,7 +416,6 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 	colliderType = gameObjects[collider]->GetType();
 	collideeType = gameObjects[collidee]->GetType();
 	
-	//First deal with object i, then deal with objIndex
 	if(gameObjects[collider]->CanDestroy(collideeType))
 	{
 		switch(colliderType)
@@ -613,6 +620,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	CNuke *nuke;
 	CProjectile *pj;
 	CBeam *beam;
+	CBlackHole *bh;
 	float *position;
 	float *nukeVector;
 	float projVector[3];
@@ -677,6 +685,12 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 		//Process gravity
 		gameObjects[i]->ProcessGravity(milliseconds, gravityWells);
+
+		if(gameObjects[i]->deleteMe)
+		{
+			gameObjects.erase(gameObjects.begin() + i);
+			continue;
+		}
 
 		if(gameObjects[i]->GetType() == TYPE_MISSILEBASE)
 		{
@@ -743,7 +757,71 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				pj->SetTTL(TTL);
 				gameObjects.push_back(pj);
 			}	
-			else if(!g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetFireKey()] && !((CFlakCannon*)(gameObjects[i]))->IsLoaded())
+			else if(g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetSingularityKey()] 
+			&& ((CFlakCannon*)(gameObjects[i]))->HasSuperWeapon()
+			&& ((CFlakCannon*)(gameObjects[i]))->IsLoaded())
+			{
+				//Fire singularity
+				((CFlakCannon*)(gameObjects[i]))->FireSuperWeapon();
+				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
+				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
+
+				audioRenderer.PlaySound(SOUND_SHOOT, 
+					position[0], 
+					position[1],
+					gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
+
+				//Create a gravity well for the black hoole
+				sGravityWell *gw = new sGravityWell();
+				gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 15;
+				gw->translation[0] = position[0];
+				gw->translation[1] = position[1];
+				gw->translation[2] = position[2];
+
+				//Create a black hole
+				bh = new CBlackHole(&gameParams);
+				bh->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
+				bh->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
+				bh->SetTranslation(position[0] + projVector[0]/50.0f, position[1] + projVector[1] / 50.0f, -.0010f);
+				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
+				bh->SetMotionVector(projVector[0]/15.0f, projVector[1]/15.0f, projVector[2]/15.0f);
+				position = gameObjects[i]->GetTranslation();
+				bh->SetMyGravity(gw);				
+				
+				gravityWells.push_back(gw);
+				gameObjects.push_back(bh);
+			}
+			else if(g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetBeamKey()] 
+			&& ((CFlakCannon*)(gameObjects[i]))->HasSuperWeapon()
+			&& ((CFlakCannon*)(gameObjects[i]))->IsLoaded())
+			{
+				//Fire beam
+				((CFlakCannon*)(gameObjects[i]))->FireSuperWeapon();
+				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
+				float angle = ((CFlakCannon*)(gameObjects[i]))->GetProjAngle();
+				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
+
+				beam = new CBeam(&gameParams);
+				beam->SetRotation(gameObjects[i]->GetRotation()[0],
+					gameObjects[i]->GetRotation()[1], angle + 90);
+				beam->SetTranslation(
+					float(gameObjects[i]->GetTranslation()[0] + projVector[0] / 100.0f),
+					float(gameObjects[i]->GetTranslation()[1] + projVector[1] / 100.0f),
+					float(gameObjects[i]->GetTranslation()[2]));
+				beam->SetScale(gameObjects[i]->GetScale()[0],
+					gameObjects[i]->GetScale()[1],
+					gameObjects[i]->GetScale()[2]);
+				beam->SetSide(gameObjects[i]->GetSide());
+
+				gameObjects.push_back(beam);
+				audioRenderer.PlaySound(SOUND_ZAP, 
+					gameObjects[i]->GetTranslation()[0], 
+					gameObjects[i]->GetTranslation()[1]);
+			}
+			else if(!g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetFireKey()] 
+			&& !g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetBeamKey()] 
+			&& !g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetSingularityKey()] 
+			&& !((CFlakCannon*)(gameObjects[i]))->IsLoaded())
 			{
 				//Allow reload			
 				((CFlakCannon*)(gameObjects[i]))->AddTimeSinceFired(milliseconds);
@@ -796,7 +874,6 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			((CMothership*)(gameObjects[i]))->AddCount(milliseconds);
 			if(((CMothership*)(gameObjects[i]))->IsFiring())
 			{
-				//Do something?
 				beam = new CBeam(&gameParams);
 				beam->SetRotation(gameObjects[i]->GetRotation()[0],
 					gameObjects[i]->GetRotation()[1],
@@ -805,7 +882,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 					gameObjects[i]->GetMotionVector()[1],
 					gameObjects[i]->GetMotionVector()[2]);
 				beam->SetTranslation(
-					float(gameObjects[i]->GetTranslation()[0]),
+					float(gameObjects[i]->GetTranslation()[0] - .075f),
 					float(gameObjects[i]->GetTranslation()[1]),
 					float(gameObjects[i]->GetTranslation()[2]));
 				beam->SetScale(gameObjects[i]->GetScale()[0],
@@ -824,7 +901,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			((CBeam*)(gameObjects[i]))->AddCount(milliseconds);
 			if(((CBeam*)(gameObjects[i]))->GetTTL() < 0)
 			{
-				((CBeam*)(gameObjects[i]))->myParent->SetMyBeam(NULL);
+				if(((CBeam*)(gameObjects[i]))->myParent != NULL)
+					((CBeam*)(gameObjects[i]))->myParent->SetMyBeam(NULL);
 				gameObjects.erase(gameObjects.begin() + i);
 				continue;
 			}
@@ -1169,8 +1247,6 @@ void CHyperWarGame::RunAttractMode()
 		gameParams.gameMode = MODE_VS;
 		Initialize(g_window, g_keys);
 	}
-
-
 }
 
 void CHyperWarGame::DrawCursors()
@@ -1179,8 +1255,14 @@ void CHyperWarGame::DrawCursors()
 
 	glTranslatef(mousePos[0][0], mousePos[0][1], 0);
 	glScalef(.05f, .05f, 1);
+	float randVal1 = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX;
+	float randVal2 = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX;
 
-	glColor3f(0, 1, 0);
+	if((gameParams.greenPoints / 50000.0) > gameParams.greenSuperFires + 1)
+		glColor3f(randVal1, 1, randVal1);
+	else
+		glColor3f(0, 1, 0);
+
 	glBegin(GL_LINES);
 		glVertex3f(-1.0f, 0, 0);
 		glVertex3f(-.2f, 0, 0);
@@ -1204,7 +1286,11 @@ void CHyperWarGame::DrawCursors()
 		glTranslatef(mousePos[1][0], mousePos[1][1], 0);
 		glScalef(.05f, .05f, 1);
 
-		glColor3f(0, 0, 1);
+		if((gameParams.bluePoints / 50000.0) > gameParams.blueSuperFires + 1)
+			glColor3f(randVal1, 1, randVal1);
+		else
+			glColor3f(0, 1, 1);
+
 		glBegin(GL_LINES);
 			glVertex3f(-1.0f, 0, 0);
 			glVertex3f(-.2f, 0, 0);

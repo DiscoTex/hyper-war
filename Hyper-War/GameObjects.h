@@ -80,6 +80,8 @@ struct sGameParams
 	float flakVelocityDivider;
 	int numGreenCities;
 	int numBlueCities;
+	int blueSuperFires;
+	int greenSuperFires;
 };
 
 struct sGravityWell
@@ -129,18 +131,16 @@ public:
 	virtual int	 GetType();
 	virtual bool CanDestroy(int destroyerType);
 
+	bool deleteMe;
 protected:
 	float motionVector[3];
 	float angularVelocity[3];
-
 	float scale[3];
 	float rotation[3];
 	float translation[3];
 	float color[3];
-
 	int   mySide;
-
-	sGameParams *gameParams;
+	sGameParams *gameParams;	
 
 	vector < sCollisionSphere* > collisionSpheres;
 };
@@ -263,23 +263,33 @@ public:
 	void SetCursorPointer(float* newPCursorPos) {pCursorPos = newPCursorPos;}
 	void SetFireKey(char key) {fireKey = key;}
 	char GetFireKey() {return fireKey;}
+	void SetSingularityKey(char key) {singularityKey = key;}
+	char GetSingularityKey() {return singularityKey;}
+	void SetBeamKey(char key) {beamKey = key;}
+	char GetBeamKey() {return beamKey;}
 	int	 GetType();
 	bool IsLoaded() {return loaded && !destroyed;}
 	void Fire();
 	void GetProjVector(int* TTL, float* projVector);
+	float GetProjAngle();
 	float* GetProjTranslation();
 	void AddTimeSinceFired(DWORD milliseconds);
 	bool IsDisabled() {return destroyed;}
+	bool HasSuperWeapon();
+	void FireSuperWeapon();
 
 	void Draw();
 private:
 	float* pCursorPos;
 	char   fireKey;
+	char   singularityKey;
+	char   beamKey;
 	bool   loaded;
 	int	   timeToReload;
 	float  projTranslation[3];
 	bool   destroyed;
 	int    timeToRebuild;
+	//int    superWeaponsFired;
 };
 
 class CProjectile : public CGameObject
@@ -354,7 +364,7 @@ public:
 
 	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells) {}
 	int	 GetType() {return TYPE_BLACKHOLE;}
-	bool CanDestroy(int destroyerType) {return false;}
+	bool CanDestroy(int destroyerType);
 	void SetMyGravity(sGravityWell *newGravity) {myGravity = newGravity;}
 	int  GetTTL() {return TTL;}
 	void KillGravity() {myGravity->mass = 0;}
