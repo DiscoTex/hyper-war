@@ -766,14 +766,14 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
 				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
 
-				audioRenderer.PlaySound(SOUND_SHOOT, 
+				audioRenderer.PlaySound(SOUND_MEGABLAST, 
 					position[0], 
 					position[1],
 					gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
 
 				//Create a gravity well for the black hoole
 				sGravityWell *gw = new sGravityWell();
-				gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 15;
+				gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 40;
 				gw->translation[0] = position[0];
 				gw->translation[1] = position[1];
 				gw->translation[2] = position[2];
@@ -890,6 +890,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 					gameObjects[i]->GetScale()[2]);
 				((CMothership*)(gameObjects[i]))->SetMyBeam(beam);
 				beam->SetMyParent(((CMothership*)(gameObjects[i])));
+				beam->SetSide(gameObjects[i]->GetSide());
 				gameObjects.push_back(beam);
 				audioRenderer.PlaySound(SOUND_ZAP, 
 					gameObjects[i]->GetTranslation()[0], 
@@ -2025,7 +2026,7 @@ void CHyperWarGame::NextWave()
 			nuke->SetColor(0, 0, .8f);
 			nuke->SetScale(.1f, .1f, .1f);
 			nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX) * -1.7f, 0);
-			nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/8.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
+			nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/64.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
 			nuke->SetThrust(.025f * waveNumber);
 			nuke->SetSide(SIDE_BLUE);
 			gameObjects.push_back(nuke);
@@ -2034,7 +2035,7 @@ void CHyperWarGame::NextWave()
 			nuke->SetColor(0, 0, .8f);
 			nuke->SetScale(.1f, .1f, .1f);
 			nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX) * 1.7f, 0);
-			nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/16.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
+			nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * -waveNumber/64.0f, (gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX - .5f), 0);
 			nuke->SetThrust(.025f * waveNumber);
 			nuke->SetSide(SIDE_BLUE);
 			gameObjects.push_back(nuke);
