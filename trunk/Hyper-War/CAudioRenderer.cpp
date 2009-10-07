@@ -76,6 +76,8 @@ ALboolean CAudioRenderer::LoadALData()
 	Buffers[SOUND_ZAP] = alutCreateBufferFromFile ("zap.wav");
 	Buffers[SOUND_BOOM] = alutCreateBufferFromFile ("boom.wav");
 	Buffers[SOUND_UFOBLAST] = alutCreateBufferFromFile ("ufoblast.wav");
+	Buffers[SOUND_MEGABLAST] = alutCreateBufferFromFile ("megablast.wav");
+
 
 
 	// Bind buffers into audio sources.
@@ -188,6 +190,13 @@ ALboolean CAudioRenderer::LoadALData()
 	alSourcefv(Sources[SOUND_UFOBLAST], AL_POSITION, SourcesPos[SOUND_UFOBLAST]);
 	alSourcefv(Sources[SOUND_UFOBLAST], AL_VELOCITY, SourcesVel[SOUND_UFOBLAST]);
 	alSourcei (Sources[SOUND_UFOBLAST], AL_LOOPING,  AL_FALSE           );
+
+	alSourcei (Sources[SOUND_MEGABLAST], AL_BUFFER,   Buffers[SOUND_MEGABLAST]   );
+	alSourcef (Sources[SOUND_MEGABLAST], AL_PITCH,    1.0f              );
+	alSourcef (Sources[SOUND_MEGABLAST], AL_GAIN,     .65f              );
+	alSourcefv(Sources[SOUND_MEGABLAST], AL_POSITION, SourcesPos[SOUND_MEGABLAST]);
+	alSourcefv(Sources[SOUND_MEGABLAST], AL_VELOCITY, SourcesVel[SOUND_MEGABLAST]);
+	alSourcei (Sources[SOUND_MEGABLAST], AL_LOOPING,  AL_FALSE           );
 
 	// Do another error check and return.
 
