@@ -171,7 +171,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -84);
 		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
-		mb->SetLaunchKey('A');
+		mb->SetLaunchKey(3);
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -181,7 +181,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -96);
 		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
-		mb->SetLaunchKey('D');
+		mb->SetLaunchKey(4);
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -191,7 +191,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, 96);
 		mb->SetTranslation(10 * cos(186*DEG2RAD) + 12.01f, 10 * sin(186*DEG2RAD), -.001f);
-		mb->SetLaunchKey('J');
+		mb->SetLaunchKey(6);
 		mb->SetCursorPointer(mousePos[1]);
 		gameObjects.push_back(mb);
 
@@ -201,7 +201,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, 84);
 		mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01f, 10 * sin(174*DEG2RAD), -.001f);
-		mb->SetLaunchKey('L');
+		mb->SetLaunchKey(7);
 		mb->SetCursorPointer(mousePos[1]);
 		gameObjects.push_back(mb);
 
@@ -276,7 +276,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, -90);
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[0]);
-		cannon->SetFireKey('S');
+		cannon->SetFireKey(5);
 		cannon->SetSingularityKey('Z');
 		cannon->SetBeamKey('X');
 		gameObjects.push_back(cannon);
@@ -288,7 +288,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, 90);
 		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[1]);
-		cannon->SetFireKey('K');
+		cannon->SetFireKey(8);
 		cannon->SetSingularityKey('N');
 		cannon->SetBeamKey('M');
 		gameObjects.push_back(cannon);
@@ -321,7 +321,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -84);
 		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
-		mb->SetLaunchKey('A');
+		mb->SetLaunchKey(3);
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -331,7 +331,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -96);
 		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
-		mb->SetLaunchKey('D');
+		mb->SetLaunchKey(4);
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -374,7 +374,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, -90);
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[0]);
-		cannon->SetFireKey('S');
+		cannon->SetFireKey(5);
 		cannon->SetSingularityKey('Z');
 		cannon->SetBeamKey('X');
 		gameObjects.push_back(cannon);
