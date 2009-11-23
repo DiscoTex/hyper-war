@@ -303,6 +303,17 @@ LRESULT CALLBACK WindowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		case WM_INPUT:
 			hyperWarGame.ProcessRawInput(lParam);
+
+			for(int i=1; i<hyperWarGame.GetNumRawMice(); i++)
+			{
+				//Set lower case characters to down corresponding to mouse buttons
+				for(int j=0; j<3; j++)
+				{
+					window->keys->keyDown[i*3+j] = hyperWarGame.MouseButtonPresed(i, j);
+					if(hyperWarGame.MouseButtonPresed(i, j))
+						i=i;
+				}
+			}
 		break;
 
 		case WM_TOGGLEFULLSCREEN:										// Toggle FullScreen Mode On/Off
@@ -374,7 +385,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	window.init.width			= GetSystemMetrics(SM_CXSCREEN);		// Window Width
 	window.init.height			= GetSystemMetrics(SM_CYSCREEN);		// Window Height
 	window.init.bitsPerPixel	= 16;									// Bits Per Pixel
-	window.init.isFullScreen	= TRUE;									// Fullscreen? (Set To TRUE)
+	window.init.isFullScreen	= FALSE;									// Fullscreen? (Set To TRUE)
 
 	ZeroMemory (&keys, sizeof (Keys));									// Zero keys Structure
 
