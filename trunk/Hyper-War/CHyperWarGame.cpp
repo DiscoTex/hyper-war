@@ -124,8 +124,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	gameParams.bluePoints = 0;
 	gameParams.debrisAmount = 5;
 	gameParams.flakDebrisFactor = 6;
-	gameParams.mouse1Index = 0;
-	gameParams.mouse2Index = 3;
+	gameParams.mouse1Index = 2;
+	gameParams.mouse2Index = 1;
 	pointMultiplier = 1;
 	audioRenderer.StopAll();
 
@@ -171,7 +171,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -84);
 		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
-		mb->SetLaunchKey(3);
+		mb->SetLaunchKey(6);
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -181,7 +181,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -96);
 		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
-		mb->SetLaunchKey(4);
+		mb->SetLaunchKey(7);
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -191,7 +191,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, 96);
 		mb->SetTranslation(10 * cos(186*DEG2RAD) + 12.01f, 10 * sin(186*DEG2RAD), -.001f);
-		mb->SetLaunchKey(6);
+		mb->SetLaunchKey(3);
 		mb->SetCursorPointer(mousePos[1]);
 		gameObjects.push_back(mb);
 
@@ -201,7 +201,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, 84);
 		mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01f, 10 * sin(174*DEG2RAD), -.001f);
-		mb->SetLaunchKey(7);
+		mb->SetLaunchKey(4);
 		mb->SetCursorPointer(mousePos[1]);
 		gameObjects.push_back(mb);
 
@@ -276,7 +276,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, -90);
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[0]);
-		cannon->SetFireKey(5);
+		cannon->SetFireKey(8);
 		cannon->SetSingularityKey('Z');
 		cannon->SetBeamKey('X');
 		gameObjects.push_back(cannon);
@@ -288,7 +288,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, 90);
 		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[1]);
-		cannon->SetFireKey(8);
+		cannon->SetFireKey(5);
 		cannon->SetSingularityKey('N');
 		cannon->SetBeamKey('M');
 		gameObjects.push_back(cannon);
@@ -321,7 +321,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -84);
 		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
-		mb->SetLaunchKey(3);
+		mb->SetLaunchKey(6);
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -331,7 +331,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -96);
 		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
-		mb->SetLaunchKey(4);
+		mb->SetLaunchKey(7);
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -374,7 +374,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, -90);
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[0]);
-		cannon->SetFireKey(5);
+		cannon->SetFireKey(8);
 		cannon->SetSingularityKey('Z');
 		cannon->SetBeamKey('X');
 		gameObjects.push_back(cannon);
@@ -638,25 +638,25 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 	if(gameParams.gameMode == MODE_VS)
 	{
-		mousePos[0][0] += rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
+		mousePos[0][0] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
 		if(mousePos[0][0] > 0)
 			mousePos[0][0] = 0;
 		else if(mousePos[0][0] < -1.8f)
 			mousePos[0][0] = -1.8f;
 
-		mousePos[0][1] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
+		mousePos[0][1] -= rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
 		if(mousePos[0][1] > 1.6f)
 			mousePos[0][1] = 1.6f;
 		else if(mousePos[0][1] < -1.6f)
 			mousePos[0][1] = -1.6f;	
 
-		mousePos[1][0] += rawMouse.get_x_delta(gameParams.mouse2Index) / 500.0f;
+		mousePos[1][0] += rawMouse.get_y_delta(gameParams.mouse2Index) / 500.0f;
 		if(mousePos[1][0] < 0)
 			mousePos[1][0] = 0;
 		else if(mousePos[1][0] > 1.8f)
 			mousePos[1][0] = 1.8f;
 
-		mousePos[1][1] -= rawMouse.get_y_delta(gameParams.mouse2Index) / 500.0f;
+		mousePos[1][1] += rawMouse.get_x_delta(gameParams.mouse2Index) / 500.0f;
 		if(mousePos[1][1] > 1.6f)
 			mousePos[1][1] = 1.6f;
 		else if(mousePos[1][1] < -1.6f)
@@ -664,13 +664,13 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	}
 	else if(gameParams.gameMode == MODE_SINGLE)
 	{
-		mousePos[0][0] += rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
+		mousePos[0][0] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
 		if(mousePos[0][0] > 2.2f)
 			mousePos[0][0] = 2.2f;
 		else if(mousePos[0][0] < -1.8f)
 			mousePos[0][0] = -1.8f;
 
-		mousePos[0][1] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
+		mousePos[0][1] -= rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
 		if(mousePos[0][1] > 1.6f)
 			mousePos[0][1] = 1.6f;
 		else if(mousePos[0][1] < -1.6f)
@@ -717,6 +717,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				nuke->SetMotionVector(nukeVector[0], nukeVector[1], nukeVector[2]);
 				nuke->SetThrust(thrust);
 				gameObjects.push_back(nuke);
+
+				audioRenderer.PlaySound(SOUND_MISSILE, 
+					position[0], 
+					position[1],
+					gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
 
 				switch(gameObjects[i]->GetSide())
 				{
@@ -977,7 +982,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		gameObjects.clear();
 		blueWins = true;		
 
-		if(hsList->CheckScore(gameParams.greenPoints))
+		if(hsList->CheckScore(gameParams.greenPoints) && gameParams.gameMode == MODE_SINGLE)
 		{
 			memset(highScoreName, 0, 64);
 			nameIndex = 0;
@@ -1034,18 +1039,18 @@ void CHyperWarGame::RunHighScoreEntry()
 
 		highScoreName[nameIndex] = charLetter;
 
-		if((g_keys->keyDown['S'] || g_keys->keyDown['s']) && hyperModeTimer > 150 && nameIndex < 63)
+		if(g_keys->keyDown[8] && hyperModeTimer > 150 && nameIndex < 63)
 		{
 			hyperModeTimer = 0;
 			nameIndex++;
 		}
-		else if((g_keys->keyDown['A'] || g_keys->keyDown['a']) && hyperModeTimer > 150 && nameIndex > 0)
+		else if(g_keys->keyDown[6] && hyperModeTimer > 150 && nameIndex > 0)
 		{
 			hyperModeTimer = 0;
 			highScoreName[nameIndex] = '\0';
 			nameIndex--;
 		}
-		else if((g_keys->keyDown['D'] || g_keys->keyDown['d']) && hyperModeTimer > 150 && nameIndex > 0)
+		else if(g_keys->keyDown[7] && hyperModeTimer > 150 && nameIndex > 0)
 		{
 			hsList->AddScore(highScoreName, gameParams.greenPoints);
 			listTime = true;
@@ -1861,112 +1866,17 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 	if(gameParams.gameMode == MODE_VS)
 		pointMultiplier = hyperLevel;
 
-	switch(hyperLevel)
+	//switch(hyperLevel)
+	switch(0)
 	{
-	case 1:
-		//Play sound indicating new hyper level
-		
-		gameParams.chargeRateDivider = 5000.0f;			//min 500
-		//gameParams.maxThrust = 3.0f;					//max 500
-		//gameParams.minThrust = 0.3f;
-		gameParams.maxThrust = 1.0f;					//max 500
-		gameParams.minThrust = 1.0f;
-		gameParams.maxGravityForce = 10.0f;
-		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		if(gameParams.gameMode == MODE_SINGLE)
-		{
-			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
-			gameParams.nukeReloadTime = 200;				//min 150
-		}
-		else
-		{
-			gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
-			gameParams.nukeReloadTime = 4000;				//min 150
-			audioRenderer.PlaySound(SOUND_LEVEL1, 0, 0);
-		}
-		gameParams.flakReloadTime = 10;	
-		gameParams.hyperModeDelay = 30000;
-		break;
-	case 2:
-		//Play sound indicating new hyper level
-		
-		gameParams.chargeRateDivider = 3000.0f;			//min 500
-		//gameParams.maxThrust = 3.0f;					//max 500
-		//gameParams.minThrust = 0.3f;
-		gameParams.maxThrust = 1.0f;					//max 500
-		gameParams.minThrust = 1.0f;
-		gameParams.maxGravityForce = 10.0f;
-		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		if(gameParams.gameMode == MODE_SINGLE)
-		{
-			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
-			gameParams.nukeReloadTime = 200;				//min 150
-		}
-		else
-		{
-			gameParams.nukeSpeedDivider = 13000.0f;			//min 1000
-			gameParams.nukeReloadTime = 2000;				//min 150
-			audioRenderer.PlaySound(SOUND_LEVEL2, 0, 0);
-		}
-		gameParams.flakReloadTime = 10;	
-		gameParams.hyperModeDelay = 25000;
-		break;
-	case 3:
-		//Play sound indicating new hyper level
-		
-		gameParams.chargeRateDivider = 2000.0f;			//min 500
-		//gameParams.maxThrust = 3.0f;					//max 500
-		//gameParams.minThrust = 0.3f;
-		gameParams.maxThrust = 1.0f;					//max 500
-		gameParams.minThrust = 1.0f;
-		gameParams.maxGravityForce = 10.0f;
-		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		if(gameParams.gameMode == MODE_SINGLE)
-		{
-			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
-			gameParams.nukeReloadTime = 200;				//min 150
-		}
-		else
-		{
-			gameParams.nukeSpeedDivider = 10000.0f;			//min 1000
-			gameParams.nukeReloadTime = 1000;				//min 150
-			audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
-		}
-		gameParams.flakReloadTime = 10;	
-		gameParams.hyperModeDelay = 20000;
-		break;
-	case 4:
-		//Play sound indicating new hyper level
-		
-		gameParams.chargeRateDivider = 1000.0f;			//min 500
-		//gameParams.maxThrust = 3.0f;					//max 500
-		//gameParams.minThrust = 0.3f;
-		gameParams.maxThrust = 1.0f;					//max 500
-		gameParams.minThrust = 1.0f;
-		gameParams.maxGravityForce = 10.0f;
-		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		if(gameParams.gameMode == MODE_SINGLE)
-		{
-			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
-			gameParams.nukeReloadTime = 200;				//min 150
-		}
-		else
-		{
-			gameParams.nukeSpeedDivider = 7000.0f;			//min 1000
-			gameParams.nukeReloadTime = 500;				//min 150
-			audioRenderer.PlaySound(SOUND_LEVEL4, 0, 0);
-		}
-		gameParams.flakReloadTime = 10;	
-		gameParams.hyperModeDelay = 15000;
-		break;
-	case 5:
+	case 0:
 		//Play sound indicating new hyper level
 		
 		gameParams.chargeRateDivider = 500.0f;			//min 500
-		//gameParams.maxThrust = 3.0f;					//max 500
-		//gameParams.minThrust = 0.3f;
 		gameParams.maxThrust = 1.0f;					//max 500
 		gameParams.minThrust = 1.0f;
+		//gameParams.maxThrust = 1.0f;					//max 500
+		//gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
 		gameParams.flakReloadTime = 10;	
@@ -1980,7 +1890,127 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		{
 			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
 			gameParams.nukeReloadTime = 200;				//min 150
-			audioRenderer.PlaySound(SOUND_LEVEL5, 0, 0);
+			//audioRenderer.PlaySound(SOUND_LEVEL5, 0, 0);
+		}
+		break;
+	case 1:
+		//Play sound indicating new hyper level
+		
+		gameParams.chargeRateDivider = 5000.0f;			//min 500
+		gameParams.maxThrust = 3.0f;					//max 500
+		gameParams.minThrust = 0.3f;
+		//gameParams.maxThrust = 1.0f;					//max 500
+		//gameParams.minThrust = 1.0f;
+		gameParams.maxGravityForce = 10.0f;
+		gameParams.nukeGravityImmunityTime = 1000;		//min 200
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
+			gameParams.nukeReloadTime = 4000;				//min 150
+			//audioRenderer.PlaySound(SOUND_LEVEL1, 0, 0);
+		}
+		gameParams.flakReloadTime = 10;	
+		gameParams.hyperModeDelay = 30000;
+		break;
+	case 2:
+		//Play sound indicating new hyper level
+		
+		gameParams.chargeRateDivider = 3000.0f;			//min 500
+		gameParams.maxThrust = 3.0f;					//max 500
+		gameParams.minThrust = 0.3f;
+		//gameParams.maxThrust = 1.0f;					//max 500
+		//gameParams.minThrust = 1.0f;
+		gameParams.maxGravityForce = 10.0f;
+		gameParams.nukeGravityImmunityTime = 1000;		//min 200
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 13000.0f;			//min 1000
+			gameParams.nukeReloadTime = 2000;				//min 150
+			//audioRenderer.PlaySound(SOUND_LEVEL2, 0, 0);
+		}
+		gameParams.flakReloadTime = 10;	
+		gameParams.hyperModeDelay = 25000;
+		break;
+	case 3:
+		//Play sound indicating new hyper level
+		
+		gameParams.chargeRateDivider = 2000.0f;			//min 500
+		gameParams.maxThrust = 3.0f;					//max 500
+		gameParams.minThrust = 0.3f;
+		//gameParams.maxThrust = 1.0f;					//max 500
+		//gameParams.minThrust = 1.0f;
+		gameParams.maxGravityForce = 10.0f;
+		gameParams.nukeGravityImmunityTime = 1000;		//min 200
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 10000.0f;			//min 1000
+			gameParams.nukeReloadTime = 1000;				//min 150
+			//audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
+		}
+		gameParams.flakReloadTime = 10;	
+		gameParams.hyperModeDelay = 20000;
+		break;
+	case 4:
+		//Play sound indicating new hyper level
+		
+		gameParams.chargeRateDivider = 1000.0f;			//min 500
+		gameParams.maxThrust = 3.0f;					//max 500
+		gameParams.minThrust = 0.3f;
+		//gameParams.maxThrust = 1.0f;					//max 500
+		//gameParams.minThrust = 1.0f;
+		gameParams.maxGravityForce = 10.0f;
+		gameParams.nukeGravityImmunityTime = 1000;		//min 200
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 7000.0f;			//min 1000
+			gameParams.nukeReloadTime = 500;				//min 150
+			//audioRenderer.PlaySound(SOUND_LEVEL4, 0, 0);
+		}
+		gameParams.flakReloadTime = 10;	
+		gameParams.hyperModeDelay = 15000;
+		break;
+	case 5:
+		//Play sound indicating new hyper level
+		
+		gameParams.chargeRateDivider = 500.0f;			//min 500
+		gameParams.maxThrust = 3.0f;					//max 500
+		gameParams.minThrust = 0.3f;
+		//gameParams.maxThrust = 1.0f;					//max 500
+		//gameParams.minThrust = 1.0f;
+		gameParams.maxGravityForce = 10.0f;
+		gameParams.nukeGravityImmunityTime = 1000;		//min 200
+		gameParams.flakReloadTime = 10;	
+		gameParams.hyperModeDelay = 60000;
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+			//audioRenderer.PlaySound(SOUND_LEVEL5, 0, 0);
 		}
 		break;
 	default:
