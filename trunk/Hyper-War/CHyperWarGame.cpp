@@ -102,6 +102,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	gameParams.hyperModeDelay = 30000;
 	gameParams.greenSuperFires = 0;
 	gameParams.blueSuperFires = 0;
+	gameParams.blueSuperAmmo = 0;
+	gameParams.greenSuperAmmo = 0;
 
 	gameObjects.clear();
 	gravityWells.clear();
@@ -278,7 +280,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetCursorPointer(mousePos[0]);
 		cannon->SetFireKey(8);
 		cannon->SetSingularityKey('Z');
-		cannon->SetBeamKey('X');
+		cannon->SetBeamKey(8);
 		gameObjects.push_back(cannon);
 
 		cannon = new CFlakCannon(&gameParams);
@@ -290,14 +292,14 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetCursorPointer(mousePos[1]);
 		cannon->SetFireKey(5);
 		cannon->SetSingularityKey('N');
-		cannon->SetBeamKey('M');
+		cannon->SetBeamKey(5);
 		gameObjects.push_back(cannon);
 
 		SetHyperLevel(1);
 	}
 	else if(gameParams.gameMode == MODE_SINGLE)
 	{
-		audioRenderer.PlaySound(SOUND_SPMUSIC, 0, 0);		
+		audioRenderer.PlaySound(SOUND_SPMUSIC, 0, 0);
 
 		//Create a green planet
 		CPlanet *planet = new CPlanet(&gameParams);
@@ -376,7 +378,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetCursorPointer(mousePos[0]);
 		cannon->SetFireKey(8);
 		cannon->SetSingularityKey('Z');
-		cannon->SetBeamKey('X');
+		cannon->SetBeamKey(8);
 		gameObjects.push_back(cannon);
 
 		SetHyperLevel(1);
@@ -737,32 +739,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 		else if(gameObjects[i]->GetType() == TYPE_FLAKCANNON)
 		{
-			if(g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetFireKey()] && ((CFlakCannon*)(gameObjects[i]))->IsLoaded())
-			{
-				//Launch projectile
-				//Set flak cannon to "just launched"
-				((CFlakCannon*)(gameObjects[i]))->Fire();
-				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
-
-				audioRenderer.PlaySound(SOUND_SHOOT, 
-					position[0], 
-					position[1],
-					gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
-
-				//Spawn a projectile
-				pj = new CProjectile(&gameParams);
-				pj->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
-				pj->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
-				
-				pj->SetTranslation(position[0], position[1], -.0010f);
-				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
-				pj->SetMotionVector(projVector[0], projVector[1], projVector[2]);
-				position = gameObjects[i]->GetTranslation();
-				pj->SetOrigin(position[0], position[1],position[2]);
-				pj->SetTTL(TTL);
-				gameObjects.push_back(pj);
-			}	
-			else if(g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetSingularityKey()] 
+			if(g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetSingularityKey()] 
 			&& ((CFlakCannon*)(gameObjects[i]))->HasSuperWeapon()
 			&& ((CFlakCannon*)(gameObjects[i]))->IsLoaded())
 			{
@@ -823,6 +800,31 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 					gameObjects[i]->GetTranslation()[0], 
 					gameObjects[i]->GetTranslation()[1]);
 			}
+			else if(g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetFireKey()] && ((CFlakCannon*)(gameObjects[i]))->IsLoaded())
+			{
+				//Launch projectile
+				//Set flak cannon to "just launched"
+				((CFlakCannon*)(gameObjects[i]))->Fire();
+				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
+
+				audioRenderer.PlaySound(SOUND_SHOOT, 
+					position[0], 
+					position[1],
+					gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
+
+				//Spawn a projectile
+				pj = new CProjectile(&gameParams);
+				pj->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
+				pj->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
+				
+				pj->SetTranslation(position[0], position[1], -.0010f);
+				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
+				pj->SetMotionVector(projVector[0], projVector[1], projVector[2]);
+				position = gameObjects[i]->GetTranslation();
+				pj->SetOrigin(position[0], position[1],position[2]);
+				pj->SetTTL(TTL);
+				gameObjects.push_back(pj);
+			}	
 			else if(!g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetFireKey()] 
 			&& !g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetBeamKey()] 
 			&& !g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetSingularityKey()] 
@@ -961,6 +963,19 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	globalEffects.SetStarFieldPosition(globalEffects.GetStarFieldPosition() + milliseconds);
 	
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
+
+	//Check to see if it is time to add super weapon ammo
+	if(gameParams.gameMode == MODE_VS && gameParams.bluePoints > (gameParams.blueSuperAmmo + 5) * 5000)
+	{
+		gameParams.blueSuperAmmo += 5;
+		audioRenderer.PlaySound(SOUND_CHARGEUP, 0, 0);
+	}
+
+	if(gameParams.greenPoints > (gameParams.greenSuperAmmo + 5) * 5000)
+	{
+		gameParams.greenSuperAmmo += 5;
+		audioRenderer.PlaySound(SOUND_CHARGEUP, 0, 0);
+	}
 
 	//check for game over
 	if(gameParams.numBlueCities < 1 && gameParams.gameMode != MODE_GAMEOVER && gameParams.gameMode != MODE_HIGHSCORE)
@@ -1265,8 +1280,11 @@ void CHyperWarGame::DrawCursors()
 	float randVal2 = .5f + gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX / 2.0f;
 	float randVal3 = .5f + gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX / 2.0f;
 
-	if((gameParams.greenPoints / 50000.0) > gameParams.greenSuperFires + 1)
+	if(gameParams.greenSuperAmmo > gameParams.greenSuperFires)
+	{
+		//Draw super cursor
 		glColor3f(randVal1, randVal2, randVal3);
+	}		
 	else
 		glColor3f(0, 1, 0);
 
@@ -1293,8 +1311,11 @@ void CHyperWarGame::DrawCursors()
 		glTranslatef(mousePos[1][0], mousePos[1][1], 0);
 		glScalef(.05f, .05f, 1);
 
-		if((gameParams.bluePoints / 50000.0) > gameParams.blueSuperFires + 1)
+		if(gameParams.blueSuperAmmo > gameParams.blueSuperFires)
+		{
+			//Draw super cursor
 			glColor3f(randVal1, randVal2, randVal3);
+		}
 		else
 			glColor3f(0, 1, 1);
 
@@ -1735,7 +1756,7 @@ void CHyperWarGame::DrawAttract()
 			width += titleFont->GetCharWidthA(storyLine[i]);
 		}
 		height = titleFont->GetCharHeight('D');
-		if(hyperModeTimer > 44000 && hyperModeTimer  < 48000)
+		if(hyperModeTimer > 44000 && hyperModeTimer  <= 48000)
 			glTranslatef(-width/2.0f, height/2.0f, -(hyperModeTimer - 44000)/50.0f);
 		else if(hyperModeTimer > 48000)
 			glTranslatef(-width/2.0f, height/2.0f, -4000/50.0f);
@@ -2027,7 +2048,7 @@ void CHyperWarGame::NextWave()
 	waveNumber++;
 	totalWaves++;
 
-	pointMultiplier = (int)(totalWaves/4.0f + 1);
+	//pointMultiplier = (int)(totalWaves/4.0f + 1);
 
 	if(totalWaves % 10 == 0)
 	{
@@ -2086,7 +2107,7 @@ void CHyperWarGame::NextWave()
 		}
 
 		//Random gravity wells
-		if(totalWaves % 6 == 0 && totalWaves > 24)
+		if(totalWaves % 5 == 0 && totalWaves > 15)
 		{
 			//Add a random gravity well
 			sGravityWell *gw = new sGravityWell();

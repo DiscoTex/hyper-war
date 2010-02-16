@@ -78,6 +78,7 @@ ALboolean CAudioRenderer::LoadALData()
 	Buffers[SOUND_UFOBLAST] = alutCreateBufferFromFile ("ufoblast.wav");
 	Buffers[SOUND_MEGABLAST] = alutCreateBufferFromFile ("megablast.wav");
 	Buffers[SOUND_MISSILE] = alutCreateBufferFromFile ("missile.wav");
+	Buffers[SOUND_CHARGEUP] = alutCreateBufferFromFile ("charge-up.wav");
 
 	// Bind buffers into audio sources.
 	alGenSources(NUM_SOURCES, Sources);
@@ -199,10 +200,19 @@ ALboolean CAudioRenderer::LoadALData()
 
 	alSourcei (Sources[SOUND_MISSILE], AL_BUFFER,   Buffers[SOUND_MISSILE]   );
 	alSourcef (Sources[SOUND_MISSILE], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_MISSILE], AL_GAIN,     .65f              );
+	alSourcef (Sources[SOUND_MISSILE], AL_GAIN,     .85f              );
 	alSourcefv(Sources[SOUND_MISSILE], AL_POSITION, SourcesPos[SOUND_MISSILE]);
 	alSourcefv(Sources[SOUND_MISSILE], AL_VELOCITY, SourcesVel[SOUND_MISSILE]);
 	alSourcei (Sources[SOUND_MISSILE], AL_LOOPING,  AL_FALSE           );
+
+	alSourcei (Sources[SOUND_CHARGEUP], AL_BUFFER,   Buffers[SOUND_CHARGEUP]   );
+	alSourcef (Sources[SOUND_CHARGEUP], AL_PITCH,    1.0f              );
+	alSourcef (Sources[SOUND_CHARGEUP], AL_GAIN,     .85f              );
+	alSourcefv(Sources[SOUND_CHARGEUP], AL_POSITION, SourcesPos[SOUND_CHARGEUP]);
+	alSourcefv(Sources[SOUND_CHARGEUP], AL_VELOCITY, SourcesVel[SOUND_CHARGEUP]);
+	alSourcei (Sources[SOUND_CHARGEUP], AL_LOOPING,  AL_FALSE           );
+
+	
 
 	// Do another error check and return.
 

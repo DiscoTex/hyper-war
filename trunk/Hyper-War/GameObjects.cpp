@@ -1742,13 +1742,13 @@ bool CFlakCannon::HasSuperWeapon()
 	switch(mySide)
 	{
 	case SIDE_BLUE:
-		if((gameParams->bluePoints / 50000.0) > gameParams->blueSuperFires + 1)
+		if(gameParams->blueSuperAmmo > gameParams->blueSuperFires)
 			result = true;
 		else
 			result = false;
 		break;
 	case SIDE_GREEN:
-		if((gameParams->greenPoints / 50000.0) > gameParams->greenSuperFires + 1)
+		if(gameParams->greenSuperAmmo > gameParams->greenSuperFires)
 			result = true;
 		else
 			result = false;
