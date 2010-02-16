@@ -82,6 +82,8 @@ struct sGameParams
 	int numBlueCities;
 	int blueSuperFires;
 	int greenSuperFires;
+	int blueSuperAmmo;
+	int	greenSuperAmmo;
 };
 
 struct sGravityWell
