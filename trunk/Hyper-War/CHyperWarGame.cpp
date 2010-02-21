@@ -784,8 +784,13 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
 
 				beam = new CBeam(&gameParams);
-				beam->SetRotation(gameObjects[i]->GetRotation()[0],
-					gameObjects[i]->GetRotation()[1], angle + 90);
+				if(gameObjects[i]->GetSide() == SIDE_GREEN)
+					beam->SetRotation(gameObjects[i]->GetRotation()[0],
+						gameObjects[i]->GetRotation()[1], angle + 90);
+				else
+					beam->SetRotation(gameObjects[i]->GetRotation()[0],
+						gameObjects[i]->GetRotation()[1], angle - 90);
+
 				beam->SetTranslation(
 					float(gameObjects[i]->GetTranslation()[0] + projVector[0] / 100.0f),
 					float(gameObjects[i]->GetTranslation()[1] + projVector[1] / 100.0f),
