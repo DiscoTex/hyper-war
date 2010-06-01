@@ -385,7 +385,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	window.init.width			= GetSystemMetrics(SM_CXSCREEN);		// Window Width
 	window.init.height			= GetSystemMetrics(SM_CYSCREEN);		// Window Height
 	window.init.bitsPerPixel	= 16;									// Bits Per Pixel
-	window.init.isFullScreen	= TRUE;									// Fullscreen? (Set To TRUE)
+	window.init.isFullScreen	= FALSE;									// Fullscreen? (Set To TRUE)
 
 	ZeroMemory (&keys, sizeof (Keys));									// Zero keys Structure
 

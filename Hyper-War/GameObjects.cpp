@@ -1761,7 +1761,7 @@ bool CFlakCannon::HasSuperWeapon()
 void CFlakCannon::FireSuperWeapon()
 {
 	loaded = false; 
-	timeToReload = gameParams->flakReloadTime;
+	timeToReload = gameParams->flakReloadTime * 100;
 
 	switch(mySide)
 	{
@@ -2397,4 +2397,346 @@ void CBlackHole::Draw()
 	glEnd();
 
 	glPopMatrix();
+}
+
+CShip::CShip(sGameParams *newGameParams) : CGameObject(newGameParams)
+{
+	sCollisionSphere *cSphere  = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = 0;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 1;
+	cSphere->globalPosition[0] = -10;
+	cSphere->globalPosition[1] = -10;
+	cSphere->globalPosition[2] = -10;
+	collisionSpheres.push_back(cSphere);
+
+	//Cycle colors
+	flameColor[0] = 1.0f;
+	flameColor[1] = (float)(gameParams->randoms[gameParams->randIndex++%512] / RAND_MAX);
+	flameColor[2] = 0;
+}
+
+void CShip::Draw()
+{
+	glPushMatrix();
+
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	
+	//The engines
+	glBegin (GL_QUADS);								
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -0.4, -0.5f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f(-.5f, -.9f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -.2f, -.9f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -0.3f, -.5f, 0.0f);
+	glEnd ();	
+
+	glBegin (GL_QUADS);								
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 0.4, -0.5f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 0.5f, -.9f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 0.2f, -.9f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 0.3f, -.5f, 0.0f);
+	glEnd ();
+
+	glBegin (GL_LINE_LOOP);								
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f( -0.4, -0.5f, 0.0f);
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f(-.5f, -.9f, 0.0f);
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f( -.2f, -.9f, 0.0f);
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f( -0.3f, -.5f, 0.0f);
+	glEnd ();	
+
+	glBegin (GL_LINE_LOOP);								
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f( 0.4, -0.5f, 0.0f);
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f( 0.5f, -.9f, 0.0f);
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f( 0.2f, -.9f, 0.0f);
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f( 0.3f, -.5f, 0.0f);
+	glEnd ();
+
+	//Laser guns!
+	glBegin(GL_QUADS);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -0.35, 0.5f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f(-.3f, 0.5f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -.3f, 0.3f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -0.35f, 0.3f, 0.0f);		
+
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 0.35, 0.5f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f(.3f, 0.5f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( .3f, 0.3f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 0.35f, 0.3f, 0.0f);
+
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -0.55, 0.1f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f(-.5f, 0.1f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -.5f, -0.1f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -0.55f, -0.1f, 0.0f);
+
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 0.55, 0.1f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f(.5f, 0.1f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( .5f, -0.1f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 0.55f, -0.1f, 0.0f);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+		glColor3f (1, 1, 1);	
+		glVertex3f( -0.35, 0.5f, 0.0f);
+		glVertex3f(-.3f, 0.5f, 0.0f);
+		glVertex3f( -.3f, 0.3f, 0.0f);
+		glVertex3f( -0.35f, 0.3f, 0.0f);		
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+		glVertex3f( 0.35, 0.5f, 0.0f);
+		glVertex3f(.3f, 0.5f, 0.0f);
+		glVertex3f( .3f, 0.3f, 0.0f);
+		glVertex3f( 0.35f, 0.3f, 0.0f);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+		glVertex3f( -0.55, 0.1f, 0.0f);
+		glVertex3f(-.5f, 0.1f, 0.0f);
+		glVertex3f( -.5f, -0.1f, 0.0f);
+		glVertex3f( -0.55f, -0.1f, 0.0f);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+		glVertex3f( 0.55, 0.1f, 0.0f);
+		glVertex3f(.5f, 0.1f, 0.0f);
+		glVertex3f( .5f, -0.1f, 0.0f);
+		glVertex3f( 0.55f, -0.1f, 0.0f);
+	glEnd();
+
+	//The body of the ship
+	glBegin (GL_QUADS);								
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 0.0f, 1.0f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f(1.0f, -1.0f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( 0.0f, -0.5f, 0.0f);
+		glColor3f (color[0], color[1], color[2]);	glVertex3f( -1.0f,-1.0f, 0.0f);
+	glEnd ();	
+
+	glBegin(GL_LINE_LOOP);
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f( 0.0f, 1.0f, 0.0f);
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f(1.0f, -1.0f, 0.0f);
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f( 0.0f, -0.5f, 0.0f);
+		glColor3f (1.f, 1.f, 1.f);	glVertex3f( -1.0f,-1.0f, 0.0f);
+	glEnd();
+
+	//Some little windows
+	glBegin (GL_TRIANGLES);								
+		glColor3f (0, 0, 0);	glVertex3f( 0.02f, 0.9f, 0.0f);
+		glColor3f (0, 0, 0);	glVertex3f(0.15f, 0.6f, 0.0f);
+		glColor3f (0, 0, 0);	glVertex3f( 0.02f, 0.6f, 0.0f);
+
+		glColor3f (0, 0, 0);	glVertex3f( -0.02f, 0.9f, 0.0f);
+		glColor3f (0, 0, 0);	glVertex3f(-0.15f, 0.6f, 0.0f);
+		glColor3f (0, 0, 0);	glVertex3f( -0.02f, 0.6f, 0.0f);
+	glEnd ();	
+
+	//Some wing decorations
+	glBegin (GL_LINE_LOOP);								
+		glColor3f (0, 0, 0);	glVertex3f( -0.05f, 0.55f, 0.0f);
+		glColor3f (0, 0, 0);	glVertex3f(-.9f, -.9f, 0.0f);
+		glColor3f (0, 0, 0);	glVertex3f( -0.05f, -0.45f, 0.0f);
+	glEnd ();	
+
+	glBegin (GL_LINE_LOOP);								
+		glColor3f (0, 0, 0);	glVertex3f( 0.05f, 0.55f, 0.0f);
+		glColor3f (0, 0, 0);	glVertex3f( 0.9f, -.9f, 0.0f);
+		glColor3f (0, 0, 0);	glVertex3f( 0.05f, -0.45f, 0.0f);
+	glEnd();
+
+
+	if(joystate->rgbButtons[1] & 0x80)
+	{
+		//Make some rocket flames!
+		//Cycle flame color
+		for(int i=0; i<2; i++)
+		{
+			glPushMatrix();
+			glScalef(1.2, 1.2, 1);
+			if(i==0)
+				glTranslatef(-.3, 0, 0);
+			else
+				glTranslatef(.3, 0, 0);
+
+			flameColor[1] = flameColor[1] - .1f;
+			if(flameColor[1] < 0)
+				flameColor[1] += 1.0f;
+			glColor3f(flameColor[0], flameColor[1], flameColor[2]);
+
+			animVal++;
+
+			int flameSize = 8;
+
+			if(animVal % 2 == 0)
+			{
+				glBegin(GL_LINE_LOOP);
+					glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.00001f);
+					
+					glVertex3f(-0.04424f, -0.34192359447479248f * 4*flameSize/6.0f, -.00001f);
+					glVertex3f(-0.01478f, -0.34192359447479248f, -.00001f);
+					glVertex3f( 0.01468f, -0.34192359447479248f * 4*flameSize/6.0f, -.00001f);
+					glVertex3f( 0.04414f,  -0.34192359447479248f, -.00001f);
+
+					glVertex3f(0.073662996292114258f, -0.34201046824455261f, -.00001f);
+				glEnd();
+			}
+
+			else if(animVal % 2 == 1)
+			{	
+				glBegin(GL_LINE_LOOP);
+					glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.00001f);
+					
+					glVertex3f(-0.04424f, -0.34192359447479248f, -.00001f);
+					glVertex3f(-0.01478f, -0.34192359447479248f * 4*flameSize/6.0f, -.00001f);
+					glVertex3f(0.01468f, -0.34192359447479248f, -.00001f);
+					glVertex3f( 0.04414f,  -0.34192359447479248f * 4*flameSize/6.0f, -.00001f);
+
+					glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
+				glEnd();
+			}
+			glPopMatrix();
+		}
+	}
+	
+	glPopMatrix();
+}
+
+bool CShip::CanDestroy(int destroyerType)
+{
+	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE ||
+		destroyerType == TYPE_PLANET)
+	{
+		return true;
+	}
+	else
+		return false;
+}
+
+void CShip::ProcessMotion(DWORD milliseconds, Keys *keys)
+{
+	//Add motion based on motion vector and elapsed time
+	translation[0] += milliseconds * motionVector[0] / 1000;
+	translation[1] += milliseconds * motionVector[1] / 1000;
+	translation[2] += milliseconds * motionVector[2] / 1000;
+
+	//Rotate based on angular velocity and elapse time
+	rotation[0] += milliseconds * angularVelocity[0] / 1000;
+	rotation[1] += milliseconds * angularVelocity[1] / 1000;
+	rotation[2] += milliseconds * angularVelocity[2] / 1000;
+
+	//Update collision sphere data
+	//Update collision sphere locations
+	for(unsigned int i = 0; i < collisionSpheres.size(); i++)
+	{
+		//First, rotate the sphere
+		collisionSpheres[i]->globalPosition[0] = cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[1] = -sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[2] = 0;
+
+		//Scale by the object's scale
+		collisionSpheres[i]->globalPosition[0] *= scale[0];
+		collisionSpheres[i]->globalPosition[1] *= scale[1];
+		collisionSpheres[i]->globalPosition[2] *= scale[2];
+
+		//Translate by the object's translation
+		collisionSpheres[i]->globalPosition[0] += translation[0];
+		collisionSpheres[i]->globalPosition[1] += translation[1];
+		collisionSpheres[i]->globalPosition[2] += translation[2];
+	}
+
+	//Loop at edge of screen
+	if(translation[1] > 1.70f)
+		translation[1] = -1.70f;
+	else if(translation[1] < -1.70f)
+		translation[1] = 1.70f;
+
+	//Delete if way off in no-mans-land
+	if(translation[0] > 2.75f || translation[0] < -2.75f)
+		deleteMe = true;
+}
+
+void CShip::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
+{
+	float vectorToGravity[3];
+	float forceVector[3];
+	float distance;
+	float tangent;
+	float pointingVector[3];
+	float vectorLen;
+	int direction = 1;
+
+	for(unsigned int i=0; i<gWells.size(); i++)
+	{
+		//Determine vector from this object to gravity well
+		vectorToGravity[0] = gWells[i]->translation[0] - translation[0];
+		vectorToGravity[1] = gWells[i]->translation[1] - translation[1];
+		vectorToGravity[2] = gWells[i]->translation[2] - translation[2];
+		
+		//Find distance to gravity well
+		distance = sqrt(pow(vectorToGravity[0], 2) + pow(vectorToGravity[1], 2) + pow(vectorToGravity[2], 2));
+		
+		//Make vectorToGravity a unit vector
+		vectorToGravity[0] /= distance;
+		vectorToGravity[1] /= distance;
+		vectorToGravity[2] /= distance;
+		
+		//Compute force vector due to gravity
+		forceVector[0] = vectorToGravity[0] * (gWells[i]->mass / pow(distance, 2));
+		forceVector[1] = vectorToGravity[1] * (gWells[i]->mass / pow(distance, 2));
+		forceVector[2] = vectorToGravity[2] * (gWells[i]->mass / pow(distance, 2));
+
+		if(forceVector[0] > gameParams->maxGravityForce)
+			forceVector[0] = gameParams->maxGravityForce;
+		if(forceVector[1] > gameParams->maxGravityForce)
+			forceVector[1] = gameParams->maxGravityForce;
+		if(forceVector[2] > gameParams->maxGravityForce)
+			forceVector[2] = gameParams->maxGravityForce;
+
+		if(forceVector[0] < -gameParams->maxGravityForce)
+			forceVector[0] = -gameParams->maxGravityForce;
+		if(forceVector[1] < -gameParams->maxGravityForce)
+			forceVector[1] = -gameParams->maxGravityForce;
+		if(forceVector[2] < -gameParams->maxGravityForce)
+			forceVector[2] = -gameParams->maxGravityForce;
+
+		//Add force vector to this object's motionVector
+		motionVector[0] += forceVector[0] * milliseconds / 1000;
+		motionVector[1] += forceVector[1] * milliseconds / 1000;
+		//motionVector[2] += forceVector[2] * milliseconds / 1000;		
+	}
+
+	//Add motion due to joystick
+	angularVelocity[2] = -(joystate->lX - 32768) / 100;
+
+	/*
+	//Find unit vector where we are currently pointing
+	tangent = tan((rotation[2] + 90) * DEG2RAD);
+	
+	while(rotation[2] + 90 < -180)
+		rotation[2] += 360;
+
+	while(rotation[2] + 90 > 180)
+		rotation[2] -= 360;
+
+	if(((int)rotation[2] + 90) > -90 && ((int)rotation[2] + 90) < 90)
+		;
+	else
+		direction *= -1;
+		*/
+		
+
+	if(joystate->rgbButtons[1] & 0x80)
+	{
+		vectorLen = sqrt(tangent * tangent + 1);
+		//pointingVector[0] = direction / sqrt(tangent * tangent + 1);
+		//pointingVector[1] = tangent / sqrt(tangent * tangent + 1);
+		pointingVector[0] = cos((rotation[2] + 90) * DEG2RAD);
+		pointingVector[1] = sin((rotation[2] + 90) * DEG2RAD);
+		
+		motionVector[0] += pointingVector[0] / 100;
+		motionVector[1] += pointingVector[1] / 100;
+	}
 }

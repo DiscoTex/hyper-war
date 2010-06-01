@@ -9,6 +9,7 @@
 #include <gl\gl.h>												// Header File For The OpenGL32 Library
 #include <gl\glu.h>												// Header File For The GLu32 Library
 #include "glBase.h"												// Header File For NeHeGL
+#include "joystick.h"
 
 #pragma comment( lib, "opengl32.lib" )							// Search For OpenGL32.lib While Linking
 #pragma comment( lib, "glu32.lib" )								// Search For GLu32.lib While Linking
@@ -36,7 +37,8 @@ enum{
 	TYPE_PROJECTILE,
 	TYPE_MOSHIP,
 	TYPE_BEAM,
-	TYPE_BLACKHOLE
+	TYPE_BLACKHOLE,
+	TYPE_SHIP
 };
 
 enum{
@@ -379,4 +381,25 @@ private:
 	int TTL;
 	int animVal;
 	sGravityWell *myGravity;
+};
+
+class CShip : public CGameObject
+{
+public:
+	CShip(sGameParams *newGameParams);
+	~CShip();
+
+	void ProcessMotion(DWORD milliseconds, Keys * keys);
+	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
+
+	int	 GetType() {return TYPE_SHIP;}
+	bool CanDestroy(int destroyerType);
+	void SetJoyState( DIJOYSTATE2 *newJoystate ) { joystate = newJoystate; }
+
+	void Draw();
+
+private:
+	DIJOYSTATE2 *joystate;
+	unsigned short		animVal;
+	float				flameColor[3];
 };

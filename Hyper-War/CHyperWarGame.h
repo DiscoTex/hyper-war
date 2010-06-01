@@ -12,6 +12,7 @@
 #include "CAudioRenderer.h"
 #include "CEffects.h"
 #include "RawMouse.h"
+#include "joystick.h"
 //#include "glfont2.h"
 #include "CHighScoreList.h"
 
@@ -68,7 +69,11 @@ private:
 	CAudioRenderer				audioRenderer;
 	//Raw Input Reader
 	CRawMouse					rawMouse;
-	//High score list
+	//Joysticks
+	Joystick					*joysticks[2];
+	//Current state of joysticks
+	DIJOYSTATE2					joystates[2];
+	//High score list	
 	CHighScoreList				*hsList;
 	//Game speed parameters
 	sGameParams					gameParams;

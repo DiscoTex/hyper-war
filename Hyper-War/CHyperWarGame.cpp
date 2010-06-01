@@ -30,6 +30,11 @@ CHyperWarGame::CHyperWarGame()
 	currentLetter = 65;
 	nameIndex = 0;
 	listTime = false;
+
+	joysticks[0] = new Joystick(0);
+	joysticks[0]->open();
+	joysticks[1] = new Joystick(1);
+	joysticks[1]->open();
 }
 
 CHyperWarGame::~CHyperWarGame()
@@ -133,6 +138,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 
 	if(gameParams.gameMode == MODE_VS)
 	{
+		audioRenderer.PlaySound(SOUND_SPMUSIC, 0, 0);
+
 		//** Create game objects
 		//Create a green planet
 		CPlanet *planet = new CPlanet(&gameParams);
@@ -381,6 +388,15 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetBeamKey(8);
 		gameObjects.push_back(cannon);
 
+		CShip *ship = new CShip(&gameParams);
+		ship->SetColor(0, .8f, 0);
+		ship->SetSide(SIDE_GREEN);
+		ship->SetScale(.05f, .05f, .05f);
+		//ship->SetRotation(0, 0, -90);
+		ship->SetJoyState(&joystates[0]);
+
+		gameObjects.push_back(ship);
+
 		SetHyperLevel(1);
 		NextWave();
 	}	
@@ -422,11 +438,9 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 	{
 		switch(colliderType)
 		{
-		case TYPE_MOSHIP:
-
+		case TYPE_MOSHIP:		
 			hyperModeTimer = 0;
 			SetHyperLevel(GetHyperLevel() - 1);
-			//waveNumber--;
 			for(int k=0; k<gameParams.debrisAmount*16; k++)
 			{
 				float  debrisAngle;
@@ -462,7 +476,7 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				gameParams.bluePoints += 500 * pointMultiplier;
 			}
 			break;
-		case TYPE_CITY:
+		case TYPE_CITY:		
 
 			hyperModeTimer = 0;
 			switch(gameObjects[collider]->GetSide())
@@ -505,7 +519,6 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 
 		case TYPE_FLAKCANNON:
 		case TYPE_MISSILEBASE:
-
 			hyperModeTimer = 0;
 			switch(gameObjects[collider]->GetSide())
 			{
@@ -528,6 +541,43 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				debris->SetMotionVector(
 					float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
 					float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )),
+					0);
+				debris->SetTranslation(
+					float(gameObjects[collider]->GetTranslation()[0]),
+					float(gameObjects[collider]->GetTranslation()[1]),
+					float(gameObjects[collider]->GetTranslation()[2]));
+				debris->SetScale(debrisSize, debrisSize, debrisSize);
+				debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+				gameObjects.push_back(debris);
+			}
+			audioRenderer.PlaySound(SOUND_EXPLOSION, 
+				gameObjects[collider]->GetTranslation()[0],
+				gameObjects[collider]->GetTranslation()[1],
+				gameParams.randoms[gameParams.randIndex++%1024]%100 / 200.0 + .5f);
+			break;
+		case TYPE_SHIP:
+			hyperModeTimer = 0;
+			switch(gameObjects[collider]->GetSide())
+			{
+			case SIDE_BLUE:
+				gameParams.greenPoints += 500 * pointMultiplier;
+				break;
+			case SIDE_GREEN:
+				gameParams.bluePoints += 500 * pointMultiplier;
+				break;
+			}
+			for(int k=0; k<gameParams.debrisAmount*16; k++)
+			{
+				float  debrisAngle;
+				float  debrisSize;							
+
+				debrisAngle = gameParams.randoms[gameParams.randIndex++%1024] % 360 + gameObjects[collider]->GetRotation()[2];
+				debrisSize = ((gameParams.randoms[gameParams.randIndex++%1024]%100) / 100.0f) * .2f;
+
+				debris = new CDebris(&gameParams);
+				debris->SetMotionVector(
+					float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )) + gameObjects[collider]->GetMotionVector()[0] ,
+					float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )) + gameObjects[collider]->GetMotionVector()[1],
 					0);
 				debris->SetTranslation(
 					float(gameObjects[collider]->GetTranslation()[0]),
@@ -627,6 +677,9 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	float *nukeVector;
 	float projVector[3];
 	int TTL;
+
+	joysticks[0]->poll(&joystates[0]);
+	joysticks[1]->poll(&joystates[1]);
 
 	if (g_keys->keyDown [VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
 	{
