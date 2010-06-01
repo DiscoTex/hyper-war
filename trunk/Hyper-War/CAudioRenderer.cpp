@@ -95,28 +95,28 @@ ALboolean CAudioRenderer::LoadALData()
 
 	alSourcei (Sources[SOUND_SHOOT], AL_BUFFER,   Buffers[SOUND_SHOOT]   );
 	alSourcef (Sources[SOUND_SHOOT], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_SHOOT], AL_GAIN,     .33f              );
+	alSourcef (Sources[SOUND_SHOOT], AL_GAIN,     .15f              );
 	alSourcefv(Sources[SOUND_SHOOT], AL_POSITION, SourcesPos[SOUND_SHOOT]);
 	alSourcefv(Sources[SOUND_SHOOT], AL_VELOCITY, SourcesVel[SOUND_SHOOT]);
 	alSourcei (Sources[SOUND_SHOOT], AL_LOOPING,  AL_FALSE           );
 
 	alSourcei (Sources[SOUND_INTRO], AL_BUFFER,   Buffers[SOUND_INTRO]   );
 	alSourcef (Sources[SOUND_INTRO], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_INTRO], AL_GAIN,     .15f              );
+	alSourcef (Sources[SOUND_INTRO], AL_GAIN,     0.7f              );
 	alSourcefv(Sources[SOUND_INTRO], AL_POSITION, SourcesPos[SOUND_INTRO]);
 	alSourcefv(Sources[SOUND_INTRO], AL_VELOCITY, SourcesVel[SOUND_INTRO]);
 	alSourcei (Sources[SOUND_INTRO], AL_LOOPING,  AL_FALSE           );
 
 	alSourcei (Sources[SOUND_MISSILE_EXPL], AL_BUFFER,   Buffers[SOUND_MISSILE_EXPL]   );
 	alSourcef (Sources[SOUND_MISSILE_EXPL], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_MISSILE_EXPL], AL_GAIN,     1.0f              );
+	alSourcef (Sources[SOUND_MISSILE_EXPL], AL_GAIN,     0.25f              );
 	alSourcefv(Sources[SOUND_MISSILE_EXPL], AL_POSITION, SourcesPos[SOUND_MISSILE_EXPL]);
 	alSourcefv(Sources[SOUND_MISSILE_EXPL], AL_VELOCITY, SourcesVel[SOUND_MISSILE_EXPL]);
 	alSourcei (Sources[SOUND_MISSILE_EXPL], AL_LOOPING,  AL_FALSE           );
 
 	alSourcei (Sources[SOUND_SPMUSIC], AL_BUFFER,   Buffers[SOUND_SPMUSIC]   );
 	alSourcef (Sources[SOUND_SPMUSIC], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_SPMUSIC], AL_GAIN,     .8f              );
+	alSourcef (Sources[SOUND_SPMUSIC], AL_GAIN,     1.0f              );
 	alSourcefv(Sources[SOUND_SPMUSIC], AL_POSITION, SourcesPos[SOUND_SPMUSIC]);
 	alSourcefv(Sources[SOUND_SPMUSIC], AL_VELOCITY, SourcesVel[SOUND_SPMUSIC]);
 	alSourcei (Sources[SOUND_SPMUSIC], AL_LOOPING,  AL_TRUE           );
@@ -179,7 +179,7 @@ ALboolean CAudioRenderer::LoadALData()
 
 	alSourcei (Sources[SOUND_BOOM], AL_BUFFER,   Buffers[SOUND_BOOM]   );
 	alSourcef (Sources[SOUND_BOOM], AL_PITCH,    1.0f              );
-	alSourcef (Sources[SOUND_BOOM], AL_GAIN,     .65f              );
+	alSourcef (Sources[SOUND_BOOM], AL_GAIN,     .35f              );
 	alSourcefv(Sources[SOUND_BOOM], AL_POSITION, SourcesPos[SOUND_BOOM]);
 	alSourcefv(Sources[SOUND_BOOM], AL_VELOCITY, SourcesVel[SOUND_BOOM]);
 	alSourcei (Sources[SOUND_BOOM], AL_LOOPING,  AL_FALSE           );
@@ -211,8 +211,6 @@ ALboolean CAudioRenderer::LoadALData()
 	alSourcefv(Sources[SOUND_CHARGEUP], AL_POSITION, SourcesPos[SOUND_CHARGEUP]);
 	alSourcefv(Sources[SOUND_CHARGEUP], AL_VELOCITY, SourcesVel[SOUND_CHARGEUP]);
 	alSourcei (Sources[SOUND_CHARGEUP], AL_LOOPING,  AL_FALSE           );
-
-	
 
 	// Do another error check and return.
 
