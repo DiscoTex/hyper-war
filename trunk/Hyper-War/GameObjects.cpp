@@ -250,30 +250,39 @@ int CGameObject::CheckCollision(vector< CGameObject* > gObjects, DWORD milliseco
 		switch(thisType)
 		{
 		case TYPE_DEBRIS:
-			if(otherType == TYPE_DEBRIS || otherType == TYPE_MISSILEBASE || otherType == TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP || otherType == TYPE_BEAM || otherType == TYPE_PROJECTILE)
+			if(otherType == TYPE_DEBRIS || otherType == TYPE_MISSILEBASE || otherType == TYPE_CITY || otherType == TYPE_FLAKCANNON 
+				|| otherType == TYPE_MOSHIP || otherType == TYPE_BEAM || otherType == TYPE_PROJECTILE || otherType == TYPE_SHIP || TYPE_BULLET)
 				continue;
 			break;
 		case TYPE_PLANET:
-			if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP || otherType == TYPE_BEAM || otherType == TYPE_PROJECTILE)
+			if(otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON 
+				|| otherType == TYPE_MOSHIP || otherType == TYPE_BEAM || otherType == TYPE_PROJECTILE)
 				continue;
 			break;
 		case TYPE_MISSILEBASE:
-			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE)
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE || otherType == TYPE_SHIP)
 				continue;
 		case TYPE_CITY:
-			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE)
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE || otherType == TYPE_SHIP)
 				continue;
 			break;
 		case TYPE_FLAKCANNON:
-			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE)
+			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE || otherType == TYPE_SHIP)
 				continue;
 			break;
 		case TYPE_MOSHIP:
-			if(gObjects[i]->GetSide() == mySide || otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE || otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE)
+			if(gObjects[i]->GetSide() == mySide || otherType == TYPE_PLANET || otherType == TYPE_MISSILEBASE 
+				|| otherType ==  TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP || otherType == TYPE_PROJECTILE || otherType == TYPE_SHIP)
 				continue;
 			break;
 		case TYPE_BEAM:
 			if(otherType == TYPE_PLANET || otherType ==  TYPE_DEBRIS || otherType == TYPE_PROJECTILE)
+				continue;
+		case TYPE_SHIP:
+			if(otherType == TYPE_DEBRIS || otherType == TYPE_MISSILEBASE || otherType == TYPE_CITY || otherType == TYPE_FLAKCANNON || otherType == TYPE_MOSHIP)
+				continue;
+		case TYPE_BULLET:
+			if(otherType == TYPE_DEBRIS)
 				continue;
 			break;
 		}
@@ -1069,6 +1078,7 @@ CMissileBase::CMissileBase(sGameParams *newGameParams) : CGameObject(newGamePara
 	launchReady = false;
 	charge = 0;
 	destroyed = false;
+	hitPoints = 30;
 }
 
 CMissileBase::~CMissileBase()
@@ -1114,12 +1124,15 @@ void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gW
 		{
 			collisionSpheres[0]->translation[0] = .50f;
 			destroyed = false;
+			hitPoints = 30;
 		}
 	}
 }
 
 bool CMissileBase::CanDestroy(int destroyerType)
 {
+	bool retval = false;
+
 	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE)
 	{
 		destroyed = true;
@@ -1127,9 +1140,23 @@ bool CMissileBase::CanDestroy(int destroyerType)
 
 		collisionSpheres[0]->translation[0] = -50;
 
-		return true;
+		retval = true;
 	}
-	return false;
+	else if(destroyerType == TYPE_BULLET)
+	{
+		hitPoints--;
+		if(hitPoints < 0)
+		{
+			destroyed = true;
+			timeToRebuild = 30000;
+
+			collisionSpheres[0]->translation[0] = -50;
+
+			retval = true;
+		}
+	}
+
+	return retval;
 }
 
 float* CMissileBase::GetNukeTranslation()
@@ -1524,6 +1551,8 @@ CCity::CCity(sGameParams *newGameParams) : CGameObject(newGameParams)
 	cSphere->globalPosition[1] = 0;
 	cSphere->globalPosition[2] = 0;
 	collisionSpheres.push_back(cSphere);
+
+	hitPoints = 30;
 }
 
 CCity::~CCity()
@@ -1536,10 +1565,18 @@ void CCity::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 
 bool CCity::CanDestroy(int destroyerType)
 {
+	bool retval = false;
+
 	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE)
-		return true;
-	else
-		return false;
+		retval = true;
+	else if(destroyerType == TYPE_BULLET)
+	{
+		hitPoints--;
+		if(hitPoints < 0)
+			retval = true;
+	}
+
+	return retval;
 }
 
 int	 CCity::GetType()
@@ -1702,6 +1739,8 @@ CFlakCannon::CFlakCannon(sGameParams *newGameParams) : CGameObject(newGameParams
 	loaded = true;
 	timeToReload = 0;
 	destroyed = false;
+
+	hitPoints = 30;
 }
 
 CFlakCannon::~CFlakCannon()
@@ -1714,14 +1753,28 @@ void CFlakCannon::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWe
 
 bool CFlakCannon::CanDestroy(int destroyerType)
 {
+	bool retval = false;
+
 	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE)
 	{
 		collisionSpheres[0]->translation[0] = 50;
 		timeToRebuild = 30000;
 		destroyed = true;
-		return true;
+		retval = true;
 	}
-	return false;
+	else if(destroyerType == TYPE_BULLET)
+	{
+		hitPoints--;
+		if(hitPoints < 0)
+		{
+			collisionSpheres[0]->translation[0] = 50;
+			timeToRebuild = 30000;
+			destroyed = true;
+			retval = true;
+		}
+	}
+
+	return retval;
 }
 
 int	CFlakCannon::GetType()
@@ -1835,6 +1888,7 @@ void CFlakCannon::AddTimeSinceFired(DWORD milliseconds)
 		{
 			collisionSpheres[0]->translation[0] = 0;
 			destroyed = false;
+			hitPoints = 30;
 		}
 	}
 }
@@ -2049,6 +2103,8 @@ CMothership::CMothership(sGameParams *newGameParams) : CGameObject(newGameParams
 
 	countDown = 15000 - gameParams->randoms[gameParams->randIndex++%512]%5000;
 	myBeam = NULL;
+
+	hitPoints = 30;
 }
 
 CMothership::~CMothership()
@@ -2162,14 +2218,26 @@ void CMothership::Draw()
 
 bool CMothership::CanDestroy(int destroyerType)
 {
+	bool retval = false;
+
 	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE)
 	{
 		if(myBeam != NULL)
 			myBeam->Kill();
-		return true;
+		retval = true;
 	}
-	else
-		return false;
+	else if(destroyerType == TYPE_BULLET)
+	{
+		hitPoints--;
+		if(hitPoints < 0)
+		{
+			if(myBeam != NULL)
+				myBeam->Kill();
+			retval = true;
+		}
+	}
+
+	return retval;
 }
 
 
@@ -2415,6 +2483,14 @@ CShip::CShip(sGameParams *newGameParams) : CGameObject(newGameParams)
 	flameColor[0] = 1.0f;
 	flameColor[1] = (float)(gameParams->randoms[gameParams->randIndex++%512] / RAND_MAX);
 	flameColor[2] = 0;
+
+	timeSinceLastFire = 0;
+
+	hitPoints = 15;
+}
+
+CShip::~CShip()
+{
 }
 
 void CShip::Draw()
@@ -2573,28 +2649,28 @@ void CShip::Draw()
 			if(animVal % 2 == 0)
 			{
 				glBegin(GL_LINE_LOOP);
-					glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.00001f);
+					glVertex3f(-0.073740899562835693f, -0.34192359447479248f, .1f);
 					
-					glVertex3f(-0.04424f, -0.34192359447479248f * 4*flameSize/6.0f, -.00001f);
-					glVertex3f(-0.01478f, -0.34192359447479248f, -.00001f);
-					glVertex3f( 0.01468f, -0.34192359447479248f * 4*flameSize/6.0f, -.00001f);
-					glVertex3f( 0.04414f,  -0.34192359447479248f, -.00001f);
+					glVertex3f(-0.04424f, -0.34192359447479248f * 4*flameSize/6.0f, .1f);
+					glVertex3f(-0.01478f, -0.34192359447479248f, -.1f);
+					glVertex3f( 0.01468f, -0.34192359447479248f * 4*flameSize/6.0f, -.1f);
+					glVertex3f( 0.04414f,  -0.34192359447479248f, -.1f);
 
-					glVertex3f(0.073662996292114258f, -0.34201046824455261f, -.00001f);
+					glVertex3f(0.073662996292114258f, -0.34201046824455261f, -.1f);
 				glEnd();
 			}
 
 			else if(animVal % 2 == 1)
 			{	
 				glBegin(GL_LINE_LOOP);
-					glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.00001f);
+					glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.1f);
 					
-					glVertex3f(-0.04424f, -0.34192359447479248f, -.00001f);
-					glVertex3f(-0.01478f, -0.34192359447479248f * 4*flameSize/6.0f, -.00001f);
-					glVertex3f(0.01468f, -0.34192359447479248f, -.00001f);
-					glVertex3f( 0.04414f,  -0.34192359447479248f * 4*flameSize/6.0f, -.00001f);
+					glVertex3f(-0.04424f, -0.34192359447479248f, -.1f);
+					glVertex3f(-0.01478f, -0.34192359447479248f * 4*flameSize/6.0f, -.1f);
+					glVertex3f(0.01468f, -0.34192359447479248f, -.1f);
+					glVertex3f( 0.04414f,  -0.34192359447479248f * 4*flameSize/6.0f, -.1f);
 
-					glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
+					glVertex3f(0.073662996292114258, -0.34201046824455261, -.1f);
 				glEnd();
 			}
 			glPopMatrix();
@@ -2606,13 +2682,22 @@ void CShip::Draw()
 
 bool CShip::CanDestroy(int destroyerType)
 {
+	bool retval = false;
+
 	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE ||
 		destroyerType == TYPE_PLANET)
 	{
-		return true;
+		retval = true;
 	}
-	else
-		return false;
+	else if(destroyerType == TYPE_BULLET)
+	{
+		hitPoints--;
+
+		if(hitPoints < 0)
+			retval = true;
+	}
+
+	return retval;
 }
 
 void CShip::ProcessMotion(DWORD milliseconds, Keys *keys)
@@ -2653,9 +2738,11 @@ void CShip::ProcessMotion(DWORD milliseconds, Keys *keys)
 	else if(translation[1] < -1.70f)
 		translation[1] = 1.70f;
 
-	//Delete if way off in no-mans-land
+	//Turn around if way off in no-mans-land
 	if(translation[0] > 2.75f || translation[0] < -2.75f)
-		deleteMe = true;
+		motionVector[0] *= -1;
+
+	timeSinceLastFire += milliseconds;
 }
 
 void CShip::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
@@ -2709,34 +2796,136 @@ void CShip::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 	}
 
 	//Add motion due to joystick
-	angularVelocity[2] = -(joystate->lX - 32768) / 100;
-
-	/*
-	//Find unit vector where we are currently pointing
-	tangent = tan((rotation[2] + 90) * DEG2RAD);
-	
-	while(rotation[2] + 90 < -180)
-		rotation[2] += 360;
-
-	while(rotation[2] + 90 > 180)
-		rotation[2] -= 360;
-
-	if(((int)rotation[2] + 90) > -90 && ((int)rotation[2] + 90) < 90)
-		;
+	if(joystate->lX < 28768 || joystate->lX > 36768)
+		angularVelocity[2] = -(joystate->lX - 32768) / 100;
 	else
-		direction *= -1;
-		*/
-		
+		angularVelocity[2] = 0;
 
 	if(joystate->rgbButtons[1] & 0x80)
 	{
-		vectorLen = sqrt(tangent * tangent + 1);
-		//pointingVector[0] = direction / sqrt(tangent * tangent + 1);
-		//pointingVector[1] = tangent / sqrt(tangent * tangent + 1);
 		pointingVector[0] = cos((rotation[2] + 90) * DEG2RAD);
 		pointingVector[1] = sin((rotation[2] + 90) * DEG2RAD);
 		
-		motionVector[0] += pointingVector[0] / 100;
-		motionVector[1] += pointingVector[1] / 100;
+		motionVector[0] += pointingVector[0] / 50;
+		motionVector[1] += pointingVector[1] / 50;
 	}
+}
+
+bool CShip::IsFiring() 
+{ 
+	bool retval;
+
+	if(timeSinceLastFire > 100)
+	{
+		retval = joystate->rgbButtons[0]; 
+		timeSinceLastFire = 0;
+	}
+	else
+		retval = false;
+
+	return retval;
+}
+
+
+CBullet::CBullet(sGameParams *newGameParams) : CGameObject(newGameParams)
+{
+	sCollisionSphere *cSphere  = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = 0;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 1;
+	cSphere->globalPosition[0] = -10;
+	cSphere->globalPosition[1] = -10;
+	cSphere->globalPosition[2] = -10;
+	collisionSpheres.push_back(cSphere);
+
+	TTL = 3000;
+}
+
+CBullet::~CBullet()
+{
+}
+
+void CBullet::Draw()
+{
+	glPushMatrix();
+	
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	glColor3f(color[0], color[1], color[2]);
+
+	glBegin(GL_QUADS);
+		glVertex3f(-.05f, -.05f, -.01f);	
+		glVertex3f(.05f, -.05f, -.01f);
+		glVertex3f(.05f, .05f, -.01f);
+		glVertex3f(-.05f, .05f, -.01f);
+	glEnd();
+
+	glBegin(GL_TRIANGLES);
+		glVertex3f(.05f, .05f, -.01f);
+		glVertex3f(-.05f, .05f, -.01f);
+		glVertex3f(0, .2f, -.001f);
+	glEnd();
+
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(-.05f, -.05f, -.01f);	
+		glVertex3f(.05f, -.05f, -.01f);
+		glVertex3f(.05f, .05f, -.01f);
+		glVertex3f(0, .2f, -.01f);
+		glVertex3f(-.05f, .05f, -.01f);
+	glEnd();
+
+	glPopMatrix();
+
+}
+
+
+void CBullet::ProcessMotion(DWORD milliseconds, Keys* keys)
+{
+	//Add motion based on motion vector and elapsed time
+	translation[0] += milliseconds * motionVector[0] / 1000;
+	translation[1] += milliseconds * motionVector[1] / 1000;
+	translation[2] += milliseconds * motionVector[2] / 1000;
+
+	//Rotate based on angular velocity and elapse time
+	rotation[0] += milliseconds * angularVelocity[0] / 1000;
+	rotation[1] += milliseconds * angularVelocity[1] / 1000;
+	rotation[2] += milliseconds * angularVelocity[2] / 1000;
+
+	//Update collision sphere data
+	//Update collision sphere locations
+	for(unsigned int i = 0; i < collisionSpheres.size(); i++)
+	{
+		//First, rotate the sphere
+		collisionSpheres[i]->globalPosition[0] = cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[1] = -sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[2] = 0;
+
+		//Scale by the object's scale
+		collisionSpheres[i]->globalPosition[0] *= scale[0];
+		collisionSpheres[i]->globalPosition[1] *= scale[1];
+		collisionSpheres[i]->globalPosition[2] *= scale[2];
+
+		//Translate by the object's translation
+		collisionSpheres[i]->globalPosition[0] += translation[0];
+		collisionSpheres[i]->globalPosition[1] += translation[1];
+		collisionSpheres[i]->globalPosition[2] += translation[2];
+	}
+
+	if(translation[1] > 1.70f)
+		translation[1] = -1.70f;
+	else if(translation[1] < -1.70f)
+		translation[1] = 1.70f;
+
+	if(translation[0] > 2.75f || translation[0] < -2.75f)
+		deleteMe = true;
+
+	TTL -= milliseconds;
+
+	if(TTL < 0)
+		deleteMe = true;
 }
