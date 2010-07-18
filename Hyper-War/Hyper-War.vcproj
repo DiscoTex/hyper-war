@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="OpenAL32.lib alut.lib"
+				AdditionalDependencies="OpenAL32.lib alut.lib odbc32.lib odbccp32.lib dinput8.lib dxguid.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"

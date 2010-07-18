@@ -1,3 +1,5 @@
+//Fix damage, respawn time
+
 /****************************************************/
 /*	CHyperWarGame.h: Main class for HyperWar game.	*/
 /*  Aaron E. Wegner									*/
@@ -106,5 +108,4 @@ private:
 	int							nameIndex;
 	double						currentLetter;
 	bool						listTime;
-
 };

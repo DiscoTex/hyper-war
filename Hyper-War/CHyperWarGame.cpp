@@ -31,6 +31,9 @@ CHyperWarGame::CHyperWarGame()
 	nameIndex = 0;
 	listTime = false;
 
+	gameParams.blueRespawnCountdown = -1;
+	gameParams.greenRespawnCountdown = -1;
+
 	joysticks[0] = new Joystick(0);
 	joysticks[0]->open();
 	joysticks[1] = new Joystick(1);
@@ -109,6 +112,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	gameParams.blueSuperFires = 0;
 	gameParams.blueSuperAmmo = 0;
 	gameParams.greenSuperAmmo = 0;
+	gameParams.blueShip = false;
+	gameParams.greenShip = false;
 
 	gameObjects.clear();
 	gravityWells.clear();
@@ -386,16 +391,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetFireKey(8);
 		cannon->SetSingularityKey('Z');
 		cannon->SetBeamKey(8);
-		gameObjects.push_back(cannon);
-
-		CShip *ship = new CShip(&gameParams);
-		ship->SetColor(0, .8f, 0);
-		ship->SetSide(SIDE_GREEN);
-		ship->SetScale(.05f, .05f, .05f);
-		//ship->SetRotation(0, 0, -90);
-		ship->SetJoyState(&joystates[0]);
-
-		gameObjects.push_back(ship);
+		gameObjects.push_back(cannon);		
 
 		SetHyperLevel(1);
 		NextWave();
@@ -523,12 +519,13 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 			switch(gameObjects[collider]->GetSide())
 			{
 			case SIDE_BLUE:
-				gameParams.greenPoints += 500 * pointMultiplier;
+				gameParams.greenPoints += 500 * pointMultiplier;				
 				break;
 			case SIDE_GREEN:
 				gameParams.bluePoints += 500 * pointMultiplier;
 				break;
 			}
+
 			for(int k=0; k<gameParams.debrisAmount*16; k++)
 			{
 				float  debrisAngle;
@@ -561,9 +558,13 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 			{
 			case SIDE_BLUE:
 				gameParams.greenPoints += 500 * pointMultiplier;
+				gameParams.blueShip = false;
+				gameParams.blueRespawnCountdown = 15000;
 				break;
 			case SIDE_GREEN:
 				gameParams.bluePoints += 500 * pointMultiplier;
+				gameParams.greenShip = false;
+				gameParams.greenRespawnCountdown = 15000;
 				break;
 			}
 			for(int k=0; k<gameParams.debrisAmount*16; k++)
@@ -584,9 +585,11 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 					float(gameObjects[collider]->GetTranslation()[1]),
 					float(gameObjects[collider]->GetTranslation()[2]));
 				debris->SetScale(debrisSize, debrisSize, debrisSize);
-				debris->SetTTL(15000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
+				debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%1024]%5000);
 				gameObjects.push_back(debris);
 			}
+
+
 			audioRenderer.PlaySound(SOUND_EXPLOSION, 
 				gameObjects[collider]->GetTranslation()[0],
 				gameObjects[collider]->GetTranslation()[1],
@@ -673,6 +676,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	CProjectile *pj;
 	CBeam *beam;
 	CBlackHole *bh;
+	CBullet *bullet;
 	float *position;
 	float *nukeVector;
 	float projVector[3];
@@ -680,6 +684,45 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 	joysticks[0]->poll(&joystates[0]);
 	joysticks[1]->poll(&joystates[1]);
+
+	if(gameParams.blueRespawnCountdown >= 0)
+		gameParams.blueRespawnCountdown -= milliseconds;
+	if(gameParams.greenRespawnCountdown >= 0)
+		gameParams.greenRespawnCountdown -= milliseconds;
+
+	if(joystates[0].rgbButtons[5] & 0x80)
+	{		
+		if(!gameParams.greenShip && gameParams.greenRespawnCountdown < 0)
+		{
+			//Spawn green ship
+			CShip *ship = new CShip(&gameParams);
+			ship->SetColor(0, .8f, 0);
+			ship->SetSide(SIDE_GREEN);
+			ship->SetScale(.05f, .05f, .05f);
+			ship->SetTranslation(-1, 0, 0);
+			ship->SetJoyState(&joystates[0]);
+			ship->SetRotation(0, 0, -90);
+			gameParams.greenShip = true;
+
+			gameObjects.push_back(ship);
+		}
+	}
+	if(joystates[1].rgbButtons[5] & 0x80)
+	{
+		if(!gameParams.blueShip && gameParams.blueRespawnCountdown < 0)
+		{
+			//Spawn blue ship
+			CShip *ship = new CShip(&gameParams);
+			ship->SetColor(0, 0, 0.8f);
+			ship->SetSide(SIDE_BLUE);
+			ship->SetScale(.05f, .05f, .05f);
+			ship->SetTranslation(1, 0, 0);
+			ship->SetJoyState(&joystates[1]);
+			ship->SetRotation(0, 0, 90);
+			gameParams.blueShip = true;
+			gameObjects.push_back(ship);
+		}
+	}
 
 	if (g_keys->keyDown [VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
 	{
@@ -747,7 +790,38 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			continue;
 		}
 
-		if(gameObjects[i]->GetType() == TYPE_MISSILEBASE)
+		if(gameObjects[i]->GetType() == TYPE_SHIP)
+		{
+			if(((CShip*)(gameObjects[i]))->IsFiring())
+			{
+				bullet = new CBullet(&gameParams);
+				
+				bullet->SetScale(.04, .04, .04);
+				
+				projVector[0] = cos((((CShip*)(gameObjects[i]))->GetRotation()[2] + 90) * DEG2RAD);
+				projVector[1] = sin((((CShip*)(gameObjects[i]))->GetRotation()[2] + 90) * DEG2RAD);
+
+				bullet->SetRotation(((CShip*)(gameObjects[i]))->GetRotation()[0],
+					((CShip*)(gameObjects[i]))->GetRotation()[1],
+					((CShip*)(gameObjects[i]))->GetRotation()[2]);
+				
+				bullet->SetTranslation(((CShip*)(gameObjects[i]))->GetTranslation()[0] + projVector[0]/16,
+					((CShip*)(gameObjects[i]))->GetTranslation()[1] + projVector[1]/16,
+					((CShip*)(gameObjects[i]))->GetTranslation()[2]);
+				bullet->SetMotionVector(
+					((CShip*)(gameObjects[i]))->GetMotionVector()[0] + projVector[0] * 4,
+					((CShip*)(gameObjects[i]))->GetMotionVector()[1] + projVector[1] * 4,
+					((CShip*)(gameObjects[i]))->GetMotionVector()[2] );		
+
+				audioRenderer.PlaySound(SOUND_SHOOT, 
+					((CShip*)(gameObjects[i]))->GetTranslation()[1], 
+					((CShip*)(gameObjects[i]))->GetTranslation()[2],
+					gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
+
+				gameObjects.push_back(bullet);				
+			}
+		}
+		else if(gameObjects[i]->GetType() == TYPE_MISSILEBASE)
 		{
 			if(g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()] && ((CMissileBase*)(gameObjects[i]))->IsLoaded())
 			{
@@ -1458,9 +1532,9 @@ void CHyperWarGame::Draw (void)
 		width = 0;
 		height = 0;
 		if(greenWins)
-			sprintf_s(tempStr, 64, "Varelyykesbri has prevailed.");
+			sprintf_s(tempStr, 64, "You Win.");
 		else if(blueWins)
-			sprintf_s(tempStr, 64, "Varelyykesbri has fallen.");
+			sprintf_s(tempStr, 64, "You Lose.");
 		else
 			sprintf_s(tempStr, 64, "");
 		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
@@ -1496,9 +1570,9 @@ void CHyperWarGame::Draw (void)
 		width = 0;
 		height = 0;
 		if(greenWins)
-			sprintf_s(tempStr, 64, "Tantusiouswui has fallen.");
+			sprintf_s(tempStr, 64, "You Lose.");
 		else if(blueWins)
-			sprintf_s(tempStr, 64, "Tantusiouswui has prevailed.");
+			sprintf_s(tempStr, 64, "You Win.");
 		else
 			sprintf_s(tempStr, 64, "");
 		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)

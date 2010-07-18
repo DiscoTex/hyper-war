@@ -38,7 +38,8 @@ enum{
 	TYPE_MOSHIP,
 	TYPE_BEAM,
 	TYPE_BLACKHOLE,
-	TYPE_SHIP
+	TYPE_SHIP,
+	TYPE_BULLET
 };
 
 enum{
@@ -86,6 +87,10 @@ struct sGameParams
 	int greenSuperFires;
 	int blueSuperAmmo;
 	int	greenSuperAmmo;
+	bool greenShip;
+	bool blueShip;
+	int  greenRespawnCountdown;
+	int  blueRespawnCountdown;
 };
 
 struct sGravityWell
@@ -237,6 +242,7 @@ private:
 	float nukeVector[3];
 	bool destroyed;
 	int	 timeToRebuild;
+	int hitPoints;
 };
 
 class CCity : public CGameObject
@@ -253,7 +259,7 @@ public:
 
 private:
 
-
+	int hitPoints;
 };
 
 class CFlakCannon : public CGameObject
@@ -272,7 +278,10 @@ public:
 	void SetBeamKey(char key) {beamKey = key;}
 	char GetBeamKey() {return beamKey;}
 	int	 GetType();
-	bool IsLoaded() {return loaded && !destroyed;}
+	bool IsLoaded() 
+	{
+		return loaded && !destroyed;
+	}
 	void Fire();
 	void GetProjVector(int* TTL, float* projVector);
 	float GetProjAngle();
@@ -293,6 +302,7 @@ private:
 	float  projTranslation[3];
 	bool   destroyed;
 	int    timeToRebuild;
+	int    hitPoints;
 	//int    superWeaponsFired;
 };
 
@@ -357,6 +367,7 @@ public:
 
 private:
 	int countDown;
+	int hitPoints;
 	CBeam* myBeam;
 };
 
@@ -395,6 +406,7 @@ public:
 	int	 GetType() {return TYPE_SHIP;}
 	bool CanDestroy(int destroyerType);
 	void SetJoyState( DIJOYSTATE2 *newJoystate ) { joystate = newJoystate; }
+	bool IsFiring();
 
 	void Draw();
 
@@ -402,4 +414,22 @@ private:
 	DIJOYSTATE2 *joystate;
 	unsigned short		animVal;
 	float				flameColor[3];
+	int					timeSinceLastFire;
+	int					hitPoints;
+};
+
+class CBullet : public CGameObject
+{
+public:
+	CBullet(sGameParams *newGameParams);
+	~CBullet();
+
+	int GetType() { return TYPE_BULLET; }
+	bool CanDestroy(int destroyerType) { return true; }
+	void ProcessMotion(DWORD milliseconds, Keys* keys);
+
+	void Draw();
+
+private:
+	int	TTL;
 };
