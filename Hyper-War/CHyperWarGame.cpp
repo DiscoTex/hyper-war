@@ -136,8 +136,13 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	gameParams.bluePoints = 0;
 	gameParams.debrisAmount = 5;
 	gameParams.flakDebrisFactor = 6;
+#ifdef PC_CONTROLS
+	gameParams.mouse1Index = 0;
+	gameParams.mouse2Index = 1;
+#else
 	gameParams.mouse1Index = 2;
 	gameParams.mouse2Index = 1;
+#endif
 	pointMultiplier = 1;
 	audioRenderer.StopAll();
 
@@ -335,7 +340,11 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -84);
 		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
+#ifdef PC_CONTROLS
+		mb->SetLaunchKey('A');
+#else 
 		mb->SetLaunchKey(6);
+#endif		
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -345,7 +354,12 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -96);
 		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
+		
+#ifdef PC_CONTROLS
+		mb->SetLaunchKey('D');
+#else
 		mb->SetLaunchKey(7);
+#endif
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
 
@@ -388,9 +402,15 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetRotation(0, 0, -90);
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[0]);
+#ifdef PC_CONTROLS
+		cannon->SetFireKey('S');
+		cannon->SetSingularityKey('X');
+		cannon->SetBeamKey('W');
+#else
 		cannon->SetFireKey(8);
-		cannon->SetSingularityKey('Z');
+		cannon->SetSingularityKey('X');
 		cannon->SetBeamKey(8);
+#endif
 		gameObjects.push_back(cannon);		
 
 		SetHyperLevel(1);
@@ -736,6 +756,32 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 	if(gameParams.gameMode == MODE_VS)
 	{
+#ifdef PC_CONTROLS
+		mousePos[0][0] -= rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
+		if(mousePos[0][0] > 0)
+			mousePos[0][0] = 0;
+		else if(mousePos[0][0] < -1.8f)
+			mousePos[0][0] = -1.8f;
+
+		mousePos[0][1] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
+		if(mousePos[0][1] > 1.6f)
+			mousePos[0][1] = 1.6f;
+		else if(mousePos[0][1] < -1.6f)
+			mousePos[0][1] = -1.6f;	
+
+		mousePos[1][0] += rawMouse.get_x_delta(gameParams.mouse2Index) / 500.0f;
+		if(mousePos[1][0] < 0)
+			mousePos[1][0] = 0;
+		else if(mousePos[1][0] > 1.8f)
+			mousePos[1][0] = 1.8f;
+
+		mousePos[1][1] -= rawMouse.get_y_delta(gameParams.mouse2Index) / 500.0f;
+		if(mousePos[1][1] > 1.6f)
+			mousePos[1][1] = 1.6f;
+		else if(mousePos[1][1] < -1.6f)
+			mousePos[1][1] = -1.6f;
+#else
+
 		mousePos[0][0] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
 		if(mousePos[0][0] > 0)
 			mousePos[0][0] = 0;
@@ -759,9 +805,26 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			mousePos[1][1] = 1.6f;
 		else if(mousePos[1][1] < -1.6f)
 			mousePos[1][1] = -1.6f;
+
+#endif
 	}
 	else if(gameParams.gameMode == MODE_SINGLE)
 	{
+
+#ifdef PC_CONTROLS
+		mousePos[0][0] += rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
+		if(mousePos[0][0] > 2.2f)
+			mousePos[0][0] = 2.2f;
+		else if(mousePos[0][0] < -1.8f)
+			mousePos[0][0] = -1.8f;
+
+		mousePos[0][1] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
+		if(mousePos[0][1] > 1.6f)
+			mousePos[0][1] = 1.6f;
+		else if(mousePos[0][1] < -1.6f)
+			mousePos[0][1] = -1.6f;	
+
+#else
 		mousePos[0][0] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
 		if(mousePos[0][0] > 2.2f)
 			mousePos[0][0] = 2.2f;
@@ -773,7 +836,10 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			mousePos[0][1] = 1.6f;
 		else if(mousePos[0][1] < -1.6f)
 			mousePos[0][1] = -1.6f;	
+
+#endif
 	}
+
 
 	//For every object in the game
 	for(unsigned int i=0; i<gameObjects.size(); i++)
@@ -1099,7 +1165,8 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	//Check to see if it is time to add super weapon ammo
 	if(gameParams.gameMode == MODE_VS && gameParams.bluePoints > (gameParams.blueSuperAmmo + 5) * 5000)
 	{
-		gameParams.blueSuperAmmo += 5;
+		//gameParams.blueSuperAmmo += 5;
+		gameParams.blueSuperAmmo += 4;
 		audioRenderer.PlaySound(SOUND_CHARGEUP, 0, 0);
 	}
 
