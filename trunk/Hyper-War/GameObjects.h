@@ -17,6 +17,7 @@
 const float DEG2RAD = 3.1415f/180;
 
 //#define COLLISION_DEBUG 1
+//#define PC_CONTROLS 1
 
 using namespace std;
 

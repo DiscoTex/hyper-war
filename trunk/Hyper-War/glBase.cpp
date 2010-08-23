@@ -392,8 +392,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	// Ask The User If They Want To Start In FullScreen Mode?
 	if (!window.init.isFullScreen)
 	{
-		window.init.width = 800;
-		window.init.height = 600;
+		window.init.width = 640;
+		window.init.height = 480;
 	}
 	else
 	{
