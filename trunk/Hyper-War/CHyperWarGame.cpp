@@ -100,12 +100,12 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 
 	gameParams.chargeRateDivider = 5000.0f;			//min 500
 	gameParams.maxThrust = 1.0f;					//max 500
-	gameParams.minThrust = 1.0f;
+	gameParams.minThrust = 0.10f;
 	gameParams.maxGravityForce = 10.0f;
 	gameParams.nukeGravityImmunityTime = 1000;		//min 200
 	gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
 	gameParams.nukeReloadTime = 4000;				//min 150
-	gameParams.flakVelocityDivider = 150.0;
+	gameParams.flakVelocityDivider = 130.0;
 	gameParams.flakReloadTime = 10;	
 	gameParams.hyperModeDelay = 30000;
 	gameParams.greenSuperFires = 0;
@@ -200,8 +200,9 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -96);
 		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
-		mb->SetLaunchKey(7);
+		mb->SetLaunchKey(6);
 		mb->SetCursorPointer(mousePos[0]);
+		mb->SetFiredLast(true);
 		gameObjects.push_back(mb);
 
 		mb = new CMissileBase(&gameParams);
@@ -220,8 +221,9 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, 84);
 		mb->SetTranslation(10 * cos(174*DEG2RAD) + 12.01f, 10 * sin(174*DEG2RAD), -.001f);
-		mb->SetLaunchKey(4);
+		mb->SetLaunchKey(3);
 		mb->SetCursorPointer(mousePos[1]);
+		mb->SetFiredLast(true);
 		gameObjects.push_back(mb);
 
 		CCity *city = new CCity(&gameParams);
@@ -297,7 +299,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetCursorPointer(mousePos[0]);
 		cannon->SetFireKey(8);
 		cannon->SetSingularityKey('Z');
-		cannon->SetBeamKey(8);
+		cannon->SetBeamKey(7);
 		gameObjects.push_back(cannon);
 
 		cannon = new CFlakCannon(&gameParams);
@@ -309,7 +311,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetCursorPointer(mousePos[1]);
 		cannon->SetFireKey(5);
 		cannon->SetSingularityKey('N');
-		cannon->SetBeamKey(5);
+		cannon->SetBeamKey(4);
 		gameObjects.push_back(cannon);
 
 		SetHyperLevel(1);
@@ -354,11 +356,12 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetScale(.1f, .1f, .1f);
 		mb->SetRotation(0, 0, -96);
 		mb->SetTranslation(10 * cos(-6*DEG2RAD) - 12.01f, 10 * sin(-6*DEG2RAD), -.001f);
+		mb->SetFiredLast(true);
 		
 #ifdef PC_CONTROLS
-		mb->SetLaunchKey('D');
+		mb->SetLaunchKey('A');		
 #else
-		mb->SetLaunchKey(7);
+		mb->SetLaunchKey(6);
 #endif
 		mb->SetCursorPointer(mousePos[0]);
 		gameObjects.push_back(mb);
@@ -409,7 +412,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 #else
 		cannon->SetFireKey(8);
 		cannon->SetSingularityKey('X');
-		cannon->SetBeamKey(8);
+		cannon->SetBeamKey(7);
 #endif
 		gameObjects.push_back(cannon);		
 
@@ -895,37 +898,46 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			}
 			else if(!g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()] && ((CMissileBase*)(gameObjects[i]))->LaunchReady())
 			{
-				//Launch missile
-				float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / gameParams.chargeRateDivider;
-				if(thrust > gameParams.maxThrust)
-					thrust = gameParams.maxThrust;
-				if(thrust < gameParams.minThrust)
-					thrust = gameParams.minThrust;
-
-				nuke = new CNuke(&gameParams);
-				nuke->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
-				nuke->SetSide(gameObjects[i]->GetSide());
-				nuke->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
-				position = ((CMissileBase*)(gameObjects[i]))->GetNukeTranslation();
-				nuke->SetTranslation(position[0], position[1], position[2]);
-				nukeVector = ((CMissileBase*)(gameObjects[i]))->GetNukeVector();
-				nuke->SetMotionVector(nukeVector[0], nukeVector[1], nukeVector[2]);
-				nuke->SetThrust(thrust);
-				gameObjects.push_back(nuke);
-
-				audioRenderer.PlaySound(SOUND_MISSILE, 
-					position[0], 
-					position[1],
-					gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
-
-				switch(gameObjects[i]->GetSide())
+				if(!((CMissileBase*)(gameObjects[i]))->GetFiredLast())
 				{
-				case SIDE_GREEN:
-					gameParams.greenPoints += 10 * pointMultiplier;
-					break;
-				case SIDE_BLUE:
-					gameParams.bluePoints += 10 * pointMultiplier;
-					break;
+					//Launch missile
+					float thrust = ((CMissileBase*)(gameObjects[i]))->Launch() / gameParams.chargeRateDivider;
+					if(thrust > gameParams.maxThrust)
+						thrust = gameParams.maxThrust;
+					if(thrust < gameParams.minThrust)
+						thrust = gameParams.minThrust;
+
+					nuke = new CNuke(&gameParams);
+					nuke->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
+					nuke->SetSide(gameObjects[i]->GetSide());
+					nuke->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
+					position = ((CMissileBase*)(gameObjects[i]))->GetNukeTranslation();
+					nuke->SetTranslation(position[0], position[1], position[2]);
+					nukeVector = ((CMissileBase*)(gameObjects[i]))->GetNukeVector();
+					nuke->SetMotionVector(nukeVector[0], nukeVector[1], nukeVector[2]);
+					nuke->SetThrust(thrust);
+					gameObjects.push_back(nuke);
+
+					audioRenderer.PlaySound(SOUND_MISSILE, 
+						position[0], 
+						position[1],
+						gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
+
+					switch(gameObjects[i]->GetSide())
+					{
+					case SIDE_GREEN:
+						gameParams.greenPoints += 10 * pointMultiplier;
+						break;
+					case SIDE_BLUE:
+						gameParams.bluePoints += 10 * pointMultiplier;
+						break;
+					}
+					((CMissileBase*)(gameObjects[i]))->SetFiredLast(true);
+				}
+				else
+				{
+					((CMissileBase*)(gameObjects[i]))->Launch();
+					((CMissileBase*)(gameObjects[i]))->SetFiredLast(false);
 				}
 			}
 		}
@@ -1163,16 +1175,16 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
 
 	//Check to see if it is time to add super weapon ammo
-	if(gameParams.gameMode == MODE_VS && gameParams.bluePoints > (gameParams.blueSuperAmmo + 5) * 5000)
+	if(gameParams.gameMode == MODE_VS && gameParams.bluePoints > (gameParams.blueSuperAmmo + 1) * 20000)
 	{
 		//gameParams.blueSuperAmmo += 5;
-		gameParams.blueSuperAmmo += 4;
+		gameParams.blueSuperAmmo += 1;
 		audioRenderer.PlaySound(SOUND_CHARGEUP, 0, 0);
 	}
 
-	if(gameParams.greenPoints > (gameParams.greenSuperAmmo + 5) * 5000)
+	if(gameParams.greenPoints > (gameParams.greenSuperAmmo + 1) * 20000)
 	{
-		gameParams.greenSuperAmmo += 5;
+		gameParams.greenSuperAmmo += 1;
 		audioRenderer.PlaySound(SOUND_CHARGEUP, 0, 0);
 	}
 
@@ -2265,6 +2277,7 @@ void CHyperWarGame::NextWave()
 			moship->SetTranslation(gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX + .5f, -1, 0);
 			gameObjects.push_back(moship);
 		}
+		gameParams.waveTime *= 0.87;
 	}
 	else
 	{
