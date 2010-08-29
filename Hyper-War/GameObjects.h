@@ -225,12 +225,14 @@ public:
 	char GetLaunchKey() {return launchKey;}
 	bool IsLoaded() {return loaded && !destroyed;}
 	int  Launch();
-	bool LaunchReady() {return launchReady;}
+	bool LaunchReady();
 	void AddCharge(DWORD milliseconds) {charge += milliseconds; launchReady = true;}
 	float* GetNukeTranslation();
 	float* GetNukeVector();
 	void  SetCursorPointer(float* newPCursorPos) {pCursorPos = newPCursorPos;}
-	void Draw();
+	void Draw();	
+	bool GetFiredLast() { return firedLast; }
+	void SetFiredLast(bool state) { firedLast = state; }
 
 private:
 	bool loaded;
@@ -244,6 +246,7 @@ private:
 	bool destroyed;
 	int	 timeToRebuild;
 	int hitPoints;
+	bool   firedLast;
 };
 
 class CCity : public CGameObject
@@ -303,7 +306,7 @@ private:
 	float  projTranslation[3];
 	bool   destroyed;
 	int    timeToRebuild;
-	int    hitPoints;
+	int    hitPoints;	
 	//int    superWeaponsFired;
 };
 

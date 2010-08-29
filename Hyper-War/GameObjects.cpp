@@ -551,7 +551,7 @@ void CNuke::Draw()
 	offset = sin(200 * DEG2RAD);
 	glBegin(GL_TRIANGLES);
 	radius = .28f;
-	for (int i=120; i<180; i+=8)
+	for (int i=120; i<180; i+=15)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
@@ -565,7 +565,7 @@ void CNuke::Draw()
 
 	glBegin(GL_TRIANGLES);
 	//Make another fin
-	for (int i=120; i<180; i+=8)
+	for (int i=120; i<180; i+=15)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.01f);
@@ -628,7 +628,7 @@ void CNuke::Draw()
 	offset = sin(200 * DEG2RAD);
 	glBegin(GL_LINES);
 	radius = .28f;
-	for (int i=120; i<180; i+=8)
+	for (int i=120; i<180; i+=15)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
@@ -647,7 +647,7 @@ void CNuke::Draw()
 
 	glBegin(GL_LINES);
 	//Make another fin
-	for (int i=120; i<180; i+=8)
+	for (int i=120; i<180; i+=15)
 	{
 		float degInRad = i*DEG2RAD;
 		glVertex3f(-cos(degInRad)*radius,sin(degInRad)*radius + offset, -0.001f);
@@ -1079,6 +1079,7 @@ CMissileBase::CMissileBase(sGameParams *newGameParams) : CGameObject(newGamePara
 	charge = 0;
 	destroyed = false;
 	hitPoints = 30;
+	firedLast = false;
 }
 
 CMissileBase::~CMissileBase()
@@ -1095,6 +1096,11 @@ int CMissileBase::Launch()
 	charge = 0;
 
 	return oldCharge;
+}
+
+bool CMissileBase::LaunchReady()
+{
+	return launchReady;
 }
 
 void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
@@ -1281,7 +1287,7 @@ void CMissileBase::Draw()
 		glVertex3f(0,1,0);
 	glEnd();
 
-	if(loaded)
+	if(loaded && !firedLast)
 	{
 		//Draw a missile on the launch pad
 		//The missile gets its own coordinate system
@@ -2134,7 +2140,7 @@ void CMothership::Draw()
 	glColor3f(color[0], color[1], color[2]);
 
 	glBegin(GL_TRIANGLES);
-		for (int i=0; i<360; i+=4)
+		for (int i=0; i<360; i+=36)
 		{
 			float degInRad = i*DEG2RAD;
 			float radius = 1.0f;
@@ -2142,7 +2148,7 @@ void CMothership::Draw()
 			glColor3f(color[0], color[1], color[2]);
 			glVertex3f(cos(degInRad) * radius * 2, sin(degInRad) * radius/2.0f + .1f, -.001f);
 
-			degInRad = (i+4)*DEG2RAD;
+			degInRad = (i+36)*DEG2RAD;
 			glVertex3f(cos(degInRad) * radius * 2, sin(degInRad) * radius/2.0f + .1f, -.001f);
 
 			glColor3f(0, 0, 0);
@@ -2153,13 +2159,13 @@ void CMothership::Draw()
 	
 	glColor3f(color[0], color[1], color[2]);
 	glBegin(GL_TRIANGLES);
-		for (int i=20; i<160; i+=4)
+		for (int i=20; i<160; i+=10)
 		{
 			float degInRad = i*DEG2RAD;
 			float radius = 1.0f;
 			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .2f, -.002f);
 
-			degInRad = (i+4)*DEG2RAD;
+			degInRad = (i+10)*DEG2RAD;
 			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .2f, -.002f);
 
 			glVertex3f(0, .2f, -.001f);
@@ -2169,25 +2175,25 @@ void CMothership::Draw()
 	glColor3f(1, 1, 1);
 
 	glBegin(GL_LINE_STRIP);
-		for (int i=0; i<360; i+=4)
+		for (int i=0; i<360; i+=36)
 		{
 			float degInRad = i*DEG2RAD;
 			float radius = 1.0f;
 			glVertex3f(cos(degInRad) * radius * 2, sin(degInRad) * radius/2.0f + .1f, -.001f);
 
-			degInRad = (i+4)*DEG2RAD;
+			degInRad = (i+36)*DEG2RAD;
 			glVertex3f(cos(degInRad) * radius * 2, sin(degInRad) * radius/2.0f + .1f, -.001f);
 		}
 	glEnd();
 
 	glBegin(GL_LINE_STRIP);
-		for (int i=20; i<160; i+=4)
+		for (int i=20; i<160; i+=10)
 		{
 			float degInRad = i*DEG2RAD;
 			float radius = 1.0f;
 			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .2f, -.001f);
 
-			degInRad = (i+4)*DEG2RAD;
+			degInRad = (i+10)*DEG2RAD;
 			glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius + .2f, -.001f);
 		}
 	glEnd();
