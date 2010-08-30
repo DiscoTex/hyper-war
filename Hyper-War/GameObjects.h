@@ -294,6 +294,10 @@ public:
 	bool IsDisabled() {return destroyed;}
 	bool HasSuperWeapon();
 	void FireSuperWeapon();
+	void SetCharge(int newCharge) {charge = newCharge;}
+	int  GetCharge() {return charge;}
+	void SetReady(bool newReady) {ready = newReady;}
+	bool GetReady() {return ready;}
 
 	void Draw();
 private:
@@ -307,6 +311,8 @@ private:
 	bool   destroyed;
 	int    timeToRebuild;
 	int    hitPoints;	
+	int	   charge;
+	bool   ready;
 	//int    superWeaponsFired;
 };
 

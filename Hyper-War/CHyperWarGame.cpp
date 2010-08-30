@@ -298,7 +298,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[0]);
 		cannon->SetFireKey(8);
-		cannon->SetSingularityKey('Z');
+		cannon->SetSingularityKey(7);
 		cannon->SetBeamKey(7);
 		gameObjects.push_back(cannon);
 
@@ -310,7 +310,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetTranslation(10 * cos(180*DEG2RAD) + 12.01f, 10 * sin(180*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[1]);
 		cannon->SetFireKey(5);
-		cannon->SetSingularityKey('N');
+		cannon->SetSingularityKey(4);
 		cannon->SetBeamKey(4);
 		gameObjects.push_back(cannon);
 
@@ -408,10 +408,10 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 #ifdef PC_CONTROLS
 		cannon->SetFireKey('S');
 		cannon->SetSingularityKey('X');
-		cannon->SetBeamKey('W');
+		cannon->SetBeamKey('X');
 #else
 		cannon->SetFireKey(8);
-		cannon->SetSingularityKey('X');
+		cannon->SetSingularityKey(7);
 		cannon->SetBeamKey(7);
 #endif
 		gameObjects.push_back(cannon);		
@@ -948,40 +948,53 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			&& ((CFlakCannon*)(gameObjects[i]))->HasSuperWeapon()
 			&& ((CFlakCannon*)(gameObjects[i]))->IsLoaded())
 			{
-				//Fire singularity
-				((CFlakCannon*)(gameObjects[i]))->FireSuperWeapon();
-				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
-				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
+				if(((CFlakCannon*)(gameObjects[i]))->GetCharge() > 500)
+				{
+					//Fire singularity
+					((CFlakCannon*)(gameObjects[i]))->FireSuperWeapon();
+					position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
+					((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
 
-				audioRenderer.PlaySound(SOUND_MEGABLAST, 
-					position[0], 
-					position[1],
-					gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
+					audioRenderer.PlaySound(SOUND_MEGABLAST, 
+						position[0], 
+						position[1],
+						gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
 
-				//Create a gravity well for the black hoole
-				sGravityWell *gw = new sGravityWell();
-				gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 40;
-				gw->translation[0] = position[0];
-				gw->translation[1] = position[1];
-				gw->translation[2] = position[2];
+					//Create a gravity well for the black hoole
+					sGravityWell *gw = new sGravityWell();
+					gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 40;
+					gw->translation[0] = position[0];
+					gw->translation[1] = position[1];
+					gw->translation[2] = position[2];
 
-				//Create a black hole
-				bh = new CBlackHole(&gameParams);
-				bh->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
-				bh->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
-				bh->SetTranslation(position[0] + projVector[0]/50.0f, position[1] + projVector[1] / 50.0f, -.0010f);
-				((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
-				bh->SetMotionVector(projVector[0]/15.0f, projVector[1]/15.0f, projVector[2]/15.0f);
-				position = gameObjects[i]->GetTranslation();
-				bh->SetMyGravity(gw);				
-				
-				gravityWells.push_back(gw);
-				gameObjects.push_back(bh);
+					//Create a black hole
+					bh = new CBlackHole(&gameParams);
+					bh->SetColor(gameObjects[i]->GetColor()[0], gameObjects[i]->GetColor()[1], gameObjects[i]->GetColor()[2]);
+					bh->SetScale(gameObjects[i]->GetScale()[0], gameObjects[i]->GetScale()[1], gameObjects[i]->GetScale()[2]);
+					bh->SetTranslation(position[0] + projVector[0]/50.0f, position[1] + projVector[1] / 50.0f, -.0010f);
+					((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
+					bh->SetMotionVector(projVector[0]/15.0f, projVector[1]/15.0f, projVector[2]/15.0f);
+					position = gameObjects[i]->GetTranslation();
+					bh->SetMyGravity(gw);				
+					
+					gravityWells.push_back(gw);
+					gameObjects.push_back(bh);
+
+					((CFlakCannon*)(gameObjects[i]))->SetReady(false);
+				}
+				else
+					((CFlakCannon*)(gameObjects[i]))->SetCharge(((CFlakCannon*)(gameObjects[i]))->GetCharge() + milliseconds);
 			}
-			else if(g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetBeamKey()] 
+			if(g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetBeamKey()] 
 			&& ((CFlakCannon*)(gameObjects[i]))->HasSuperWeapon()
 			&& ((CFlakCannon*)(gameObjects[i]))->IsLoaded())
 			{
+				((CFlakCannon*)(gameObjects[i]))->SetReady(true);
+			}
+			else if(((CFlakCannon*)(gameObjects[i]))->GetReady() && !g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetBeamKey()])
+			{
+				((CFlakCannon*)(gameObjects[i]))->SetReady(false);
+
 				//Fire beam
 				((CFlakCannon*)(gameObjects[i]))->FireSuperWeapon();
 				position = ((CFlakCannon*)(gameObjects[i]))->GetProjTranslation();
@@ -2099,7 +2112,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		pointMultiplier = hyperLevel;
 
 	//switch(hyperLevel)
-	switch(0)
+	switch(hyperLevel)
 	{
 	case 0:
 		//Play sound indicating new hyper level
@@ -2120,17 +2133,41 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		}
 		else
 		{
-			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeSpeedDivider = 32000.0f;			//min 1000
 			gameParams.nukeReloadTime = 200;				//min 150
-			//audioRenderer.PlaySound(SOUND_LEVEL5, 0, 0);
+			audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
 		}
 		break;
 	case 1:
 		//Play sound indicating new hyper level
 		
-		gameParams.chargeRateDivider = 5000.0f;			//min 500
-		gameParams.maxThrust = 3.0f;					//max 500
-		gameParams.minThrust = 0.3f;
+		gameParams.chargeRateDivider = 500.0f;			//min 500
+		gameParams.maxThrust = 10.0f;					//max 500
+		gameParams.minThrust = 1.0f;
+		//gameParams.maxThrust = 1.0f;					//max 500
+		//gameParams.minThrust = 1.0f;
+		gameParams.maxGravityForce = 10.0f;
+		gameParams.nukeGravityImmunityTime = 1000;		//min 200
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 24000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+			audioRenderer.PlaySound(SOUND_LEVEL1, 0, 0);
+		}
+		gameParams.flakReloadTime = 10;	
+		gameParams.hyperModeDelay = 30000;
+		break;
+	case 2:
+		//Play sound indicating new hyper level
+		
+		gameParams.chargeRateDivider = 500;			//min 500
+		gameParams.maxThrust = 10.0f;					//max 500
+		gameParams.minThrust = 1.0f;
 		//gameParams.maxThrust = 1.0f;					//max 500
 		//gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
@@ -2143,32 +2180,8 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		else
 		{
 			gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
-			gameParams.nukeReloadTime = 4000;				//min 150
-			//audioRenderer.PlaySound(SOUND_LEVEL1, 0, 0);
-		}
-		gameParams.flakReloadTime = 10;	
-		gameParams.hyperModeDelay = 30000;
-		break;
-	case 2:
-		//Play sound indicating new hyper level
-		
-		gameParams.chargeRateDivider = 3000.0f;			//min 500
-		gameParams.maxThrust = 3.0f;					//max 500
-		gameParams.minThrust = 0.3f;
-		//gameParams.maxThrust = 1.0f;					//max 500
-		//gameParams.minThrust = 1.0f;
-		gameParams.maxGravityForce = 10.0f;
-		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		if(gameParams.gameMode == MODE_SINGLE)
-		{
-			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
 			gameParams.nukeReloadTime = 200;				//min 150
-		}
-		else
-		{
-			gameParams.nukeSpeedDivider = 13000.0f;			//min 1000
-			gameParams.nukeReloadTime = 2000;				//min 150
-			//audioRenderer.PlaySound(SOUND_LEVEL2, 0, 0);
+			audioRenderer.PlaySound(SOUND_LEVEL2, 0, 0);
 		}
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 25000;
@@ -2176,9 +2189,9 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 	case 3:
 		//Play sound indicating new hyper level
 		
-		gameParams.chargeRateDivider = 2000.0f;			//min 500
-		gameParams.maxThrust = 3.0f;					//max 500
-		gameParams.minThrust = 0.3f;
+		gameParams.chargeRateDivider = 500;			//min 500
+		gameParams.maxThrust = 10.0f;					//max 500
+		gameParams.minThrust = 1.0f;
 		//gameParams.maxThrust = 1.0f;					//max 500
 		//gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
@@ -2190,9 +2203,9 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		}
 		else
 		{
-			gameParams.nukeSpeedDivider = 10000.0f;			//min 1000
-			gameParams.nukeReloadTime = 1000;				//min 150
-			//audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
+			gameParams.nukeSpeedDivider = 9000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+			audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
 		}
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 20000;
@@ -2200,9 +2213,9 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 	case 4:
 		//Play sound indicating new hyper level
 		
-		gameParams.chargeRateDivider = 1000.0f;			//min 500
-		gameParams.maxThrust = 3.0f;					//max 500
-		gameParams.minThrust = 0.3f;
+		gameParams.chargeRateDivider = 500;			//min 500
+		gameParams.maxThrust = 10.0f;					//max 500
+		gameParams.minThrust = 1.0f;
 		//gameParams.maxThrust = 1.0f;					//max 500
 		//gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
@@ -2214,9 +2227,9 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		}
 		else
 		{
-			gameParams.nukeSpeedDivider = 7000.0f;			//min 1000
-			gameParams.nukeReloadTime = 500;				//min 150
-			//audioRenderer.PlaySound(SOUND_LEVEL4, 0, 0);
+			gameParams.nukeSpeedDivider = 6000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+			audioRenderer.PlaySound(SOUND_LEVEL4, 0, 0);
 		}
 		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 15000;
@@ -2225,8 +2238,8 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		//Play sound indicating new hyper level
 		
 		gameParams.chargeRateDivider = 500.0f;			//min 500
-		gameParams.maxThrust = 3.0f;					//max 500
-		gameParams.minThrust = 0.3f;
+		gameParams.maxThrust = 10.0f;					//max 500
+		gameParams.minThrust = 1.0f;
 		//gameParams.maxThrust = 1.0f;					//max 500
 		//gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
@@ -2240,9 +2253,9 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		}
 		else
 		{
-			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeSpeedDivider = 4000;			//min 1000
 			gameParams.nukeReloadTime = 200;				//min 150
-			//audioRenderer.PlaySound(SOUND_LEVEL5, 0, 0);
+			audioRenderer.PlaySound(SOUND_LEVEL5, 0, 0);
 		}
 		break;
 	default:
