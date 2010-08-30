@@ -674,7 +674,8 @@ void CNuke::Draw()
 	animVal++;
 	//animVal %=2;
 
-	int flameSize = (int)((thrust + .3f) / .2f);
+	//int flameSize = (int)((thrust + .3f) / .2f);
+	int flameSize = (int)(thrust + .3f) * 2.0;
 
 	if(animVal % 2 == 0)
 	{
@@ -1745,6 +1746,8 @@ CFlakCannon::CFlakCannon(sGameParams *newGameParams) : CGameObject(newGameParams
 	loaded = true;
 	timeToReload = 0;
 	destroyed = false;
+	charge = 0;
+	ready = false;
 
 	hitPoints = 30;
 }
@@ -1821,6 +1824,7 @@ void CFlakCannon::FireSuperWeapon()
 {
 	loaded = false; 
 	timeToReload = gameParams->flakReloadTime * 100;
+	charge = 0;
 
 	switch(mySide)
 	{
@@ -2382,7 +2386,7 @@ void CBlackHole::ProcessMotion(DWORD milliseconds, Keys* keys)
 
 bool CBlackHole::CanDestroy(int destroyerType)
 {
-	if(destroyerType == TYPE_MISSILEBASE || destroyerType == TYPE_CITY || destroyerType == TYPE_FLAKCANNON)
+	if(destroyerType == TYPE_MISSILEBASE || destroyerType == TYPE_CITY || destroyerType == TYPE_FLAKCANNON || destroyerType == TYPE_PLANET)
 	{
 		motionVector[0] = 0;
 		motionVector[1] = 0;
