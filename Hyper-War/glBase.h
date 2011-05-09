@@ -38,6 +38,7 @@
 #include <windows.h>								// Header File For Windows
 #include <math.h>
 #include <vector>
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include "glfont2.h"
 

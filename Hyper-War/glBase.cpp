@@ -16,6 +16,7 @@
 ***********************************************/
 
 #include <windows.h>													// Header File For The Windows Library
+#include <gl/glew.h>
 #include <gl/gl.h>														// Header File For The OpenGL32 Library
 #include <gl/glu.h>														// Header File For The GLu32 Library
 
@@ -385,7 +386,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	window.init.width			= GetSystemMetrics(SM_CXSCREEN);		// Window Width
 	window.init.height			= GetSystemMetrics(SM_CYSCREEN);		// Window Height
 	window.init.bitsPerPixel	= 16;									// Bits Per Pixel
-	window.init.isFullScreen	= TRUE;									// Fullscreen? (Set To TRUE)
+	window.init.isFullScreen	= FALSE;									// Fullscreen? (Set To TRUE)
 
 	ZeroMemory (&keys, sizeof (Keys));									// Zero keys Structure
 

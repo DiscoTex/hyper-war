@@ -1,5 +1,3 @@
-//Fix damage, respawn time
-
 /****************************************************/
 /*	CHyperWarGame.h: Main class for HyperWar game.	*/
 /*  Aaron E. Wegner									*/
@@ -7,6 +5,8 @@
 /****************************************************/
 
 #include <windows.h>											// Header File For Windows
+#include <iostream>
+#include <gl/glew.h>
 #include <gl\gl.h>												// Header File For The OpenGL32 Library
 #include <gl\glu.h>												// Header File For The GLu32 Library
 
@@ -108,4 +108,20 @@ private:
 	int							nameIndex;
 	double						currentLetter;
 	bool						listTime;
+
+	//Shaders
+	GLenum						vertGuassPrg;
+	GLenum						horizGuassPrg;
+	GLenum						vertGuassFragShader;
+	GLenum						horizGuassFragShader;
+	GLenum						vertGuassVertShader;
+	GLenum						horizGuassVertShader;
+
+	GLuint						renderTex;
+	GLuint						fbo;
+
 };
+
+/* Util */
+char* ReadShaderCode(const char*);
+int CheckGLError();
