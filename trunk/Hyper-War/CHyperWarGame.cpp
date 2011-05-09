@@ -61,6 +61,9 @@ CHyperWarGame::~CHyperWarGame()
 
 BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Init Code & User Initialiazation Goes Here
 {
+	GLenum result;
+	GLint viewport[4];
+
 	if(!initialized)
 	{
 		//Store keys array and window info
@@ -73,10 +76,90 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		glDepthFunc (GL_LEQUAL);									// The Type Of Depth Testing (Less Or Equal)
 		glEnable (GL_DEPTH_TEST);									// Enable Depth Testing
 		glShadeModel (GL_SMOOTH);									// Select Smooth Shading
-		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);			// Set Perspective Calculations To Most Accurate
+		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);		// Set Perspective Calculations To fastest
 
+		//Blending mode
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
+
+		//Antialiasing for lines
+		glEnable (GL_LINE_SMOOTH);
+		glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+		//Line width
+		glLineWidth(.05);	
+
+		//Get viewport size
+		glGetIntegerv(GL_VIEWPORT, viewport);
+
+		result = glewInit();
+
+		//Load shaders	
+		// Get Vertex And Fragment Shader Sources
+		const GLcharARB* vertGaussFragSrc = (GLcharARB*)ReadShaderCode("vertical_gaus_frag.glsl");
+		const GLcharARB* vertGaussVertSrc = (GLcharARB*)ReadShaderCode("vertical_gaus_vert.glsl");
+
+		// Create Shader And Program Objects
+		vertGuassPrg = glCreateProgramObjectARB();
+		CheckGLError();
+
+		vertGuassFragShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+		CheckGLError();
+		vertGuassVertShader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+		CheckGLError();
+
+		// Load Shader Sources
+		glShaderSourceARB(vertGuassFragShader, 1, &vertGaussFragSrc, NULL);
+		CheckGLError();
+		glShaderSourceARB(vertGuassVertShader, 1, &vertGaussVertSrc, NULL);
+		CheckGLError();
+
+		// Compile The Shaders
+		glCompileShaderARB(vertGuassFragShader);
+		CheckGLError();
+		glCompileShaderARB(vertGuassVertShader);
+		CheckGLError();
+
+		// Attach The Shader Objects To The Program Objects
+		glAttachObjectARB(vertGuassPrg, vertGuassFragShader);
+		CheckGLError();
+		glAttachObjectARB(vertGuassPrg, vertGuassVertShader);
+		CheckGLError();		
+
+		// Link The Program Object
+		glLinkProgramARB(vertGuassPrg);	
+		CheckGLError();
+
+		//Free shader code strings
+		free((void*)vertGaussFragSrc);
+		free((void*)vertGaussVertSrc);	
+
+		//Free shader objects
+		glDeleteObjectARB(vertGuassVertShader);
+		glDeleteObjectARB(vertGuassFragShader);
+
+		//Create offscreen rendering target using FBO with attached render texture
+		glGenTextures(1, &renderTex);
+		glBindTexture(GL_TEXTURE_2D, renderTex);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // automatic mipmap
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, viewport[2], viewport[3], 
+			0,GL_RGBA, GL_UNSIGNED_BYTE, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		// create a framebuffer object
+		glGenFramebuffersEXT(1, &fbo);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+
+		// attach the texture to FBO color attachment point
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+			GL_TEXTURE_2D, renderTex, 0);
+
+		//Go back to the regular frame buffer
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 		//Create fonts
 		glGenTextures(1, &scoreFontTex);
@@ -95,7 +178,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		hsList->ReadScores();
 
 		gameObjects.reserve(1000);
-		initialized = true;
+		initialized = true;		
 	}
 
 	gameParams.chargeRateDivider = 5000.0f;			//min 500
@@ -122,6 +205,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	totalWaves = 0;
 	gameParams.numBlueCities = 4;
 	gameParams.numGreenCities = 4;
+	gameParams.numBlueLaunchers = 2;
+	gameParams.numGreenLaunchers = 2;
 	blueWins = false;
 	greenWins = false;
 	playingStory = false;
@@ -923,16 +1008,22 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 						position[1],
 						gameParams.randoms[gameParams.randIndex++%1024]%100 / 300.0 + .66f);
 
+					((CMissileBase*)(gameObjects[i]))->SetFiredLast(true);
+
 					switch(gameObjects[i]->GetSide())
 					{
 					case SIDE_GREEN:
 						gameParams.greenPoints += 10 * pointMultiplier;
+						if(gameParams.numGreenLaunchers < 2)
+							((CMissileBase*)(gameObjects[i]))->SetFiredLast(false);
+
 						break;
 					case SIDE_BLUE:
 						gameParams.bluePoints += 10 * pointMultiplier;
+						if(gameParams.numBlueLaunchers < 2)
+							((CMissileBase*)(gameObjects[i]))->SetFiredLast(false);
 						break;
-					}
-					((CMissileBase*)(gameObjects[i]))->SetFiredLast(true);
+					}				
 				}
 				else
 				{
@@ -962,7 +1053,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 					//Create a gravity well for the black hoole
 					sGravityWell *gw = new sGravityWell();
-					gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 40;
+					gw->mass = gameParams.randoms[gameParams.randIndex++%1024]/(float)RAND_MAX * 20;
 					gw->translation[0] = position[0];
 					gw->translation[1] = position[1];
 					gw->translation[2] = position[2];
@@ -974,7 +1065,9 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 					bh->SetTranslation(position[0] + projVector[0]/50.0f, position[1] + projVector[1] / 50.0f, -.0010f);
 					((CFlakCannon*)(gameObjects[i]))->GetProjVector(&TTL, projVector);
 					bh->SetMotionVector(projVector[0]/15.0f, projVector[1]/15.0f, projVector[2]/15.0f);
+					bh->SetTTL(15000);
 					position = gameObjects[i]->GetTranslation();
+
 					bh->SetMyGravity(gw);				
 					
 					gravityWells.push_back(gw);
@@ -2133,7 +2226,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		}
 		else
 		{
-			gameParams.nukeSpeedDivider = 32000.0f;			//min 1000
+			gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
 			gameParams.nukeReloadTime = 200;				//min 150
 			audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
 		}
@@ -2142,7 +2235,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		//Play sound indicating new hyper level
 		
 		gameParams.chargeRateDivider = 500.0f;			//min 500
-		gameParams.maxThrust = 10.0f;					//max 500
+		gameParams.maxThrust = 4.0f;					//max 500
 		gameParams.minThrust = 1.0f;
 		//gameParams.maxThrust = 1.0f;					//max 500
 		//gameParams.minThrust = 1.0f;
@@ -2155,7 +2248,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		}
 		else
 		{
-			gameParams.nukeSpeedDivider = 24000.0f;			//min 1000
+			gameParams.nukeSpeedDivider = 10000.0f;			//min 1000
 			gameParams.nukeReloadTime = 200;				//min 150
 			audioRenderer.PlaySound(SOUND_LEVEL1, 0, 0);
 		}
@@ -2166,7 +2259,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		//Play sound indicating new hyper level
 		
 		gameParams.chargeRateDivider = 500;			//min 500
-		gameParams.maxThrust = 10.0f;					//max 500
+		gameParams.maxThrust = 4.0f;					//max 500
 		gameParams.minThrust = 1.0f;
 		//gameParams.maxThrust = 1.0f;					//max 500
 		//gameParams.minThrust = 1.0f;
@@ -2179,7 +2272,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		}
 		else
 		{
-			gameParams.nukeSpeedDivider = 16000.0f;			//min 1000
+			gameParams.nukeSpeedDivider = 8000.0f;			//min 1000
 			gameParams.nukeReloadTime = 200;				//min 150
 			audioRenderer.PlaySound(SOUND_LEVEL2, 0, 0);
 		}
@@ -2190,31 +2283,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		//Play sound indicating new hyper level
 		
 		gameParams.chargeRateDivider = 500;			//min 500
-		gameParams.maxThrust = 10.0f;					//max 500
-		gameParams.minThrust = 1.0f;
-		//gameParams.maxThrust = 1.0f;					//max 500
-		//gameParams.minThrust = 1.0f;
-		gameParams.maxGravityForce = 10.0f;
-		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		if(gameParams.gameMode == MODE_SINGLE)
-		{
-			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
-			gameParams.nukeReloadTime = 200;				//min 150
-		}
-		else
-		{
-			gameParams.nukeSpeedDivider = 9000.0f;			//min 1000
-			gameParams.nukeReloadTime = 200;				//min 150
-			audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
-		}
-		gameParams.flakReloadTime = 10;	
-		gameParams.hyperModeDelay = 20000;
-		break;
-	case 4:
-		//Play sound indicating new hyper level
-		
-		gameParams.chargeRateDivider = 500;			//min 500
-		gameParams.maxThrust = 10.0f;					//max 500
+		gameParams.maxThrust = 4.0f;					//max 500
 		gameParams.minThrust = 1.0f;
 		//gameParams.maxThrust = 1.0f;					//max 500
 		//gameParams.minThrust = 1.0f;
@@ -2229,6 +2298,30 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		{
 			gameParams.nukeSpeedDivider = 6000.0f;			//min 1000
 			gameParams.nukeReloadTime = 200;				//min 150
+			audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
+		}
+		gameParams.flakReloadTime = 10;	
+		gameParams.hyperModeDelay = 20000;
+		break;
+	case 4:
+		//Play sound indicating new hyper level
+		
+		gameParams.chargeRateDivider = 500;			//min 500
+		gameParams.maxThrust = 4.0f;					//max 500
+		gameParams.minThrust = 1.0f;
+		//gameParams.maxThrust = 1.0f;					//max 500
+		//gameParams.minThrust = 1.0f;
+		gameParams.maxGravityForce = 10.0f;
+		gameParams.nukeGravityImmunityTime = 1000;		//min 200
+		if(gameParams.gameMode == MODE_SINGLE)
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
+		}
+		else
+		{
+			gameParams.nukeSpeedDivider = 4000.0f;			//min 1000
+			gameParams.nukeReloadTime = 200;				//min 150
 			audioRenderer.PlaySound(SOUND_LEVEL4, 0, 0);
 		}
 		gameParams.flakReloadTime = 10;	
@@ -2238,7 +2331,7 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		//Play sound indicating new hyper level
 		
 		gameParams.chargeRateDivider = 500.0f;			//min 500
-		gameParams.maxThrust = 10.0f;					//max 500
+		gameParams.maxThrust = 4.0f;					//max 500
 		gameParams.minThrust = 1.0f;
 		//gameParams.maxThrust = 1.0f;					//max 500
 		//gameParams.minThrust = 1.0f;
@@ -2360,4 +2453,53 @@ void CHyperWarGame::NextWave()
 			SetHyperLevel(GetHyperLevel() + 1);
 		}
 	}
+}
+
+char* ReadShaderCode(const char* filename)
+{
+	int charCount = 0;
+	int bytesRead;
+	char* code;;
+	FILE* infile;
+
+	infile = fopen(filename, "r");
+
+	fseek(infile, 0, SEEK_END);
+	charCount = ftell(infile);
+	fseek(infile, 0, SEEK_SET);
+
+	code = (char*)malloc(charCount);
+
+	bytesRead = fread(code, 1, charCount, infile);
+
+	fclose(infile);
+	return code;
+}
+
+int CheckGLError()
+{
+   GLenum glErr;
+   int    retCode = 0;
+   char		errStr[256];
+
+   glErr = glGetError();
+   while (glErr != GL_NO_ERROR) 
+   {
+     const GLubyte* sError = gluErrorString(glErr);
+
+	 if (sError)
+	 {
+		 std::cout << "GL Error #" << glErr << "(" << gluErrorString(glErr) << ") " << endl;
+		 sprintf(errStr, "%s", gluErrorString(glErr));
+	 }
+	 else
+	 {
+		 std::cout << "GL Error #" << glErr << " (no message available)" << endl;
+		 sprintf(errStr, "%s", gluErrorString(glErr));
+	 }
+		
+	 retCode = 1;
+	 glErr = glGetError();
+   }
+   return retCode;
 }

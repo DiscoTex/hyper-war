@@ -664,7 +664,7 @@ void CNuke::Draw()
 		glVertex3f(-cos(179*DEG2RAD)*radius,sin(179*DEG2RAD)*radius + offset, -0.005f);
 	glEnd();
 
-	//Make some rocket flames!
+	//Make some rad flames!
 	//Cycle flame color
 	flameColor[1] = flameColor[1] - .1f;
 	if(flameColor[1] < 0)
@@ -674,8 +674,7 @@ void CNuke::Draw()
 	animVal++;
 	//animVal %=2;
 
-	//int flameSize = (int)((thrust + .3f) / .2f);
-	int flameSize = (int)(thrust + .3f) * 2.0;
+	int flameSize = (int)(thrust + 1.0f) * 2.0;
 
 	if(animVal % 2 == 0)
 	{
@@ -703,7 +702,7 @@ void CNuke::Draw()
 
 			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
 		glEnd();
-	}
+	}	
 
 	glPopMatrix();
 
@@ -1128,10 +1127,22 @@ void CMissileBase::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gW
 	{
 		timeToRebuild -= milliseconds * numCities;
 		if(timeToRebuild < 0)
-		{
+		{			
 			collisionSpheres[0]->translation[0] = .50f;
 			destroyed = false;
 			hitPoints = 30;
+
+			SetFiredLast(true);
+
+			switch(mySide)
+			{
+			case SIDE_BLUE:
+				gameParams->numBlueLaunchers+=2;
+				break;
+			case SIDE_GREEN:
+				gameParams->numGreenLaunchers+=2;
+				break;
+			}
 		}
 	}
 }
@@ -1146,6 +1157,16 @@ bool CMissileBase::CanDestroy(int destroyerType)
 		timeToRebuild = 30000;
 
 		collisionSpheres[0]->translation[0] = -50;
+		
+		switch(mySide)
+		{
+		case SIDE_BLUE:
+			gameParams->numBlueLaunchers--;
+			break;
+		case SIDE_GREEN:
+			gameParams->numGreenLaunchers--;
+			break;
+		}
 
 		retval = true;
 	}
@@ -1158,6 +1179,16 @@ bool CMissileBase::CanDestroy(int destroyerType)
 			timeToRebuild = 30000;
 
 			collisionSpheres[0]->translation[0] = -50;
+
+			switch(mySide)
+			{
+			case SIDE_BLUE:
+				gameParams->numBlueLaunchers--;
+				break;
+			case SIDE_GREEN:
+				gameParams->numGreenLaunchers--;
+				break;
+			}
 
 			retval = true;
 		}

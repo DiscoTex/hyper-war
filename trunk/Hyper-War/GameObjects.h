@@ -6,6 +6,7 @@
 /*************************************************************/
 
 #include <windows.h>											// Header File For Windows
+#include <gl/glew.h>
 #include <gl\gl.h>												// Header File For The OpenGL32 Library
 #include <gl\glu.h>												// Header File For The GLu32 Library
 #include "glBase.h"												// Header File For NeHeGL
@@ -85,6 +86,8 @@ struct sGameParams
 	int numGreenCities;
 	int numBlueCities;
 	int blueSuperFires;
+	int numGreenLaunchers;
+	int numBlueLaunchers;
 	int greenSuperFires;
 	int blueSuperAmmo;
 	int	greenSuperAmmo;
@@ -392,6 +395,7 @@ public:
 	bool CanDestroy(int destroyerType);
 	void SetMyGravity(sGravityWell *newGravity) {myGravity = newGravity;}
 	int  GetTTL() {return TTL;}
+	void  SetTTL(int newTTL) {TTL = newTTL;}
 	void KillGravity() {myGravity->mass = 0;}
 
 	void ProcessMotion(DWORD milliseconds, Keys* keys);
