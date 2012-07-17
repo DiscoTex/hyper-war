@@ -121,13 +121,27 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		CheckGLError();
 
 		// Attach The Shader Objects To The Program Objects
+		glAttachObjectARB(vertGuassPrg, vertGuassVertShader);
+		CheckGLError();
 		glAttachObjectARB(vertGuassPrg, vertGuassFragShader);
 		CheckGLError();
-		glAttachObjectARB(vertGuassPrg, vertGuassVertShader);
-		CheckGLError();		
+		
 
 		// Link The Program Object
 		glLinkProgramARB(vertGuassPrg);	
+		CheckGLError();
+
+		//rt_h_attrib = glGetAttribLocationARB(vertGuassPrg, "rt_h");
+		//CheckGLError();
+		//rt_w_attrib = glGetAttribLocationARB(vertGuassPrg, "rt_w");
+		//CheckGLError();
+
+		glUseProgram(vertGuassPrg);
+		CheckGLError();
+
+		glVertexAttrib1fARB(rt_w_attrib, viewport[2]);
+		CheckGLError();
+		glVertexAttrib1fARB(rt_h_attrib, viewport[3]);
 		CheckGLError();
 
 		//Free shader code strings
@@ -154,9 +168,19 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		glGenFramebuffersEXT(1, &fbo);
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 
+		// create a renderbuffer object to store depth info
+		glGenRenderbuffersEXT(1, &rbo);
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo);
+		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT,
+								 viewport[2], viewport[3]);
+
 		// attach the texture to FBO color attachment point
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
 			GL_TEXTURE_2D, renderTex, 0);
+
+		// attach the renderbuffer to depth attachment point
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
+									 GL_RENDERBUFFER_EXT, rbo);
 
 		//Go back to the regular frame buffer
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -1654,12 +1678,66 @@ void CHyperWarGame::DrawCursors()
 	}
 }
 
+void CHyperWarGame::OuterDraw(void)
+{
+	int viewport[4];
+	double xsize, ysize;
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+	glMatrixMode (GL_PROJECTION);				// Select The Projection Matrix
+	glLoadIdentity ();							// Reset The Projection Matrix
+	gluPerspective (45.0f, (GLfloat)(viewport[2])/(GLfloat)(viewport[3]),			// Calculate The Aspect Ratio Of The Window
+					1.0f, 100.0f);		
+	
+	//Set render target to off screen fbo	
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+	Draw();
+	//Back to regular framebuffer
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	
+	
+
+	//Now render the entire scene as one textured quad
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// Clear Screen And Depth Buffer
+
+	glMatrixMode (GL_PROJECTION);				// Select The Projection Matrix
+	glLoadIdentity ();							// Reset The Projection Matrix
+	gluOrtho2D(0, viewport[2], 0, viewport[3]); 
+	
+
+	glMatrixMode(GL_MODELVIEW);
+	
+	glPushMatrix();
+	glLoadIdentity ();
+
+	xsize = viewport[2];
+	ysize = viewport[3];
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, renderTex);	
+	glBegin(GL_QUADS);
+		glTexCoord2d(0, 0);				glVertex3d(0, 0, 0);		
+		glTexCoord2d(1, 0);				glVertex3d(xsize, 0, 0);		
+		glTexCoord2d(1, 1);				glVertex3d(xsize, ysize, 0);		
+		glTexCoord2d(0, 1);				glVertex3d(0, ysize, 0);		
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+
+	glPopMatrix();
+
+	glFlush ();													// Flush The GL Rendering Pipeline
+
+	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+}
+
 void CHyperWarGame::Draw (void)
 {
 	char tempStr[64];
 	int width, height;
 
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// Clear Screen And Depth Buffer
+	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity ();											// Reset The Modelview Matrix
 	
 	//Set up the global rendering coordinate system
@@ -1779,9 +1857,7 @@ void CHyperWarGame::Draw (void)
 			this->Initialize(g_window, g_keys);
 		}
 		break;
-	}	
-
-	glFlush ();													// Flush The GL Rendering Pipeline
+	}		
 }
 
 void CHyperWarGame::DrawHUD()
