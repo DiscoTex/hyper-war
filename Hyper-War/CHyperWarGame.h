@@ -43,6 +43,7 @@ public:
 	void CollideDestroyObjects(unsigned int obj1, unsigned int obj2);
 	void Update (DWORD milliseconds);					// Perform Motion Updates Here
 	void DrawCursors();
+	void OuterDraw();
 	void Draw();										// Draw the current frame
 	void DrawHUD();
 	void DrawAttract();
@@ -116,9 +117,13 @@ private:
 	GLenum						horizGuassFragShader;
 	GLenum						vertGuassVertShader;
 	GLenum						horizGuassVertShader;
+	GLenum						rt_h_attrib;
+	GLenum						rt_w_attrib;
 
 	GLuint						renderTex;
 	GLuint						fbo;
+
+	GLuint						rbo;
 
 };
 

@@ -455,7 +455,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 							tickCount = GetTickCount ();				// Get The Tick Count
 							hyperWarGame.Update (tickCount - window.lastTickCount);	// Update The Counter
 							window.lastTickCount = tickCount;			// Set Last Count To Current Count
-							hyperWarGame.Draw ();									// Draw Our Scene
+							hyperWarGame.OuterDraw();									// Draw Our Scene
 
 							SwapBuffers (window.hDC);					// Swap Buffers (Double Buffering)
 						}
