@@ -1,0 +1,11 @@
+# Introduction #
+
+The awesome level of this game should be very high.
+
+
+# Details #
+
+By "high awesome level", I mean the following:
+  * The game will be _really really_ **awesome**.
+  * It will not be lame.
+  * It should be fun to play.

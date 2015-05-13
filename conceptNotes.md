@@ -1,0 +1,41 @@
+# Objectives #
+Destroy all opponent cities using Nukes or Landers while defending yours with your Flak Cannon.
+
+# Controls #
+Trackball + 3 buttons.  All weapons always point toward cursor.  Each button corresponds to a Weapon.
+
+# Playing Field #
+Each player owns a “planet” with 4 cities and 3 weapons (Nuke, Flak Cannon, and Lander).  Every projectile object in the game is affected by the gravity of the two planets.  The existence of gravity should make for more difficult aiming than simple straight lines.  Also, it’s necessary for lunar-lander style gameplay.  The gravity of the two planets cannot be identical to one another, or aiming would be too easy.  (The hit location would always be very close to the same as what a straight line would have done.)  The center of gravity and strength of gravity should be randomized per game, but care must be taken not to cause an unfair field.  The Lagrange point should always be near the middle.
+
+# Attacking with a Nuke #
+A Nuke is launched by aiming it using the cursor, then pushing the Nuke launch button.  For simplicity, we should probably only aim, and not use a Scorched Earth style power meter.  A nuke will hit the same spot every time for a certain angle, and its speed will approach 0 as it crosses the Lagrange point.  A nuke takes out a city or with a single hit.  If it hits a weapon, it disables the weapon for a period of time.
+Use of the Nuke is limited by its reload time.  Reload time changes over the coarse of a game.  See the timing notes for info on how Nuke reload time changes.
+Nukes leave a trail behind them as in Missle Command or DEFCON.
+Nukes fly relatively slowly.
+
+# Defending with the Flak Cannon #
+The Flak Cannon is used to defend your cities and weapons from incoming Nuke or Lander attacks.  Fire it by pointing it with the cursor and pressing the fire Flak Cannon Button.  The Flak Cannon shot will explode in the location where the cursor was clicked, like in Missle Command.  The flak shot explodes into many small projectiles, each of which is affected by gravity.  If one of those projectiles hits the incoming attack vehicle, the attack vehicle explodes, too.  This should cause a big mess of projectiles flying all over the area.  This larger debris cloud should increase the probability of other attack vehicles in the local vicinity.
+Flak Cannon range is strictly limited to the gravity influence of its own planet.
+Flak Cannon reload time is constant.  It doesn’t change like the Nuke launcher reload time.
+Flak cannon shots fly at about twice the speed of Nukes.
+
+# Attacking with a Lander #
+The Lander is used by pointing it in a direction with the cursor and pushing the Lander thrust button.  The Lander can be piloted to an opponent’s city and landed on its flat part to destroy it.  The Lander flies about the same speed as a Nuke.  The lander should be easier to guide to a target than a Nuke, but requires more attention, and , of course, a successful landing.
+If a lander successfully lands at a city, it sits there for a period of time before taking off and blowing up the city.  This is to give the flak cannon a chance to re-enable if it was previously disabled.  A lander would be very lucky if is able to take out more than one city in a single run.
+Reload time is the same as the Nuke.
+
+# Timing and Pacing #
+The game starts out at a slow pace, with slow-ish reload times for Nuke and Lander.  Since the Flak Cannon has a fairly fast constant reload time, it should be easy to stop any incoming attacks at the beginning of the game.  As time progresses, the reload time decreases and increases variably.
+Let’s say there’s an ALERT LEVEL that is proportional to reloading speed.  Higher alert level means short reload times.  So, the ALERT LEVEL could change every 20 seconds in the following pattern:
+1,2,3,  2,3,4,  3,4,5,  4,5,6,  etc.
+The reload time could be indicated by the ALERT LEVEL clearly visible on the screen.  Possibly, color-coordinate the playing field background with the ALERT LEVEL.  Have a booming or frantic voice announce changes in the alert level in order to increase the feeling of tension in the game.
+
+# Tunable Parameters For Game Balancing #
+Speed of each weapon, blast radius, reload times, gravity strength, flak cannon particle density, flak cannon disable time
+
+# Emergent Strategies #
+Low angle nuke – If you fire a nuke at a very low angle, it should loop past the edge of the screen a couple of times.  It will take a long time to get to the opponent’s planet, but its hit location will be somewhat unpredictable.
+Disabling the flak cannon – a good strategy may be to launch the lander as soon as the opponent’s flak cannon is disabled.  You should have just enough time to land it if you are good.
+
+# Flying the lander #
+Flying the lander from one planet to the other in the quickest way possible can be achieved by leaving the cursor near the middle of the screen while thrusting.  That way, it is accelerating as it leaves your planet and decelerating as it approaches the opponent’s planet.
