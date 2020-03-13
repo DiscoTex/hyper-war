@@ -170,10 +170,22 @@ void CGameObject::ProcessMotion(DWORD milliseconds, Keys* keys)
 
 	if(GetType() !=  TYPE_PLANET)
 	{
-		if(translation[1] > 1.70f)
-			translation[1] = -1.70f;
-		else if(translation[1] < -1.70f)
-			translation[1] = 1.70f;
+		if (gameParams->gameMode == MODE_RACE)
+		{
+			//Loop at edge of screen
+			if (translation[1] > 3.7f)
+				translation[1] = -3.7f;
+			else if (translation[1] < -3.7f)
+				translation[1] = 3.7f;
+		}
+		else
+		{
+			//Loop at edge of screen
+			if (translation[1] > 1.70f)
+				translation[1] = -1.70f;
+			else if (translation[1] < -1.70f)
+				translation[1] = 1.70f;
+		}
 
 		if(translation[0] > 2.75f || translation[0] < -2.75f)
 			deleteMe = true;
@@ -483,7 +495,7 @@ CNuke::CNuke(sGameParams *newGameParams) : CGameObject(newGameParams)
 
 	//Cycle colors
 	flameColor[0] = 1.0f;
-	flameColor[1] = (float)(gameParams->randoms[gameParams->randIndex++%512] / RAND_MAX);
+	flameColor[1] = (float)(gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / RAND_MAX);
 	flameColor[2] = 0;
 
 	animVal = 0;
@@ -672,12 +684,12 @@ void CNuke::Draw()
 	glColor3f(flameColor[0], flameColor[1], flameColor[2]);
 
 	animVal++;
-	//animVal %=2;
 
 	int flameSize = (int)(thrust + 1.0f) * 2.0;
 
-	if(animVal % 2 == 0)
-	{
+	
+	//if(animVal % 2 == 0)
+	//{
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.00001f);
 			
@@ -688,9 +700,9 @@ void CNuke::Draw()
 
 			glVertex3f(0.073662996292114258f, -0.34201046824455261f, -.00001f);
 		glEnd();
-	}
-
-	else if(animVal % 2 == 1)
+	//}
+	/*
+	if(animVal % 2 == 1)
 	{	
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.00001f);
@@ -702,7 +714,9 @@ void CNuke::Draw()
 
 			glVertex3f(0.073662996292114258, -0.34201046824455261, -.00001f);
 		glEnd();
-	}	
+	}
+	*/
+	
 
 	glPopMatrix();
 
@@ -766,10 +780,22 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
 
-	if(translation[1] > 1.70f)
-		translation[1] = -1.70f;
-	else if(translation[1] < -1.70f)
-		translation[1] = 1.70f;
+	if (gameParams->gameMode == MODE_RACE)
+	{
+		//Loop at edge of screen
+		if (translation[1] > 3.7f)
+			translation[1] = -3.7f;
+		else if (translation[1] < -3.7f)
+			translation[1] = 3.7f;
+	}
+	else
+	{
+		//Loop at edge of screen
+		if (translation[1] > 1.70f)
+			translation[1] = -1.70f;
+		else if (translation[1] < -1.70f)
+			translation[1] = 1.70f;
+	}
 
 	if(translation[0] > 7.5f || translation[0] < -2.75f)
 		deleteMe = true;
@@ -852,7 +878,7 @@ void CNuke::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 CDebris::CDebris(sGameParams *newGameParams) : CGameObject(newGameParams)
 {
 	//Pick a random debris type
-	debType = gameParams->randoms[gameParams->randIndex++%512] * 4 / 32768;
+	debType = gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] * 4 / 32768;
 
 	sCollisionSphere* cSphere;
 
@@ -908,16 +934,16 @@ CDebris::CDebris(sGameParams *newGameParams) : CGameObject(newGameParams)
 	}	
 
 	color[0] = 1;
-	color[1] = (float)gameParams->randoms[gameParams->randIndex++%512] / RAND_MAX;;
+	color[1] = (float)gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / RAND_MAX;;
 	color[2] = 0;
 
-	angularVelocity[0] = float(gameParams->randoms[gameParams->randIndex++%512] % 500);
-	angularVelocity[1] = float(gameParams->randoms[gameParams->randIndex++%512] % 500);
-	angularVelocity[2] = float(gameParams->randoms[gameParams->randIndex++%512] % 500);
+	angularVelocity[0] = float(gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] % 500);
+	angularVelocity[1] = float(gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] % 500);
+	angularVelocity[2] = float(gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] % 500);
 
-	rotation[2] = float(gameParams->randoms[gameParams->randIndex++%512] % 500);
+	rotation[2] = float(gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] % 500);
 
-	TTL = 1500 - gameParams->randoms[gameParams->randIndex++%512]%500;
+	TTL = 1500 - gameParams->randoms[gameParams->randIndex++%NUM_PRIMES]%500;
 }
 
 CDebris::~CDebris()
@@ -1037,10 +1063,22 @@ void CDebris::ProcessMotion(DWORD milliseconds, Keys* keys)
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
 
-	if(translation[1] > 1.75)
-		translation[1] = -1.75;
-	else if(translation[1] < -1.75)
-		translation[1] = 1.75;
+	if (gameParams->gameMode == MODE_RACE)
+	{
+		//Loop at edge of screen
+		if (translation[1] > 3.7f)
+			translation[1] = -3.7f;
+		else if (translation[1] < -3.7f)
+			translation[1] = 3.7f;
+	}
+	else
+	{
+		//Loop at edge of screen
+		if (translation[1] > 1.70f)
+			translation[1] = -1.70f;
+		else if (translation[1] < -1.70f)
+			translation[1] = 1.70f;
+	}
 
 	if(translation[0] > 14 || translation[0] < -14)
 		deleteMe = true;
@@ -2142,7 +2180,7 @@ CMothership::CMothership(sGameParams *newGameParams) : CGameObject(newGameParams
 	cSphere->globalPosition[2] = 0;
 	collisionSpheres.push_back(cSphere);
 
-	countDown = 15000 - gameParams->randoms[gameParams->randIndex++%512]%5000;
+	countDown = 15000 - gameParams->randoms[gameParams->randIndex++%NUM_PRIMES]%5000;
 	myBeam = NULL;
 
 	hitPoints = 30;
@@ -2156,7 +2194,7 @@ bool CMothership::IsFiring()
 {
 	if(countDown < 0)
 	{
-		countDown = 15000 - gameParams->randoms[gameParams->randIndex++%512]%5000;
+		countDown = 15000 - gameParams->randoms[gameParams->randIndex++%NUM_PRIMES]%5000;
 		return true;
 	}
 	else
@@ -2461,15 +2499,16 @@ void CBlackHole::Draw()
 	{
 		float degInRad = i*DEG2RAD;
 		float radius = 1.0f;
+		
+		glVertex3f(cos(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 4.0f),
+			sin(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 4.0f), -.001f);
 
-		glVertex3f(cos(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/ 4.0f,
-			sin(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/4.0f, -.001f);
+		degInRad = (i + 4)*DEG2RAD;
 
-		degInRad = (i+4)*DEG2RAD;
+		glVertex3f(cos(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 4.0f),
+			sin(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 4.0f), -.001f);
 
-		glVertex3f(cos(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/ 4.0f,
-			sin(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/4.0f, -.001f);
-
+		
 	}
 	glEnd();
 
@@ -2481,14 +2520,15 @@ void CBlackHole::Draw()
 		float degInRad = i*DEG2RAD;
 		float radius = 1.0f;
 
-		glVertex3f(cos(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/ 4.0f,
-			sin(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/4.0f, -.001f);
+		glVertex3f(cos(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 4.0f),
+			sin(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 4.0f), -.001f);
 
-		degInRad = (i+4)*DEG2RAD;
+		degInRad = (i + 4)*DEG2RAD;
 
-		glVertex3f(cos(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/ 4.0f,
-			sin(degInRad) * radius + ((gameParams->randoms[gameParams->randIndex++%1024]/(float)RAND_MAX) - .5f)/4.0f, -.001f);
-
+		glVertex3f(cos(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 4.0f),
+			sin(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 4.0f), -.001f);
+		
+			
 	}
 	glEnd();
 
@@ -2519,10 +2559,11 @@ CShip::CShip(sGameParams *newGameParams) : CGameObject(newGameParams)
 	cSphere->globalPosition[1] = -10;
 	cSphere->globalPosition[2] = -10;
 	collisionSpheres.push_back(cSphere);
+	animVal = 0;
 
 	//Cycle colors
 	flameColor[0] = 1.0f;
-	flameColor[1] = (float)(gameParams->randoms[gameParams->randIndex++%512] / RAND_MAX);
+	flameColor[1] = (float)(gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / RAND_MAX);
 	flameColor[2] = 0;
 
 	timeSinceLastFire = 0;
@@ -2665,7 +2706,7 @@ void CShip::Draw()
 	glEnd();
 
 
-	if(joystate->rgbButtons[1] & 0x80)
+	if(joystate->rgbButtons[0] & 0x80)
 	{
 		//Make some rocket flames!
 		//Cycle flame color
@@ -2687,33 +2728,36 @@ void CShip::Draw()
 
 			int flameSize = 8;
 
-			if(animVal % 2 == 0)
+			
+			if(animVal % 8 < 4)
 			{
 				glBegin(GL_LINE_LOOP);
-					glVertex3f(-0.073740899562835693f, -0.34192359447479248f, .1f);
+					glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.01f);
 					
-					glVertex3f(-0.04424f, -0.34192359447479248f * 4*flameSize/6.0f, .1f);
-					glVertex3f(-0.01478f, -0.34192359447479248f, -.1f);
-					glVertex3f( 0.01468f, -0.34192359447479248f * 4*flameSize/6.0f, -.1f);
-					glVertex3f( 0.04414f,  -0.34192359447479248f, -.1f);
+					glVertex3f(-0.04424f, -0.34192359447479248f * 4*flameSize/6.0f, -.01f);
+					glVertex3f(-0.01478f, -0.34192359447479248f, -.01f);
+					glVertex3f( 0.01468f, -0.34192359447479248f * 4*flameSize/6.0f, -.01f);
+					glVertex3f( 0.04414f,  -0.34192359447479248f, -.01f);
 
-					glVertex3f(0.073662996292114258f, -0.34201046824455261f, -.1f);
+					glVertex3f(0.073662996292114258f, -0.34201046824455261f, -.01f);
 				glEnd();
-			}
-
-			else if(animVal % 2 == 1)
+			}			
+			
+			else
 			{	
 				glBegin(GL_LINE_LOOP);
-					glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.1f);
+					glVertex3f(-0.073740899562835693f, -0.34192359447479248f, -.01f);
 					
-					glVertex3f(-0.04424f, -0.34192359447479248f, -.1f);
-					glVertex3f(-0.01478f, -0.34192359447479248f * 4*flameSize/6.0f, -.1f);
-					glVertex3f(0.01468f, -0.34192359447479248f, -.1f);
-					glVertex3f( 0.04414f,  -0.34192359447479248f * 4*flameSize/6.0f, -.1f);
+					glVertex3f(-0.04424f, -0.34192359447479248f, -.01f);
+					glVertex3f(-0.01478f, -0.34192359447479248f * 4*flameSize/6.0f, -.01f);
+					glVertex3f(0.01468f, -0.34192359447479248f, -.01f);
+					glVertex3f( 0.04414f,  -0.34192359447479248f * 4*flameSize/6.0f, -.01f);
 
-					glVertex3f(0.073662996292114258, -0.34201046824455261, -.1f);
+					glVertex3f(0.073662996292114258, -0.34201046824455261, -.01f);
 				glEnd();
 			}
+			
+			
 			glPopMatrix();
 		}
 	}
@@ -2726,7 +2770,7 @@ bool CShip::CanDestroy(int destroyerType)
 	bool retval = false;
 
 	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE ||
-		destroyerType == TYPE_PLANET)
+		destroyerType == TYPE_PLANET || destroyerType == TYPE_SHIP)
 	{
 		retval = true;
 	}
@@ -2734,7 +2778,7 @@ bool CShip::CanDestroy(int destroyerType)
 	{
 		hitPoints--;
 
-		if(hitPoints < 0)
+		if(hitPoints <= 0)
 			retval = true;
 	}
 
@@ -2772,16 +2816,30 @@ void CShip::ProcessMotion(DWORD milliseconds, Keys *keys)
 		collisionSpheres[i]->globalPosition[1] += translation[1];
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
-
-	//Loop at edge of screen
-	if(translation[1] > 1.70f)
-		translation[1] = -1.70f;
-	else if(translation[1] < -1.70f)
-		translation[1] = 1.70f;
+	if (gameParams->gameMode == MODE_RACE)
+	{
+		//Loop at edge of screen
+		if (translation[1] > 3.7f)
+			translation[1] = -3.7f;
+		else if (translation[1] < -3.7f)
+			translation[1] = 3.7f;
+	}
+	else
+	{
+		//Loop at edge of screen
+		if (translation[1] > 1.70f)
+			translation[1] = -1.70f;
+		else if (translation[1] < -1.70f)
+			translation[1] = 1.70f;
+	}
 
 	//Turn around if way off in no-mans-land
 	if(translation[0] > 2.75f || translation[0] < -2.75f)
 		motionVector[0] *= -1;
+
+	//Friction
+	motionVector[0] *= .99;
+	motionVector[1] *= .99;
 
 	timeSinceLastFire += milliseconds;
 }
@@ -2842,7 +2900,7 @@ void CShip::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
 	else
 		angularVelocity[2] = 0;
 
-	if(joystate->rgbButtons[1] & 0x80)
+	if(joystate->rgbButtons[0] & 0x80)
 	{
 		pointingVector[0] = cos((rotation[2] + 90) * DEG2RAD);
 		pointingVector[1] = sin((rotation[2] + 90) * DEG2RAD);
@@ -2858,8 +2916,53 @@ bool CShip::IsFiring()
 
 	if(timeSinceLastFire > 100)
 	{
-		retval = joystate->rgbButtons[0]; 
-		timeSinceLastFire = 0;
+		if(retval = joystate->rgbButtons[1]) 
+			timeSinceLastFire = 0;
+	}
+	else
+		retval = false;
+
+	return retval;
+}
+
+bool CShip::IsFiringMissile()
+{
+	bool retval;
+
+	if (timeSinceLastFire > 500)
+	{
+		if(retval = joystate->rgbButtons[2])
+			timeSinceLastFire = 0;
+	}
+	else
+		retval = false;
+
+	return retval;
+}
+
+bool CShip::IsFiringSingularity()
+{
+	bool retval;
+
+	if (timeSinceLastFire > 1000)
+	{
+		if(retval = joystate->rgbButtons[3])
+			timeSinceLastFire = 0;
+	}
+	else
+		retval = false;
+
+	return retval;
+}
+
+bool CShip::IsFiringBeam()
+{
+	bool retval;
+
+	if (timeSinceLastFire > 100)
+	{
+		if(retval = joystate->rgbButtons[4])
+			timeSinceLastFire = 0;
 	}
 	else
 		retval = false;
@@ -2957,10 +3060,22 @@ void CBullet::ProcessMotion(DWORD milliseconds, Keys* keys)
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
 
-	if(translation[1] > 1.70f)
-		translation[1] = -1.70f;
-	else if(translation[1] < -1.70f)
-		translation[1] = 1.70f;
+	if (gameParams->gameMode == MODE_RACE)
+	{
+		//Loop at edge of screen
+		if (translation[1] > 3.7f)
+			translation[1] = -3.7f;
+		else if (translation[1] < -3.7f)
+			translation[1] = 3.7f;
+	}
+	else
+	{
+		//Loop at edge of screen
+		if (translation[1] > 1.70f)
+			translation[1] = -1.70f;
+		else if (translation[1] < -1.70f)
+			translation[1] = 1.70f;
+	}
 
 	if(translation[0] > 2.75f || translation[0] < -2.75f)
 		deleteMe = true;
@@ -2969,4 +3084,121 @@ void CBullet::ProcessMotion(DWORD milliseconds, Keys* keys)
 
 	if(TTL < 0)
 		deleteMe = true;
+}
+
+
+CBarrier::CBarrier(sGameParams * newGameParams) : CGameObject(newGameParams)
+{
+	TTL = -900;
+	animVal = 0;
+	myGravity = NULL;
+}
+
+CBarrier::~CBarrier()
+{
+}
+
+bool CBarrier::CanDestroy(int destroyerType)
+{
+	return false;
+}
+
+void CBarrier::SetScale(float x, float y, float z)
+{
+	sCollisionSphere *cSphere = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = 0;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 1;
+	cSphere->globalPosition[0] = 10;
+	cSphere->globalPosition[1] = 10;
+	cSphere->globalPosition[2] = 10;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = 1;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 1;
+	cSphere->globalPosition[0] = 10;
+	cSphere->globalPosition[1] = 10;
+	cSphere->globalPosition[2] = 10;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = 2;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 1;
+	cSphere->globalPosition[0] = 10;
+	cSphere->globalPosition[1] = 10;
+	cSphere->globalPosition[2] = 10;
+	collisionSpheres.push_back(cSphere);
+
+	CGameObject::SetScale(x, y, z);
+}
+
+void CBarrier::ProcessMotion(DWORD milliseconds, Keys * keys)
+{
+	//Update collision sphere data
+	//Update collision sphere locations
+	for (unsigned int i = 0; i < collisionSpheres.size(); i++)
+	{
+		//First, rotate the sphere
+		collisionSpheres[i]->globalPosition[0] = cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[1] = -sin(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[0] + cos(-(rotation[2]) * DEG2RAD)*collisionSpheres[i]->translation[1];
+		collisionSpheres[i]->globalPosition[2] = 0;
+
+		//Scale by the object's scale
+		collisionSpheres[i]->globalPosition[0] *= scale[0];
+		collisionSpheres[i]->globalPosition[1] *= scale[1];
+		collisionSpheres[i]->globalPosition[2] *= scale[2];
+
+		//Translate by the object's translation
+		collisionSpheres[i]->globalPosition[0] += translation[0];
+		collisionSpheres[i]->globalPosition[1] += translation[1];
+		collisionSpheres[i]->globalPosition[2] += translation[2];
+	}
+}
+
+void CBarrier::Draw()
+{
+	glPushMatrix();
+
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	glColor3f(color[0], color[1], color[2]);
+
+	glBegin(GL_QUADS);
+	glVertex3f(-1.0f, -1.0f, -.01f);
+	glVertex3f(1.0f, -1.0f, -.01f);
+	glVertex3f(1.0f, 1.0f, -.01f);
+	glVertex3f(-1.0f, 1.0f, -.01f);
+	glEnd();
+
+	glPopMatrix();
+
+#ifdef COLLISION_DEBUG
+	glPushMatrix();
+
+	//Draw collision spheres for debug
+	float radius;
+	for (unsigned int i = 0; i<collisionSpheres.size(); i++)
+	{
+		radius = collisionSpheres[i]->radius * scale[1];
+		glColor3f(1, 1, 0);
+		glBegin(GL_LINE_LOOP);
+		for (int j = 0; j<360; j++)
+		{
+			float degInRad = j * DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0], sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
+		}
+		glEnd();
+	}
+
+	glPopMatrix();
+#endif
 }

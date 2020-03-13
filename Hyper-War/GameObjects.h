@@ -18,7 +18,8 @@
 const float DEG2RAD = 3.1415f/180;
 
 //#define COLLISION_DEBUG 1
-//#define PC_CONTROLS 1
+#define PC_CONTROLS 1
+#define NUM_PRIMES 1117
 
 using namespace std;
 
@@ -41,13 +42,15 @@ enum{
 	TYPE_BEAM,
 	TYPE_BLACKHOLE,
 	TYPE_SHIP,
-	TYPE_BULLET
+	TYPE_BULLET,
+	TYPE_BARRIER
 };
 
 enum{
 	MODE_VS,
 	MODE_SINGLE,
 	MODE_COOP,
+	MODE_RACE,
 	MODE_ATTRACT,
 	MODE_GAMEOVER,
 	MODE_HIGHSCORE
@@ -78,7 +81,7 @@ struct sGameParams
 	int	waveTime;
 	int mouse1Index;
 	int mouse2Index;
-	int randoms[1024];
+	int randoms[NUM_PRIMES];
 	unsigned long int	randIndex;
 	int	greenPoints;
 	int	bluePoints;
@@ -95,6 +98,7 @@ struct sGameParams
 	bool blueShip;
 	int  greenRespawnCountdown;
 	int  blueRespawnCountdown;
+	bool rotated;
 };
 
 struct sGravityWell
@@ -422,6 +426,10 @@ public:
 	void SetJoyState( DIJOYSTATE2 *newJoystate ) { joystate = newJoystate; }
 	bool IsFiring();
 
+	bool IsFiringMissile();
+	bool IsFiringSingularity();
+	bool IsFiringBeam();
+
 	void Draw();
 
 private:
@@ -446,4 +454,28 @@ public:
 
 private:
 	int	TTL;
+};
+
+class CBarrier : public CGameObject
+{
+public:
+	CBarrier(sGameParams *newGameParams);
+	~CBarrier();
+	
+	int	 GetType() { return TYPE_BARRIER; }
+	bool CanDestroy(int destroyerType);
+	void SetMyGravity(sGravityWell *newGravity) { myGravity = newGravity; }
+	int  GetTTL() { return TTL; }
+	void  SetTTL(int newTTL) { TTL = newTTL; }
+	void KillGravity() { myGravity->mass = 0; }
+	void SetScale(float x, float y, float z);
+
+	void ProcessMotion(DWORD milliseconds, Keys* keys);
+
+	void Draw();
+
+private:
+	int TTL;
+	int animVal;
+	sGravityWell *myGravity;
 };

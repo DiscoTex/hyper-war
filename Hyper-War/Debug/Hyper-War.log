@@ -1,0 +1,93 @@
+﻿Build started 3/10/2020 11:12:20 PM.
+     1>Project "C:\Users\Aaron\Documents\GitHub\hyper-war\Hyper-War\Hyper-War.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I./ /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /Gm /EHsc /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CAudioRenderer.cpp CEffects.cpp CHighScoreList.cpp CHyperWarGame.cpp GameObjects.cpp glBase.cpp glfont2.cpp joystick.cpp RawMouse.cpp
+         RawMouse.cpp
+         joystick.cpp
+         C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+     1>joystick.cpp(43): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(195) : see declaration of 'strncpy'
+         glfont2.cpp
+         glBase.cpp
+         C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+         GameObjects.cpp
+         C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+     1>GameObjects.cpp(688): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+     1>GameObjects.cpp(2590): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2597): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2604): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2611): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2619): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2624): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2629): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2634): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2642): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2649): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2656): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2663): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2716): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2718): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2720): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2841): warning C4305: '*=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(2842): warning C4305: '*=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(2899): warning C4244: '=' : conversion from 'LONG' to 'float', possible loss of data
+     1>GameObjects.cpp(2854): warning C4101: 'vectorLen' : unreferenced local variable
+     1>GameObjects.cpp(2852): warning C4101: 'tangent' : unreferenced local variable
+     1>GameObjects.cpp(2919): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
+     1>GameObjects.cpp(2934): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
+     1>GameObjects.cpp(2949): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
+     1>GameObjects.cpp(2964): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
+         CHyperWarGame.cpp
+         C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+     1>CHyperWarGame.cpp(564): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(653): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(702): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(742): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(785): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(792): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1037): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(1057): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1091): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1130): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1173): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1250): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1303): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1788): warning C4101: 'ysize' : unreferenced local variable
+     1>CHyperWarGame.cpp(1788): warning C4101: 'xsize' : unreferenced local variable
+     1>CHyperWarGame.cpp(2657): warning C4244: '*=' : conversion from 'double' to 'int', possible loss of data
+     1>CHyperWarGame.cpp(2736): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
+     1>CHyperWarGame.cpp(2764): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
+     1>CHyperWarGame.cpp(2769): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
+         CHighScoreList.cpp
+     1>CHighScoreList.cpp(149): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
+         CEffects.cpp
+         CAudioRenderer.cpp
+         C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+     1>CAudioRenderer.cpp(49): warning C4101: 'freq' : unreferenced local variable
+     1>CAudioRenderer.cpp(50): warning C4101: 'loop' : unreferenced local variable
+     1>CAudioRenderer.cpp(47): warning C4101: 'size' : unreferenced local variable
+     1>CAudioRenderer.cpp(46): warning C4101: 'format' : unreferenced local variable
+     1>CAudioRenderer.cpp(48): warning C4101: 'data' : unreferenced local variable
+     1>CAudioRenderer.cpp(275): warning C4244: '=' : conversion from 'double' to 'ALfloat', possible loss of data
+     1>CAudioRenderer.cpp(276): warning C4244: '=' : conversion from 'double' to 'ALfloat', possible loss of data
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Aaron\Documents\GitHub\hyper-war\Debug\Hyper-War.exe" /INCREMENTAL /NOLOGO OpenAL32.lib alut.lib odbc32.lib odbccp32.lib dinput8.lib dxguid.lib glew32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Aaron\Documents\GitHub\hyper-war\Debug\Hyper-War.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Aaron\Documents\GitHub\hyper-war\Debug\Hyper-War.lib" /MACHINE:X86 /SAFESEH Debug\CAudioRenderer.obj
+         Debug\CEffects.obj
+         Debug\CHighScoreList.obj
+         Debug\CHyperWarGame.obj
+         Debug\GameObjects.obj
+         Debug\glBase.obj
+         Debug\glfont2.obj
+         Debug\joystick.obj
+         Debug\RawMouse.obj
+         Hyper-War.vcxproj -> C:\Users\Aaron\Documents\GitHub\hyper-war\Debug\Hyper-War.exe
+     1>Done Building Project "C:\Users\Aaron\Documents\GitHub\hyper-war\Hyper-War\Hyper-War.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:05.57

@@ -109,6 +109,7 @@ private:
 	int							nameIndex;
 	double						currentLetter;
 	bool						listTime;
+	bool						firstAttract;
 
 	//Shaders
 	GLenum						vertGuassPrg;

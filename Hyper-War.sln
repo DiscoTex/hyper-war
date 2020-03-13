@@ -1,20 +1,28 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Hyper-War", "Hyper-War\Hyper-War.vcproj", "{D32A9431-A5E4-412A-B1E0-3F910D341A6A}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2026
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Hyper-War", "Hyper-War\Hyper-War.vcxproj", "{D32A9431-A5E4-412A-B1E0-3F910D341A6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
+		Release-2|Win32 = Release-2|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D32A9431-A5E4-412A-B1E0-3F910D341A6A}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D32A9431-A5E4-412A-B1E0-3F910D341A6A}.Debug|Win32.Build.0 = Debug|Win32
 		{D32A9431-A5E4-412A-B1E0-3F910D341A6A}.Release|Win32.ActiveCfg = Release|Win32
 		{D32A9431-A5E4-412A-B1E0-3F910D341A6A}.Release|Win32.Build.0 = Release|Win32
+		{D32A9431-A5E4-412A-B1E0-3F910D341A6A}.Release-2|Win32.ActiveCfg = Release-2|Win32
+		{D32A9431-A5E4-412A-B1E0-3F910D341A6A}.Release-2|Win32.Build.0 = Release-2|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1F0E49CD-E3C7-4EE5-B05A-5A725F60AC57}
 	EndGlobalSection
 EndGlobal

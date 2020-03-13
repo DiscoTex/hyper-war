@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hello_world", "OpenAL_playground\OpenAL_playground.vcproj", "{77AB59D8-FBFD-4D47-BBA7-983330DF2C24}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "playfile", "playfile\playfile.vcproj", "{75390896-EB3D-4249-9665-5F3A7EEA4706}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Static_Sound", "Static_Sound\Static_Sound.vcproj", "{506F2145-D2D9-4124-BF6A-B5AFD7C7B720}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Multiple_Sources", "Multiple_Sources\Multiple_Sources.vcproj", "{8A0FB77A-7CB5-4C74-AAF7-CF10CD16BF85}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77AB59D8-FBFD-4D47-BBA7-983330DF2C24}.Debug|Win32.ActiveCfg = Debug|Win32
+		{77AB59D8-FBFD-4D47-BBA7-983330DF2C24}.Debug|Win32.Build.0 = Debug|Win32
+		{77AB59D8-FBFD-4D47-BBA7-983330DF2C24}.Release|Win32.ActiveCfg = Release|Win32
+		{77AB59D8-FBFD-4D47-BBA7-983330DF2C24}.Release|Win32.Build.0 = Release|Win32
+		{75390896-EB3D-4249-9665-5F3A7EEA4706}.Debug|Win32.ActiveCfg = Debug|Win32
+		{75390896-EB3D-4249-9665-5F3A7EEA4706}.Debug|Win32.Build.0 = Debug|Win32
+		{75390896-EB3D-4249-9665-5F3A7EEA4706}.Release|Win32.ActiveCfg = Release|Win32
+		{75390896-EB3D-4249-9665-5F3A7EEA4706}.Release|Win32.Build.0 = Release|Win32
+		{506F2145-D2D9-4124-BF6A-B5AFD7C7B720}.Debug|Win32.ActiveCfg = Debug|Win32
+		{506F2145-D2D9-4124-BF6A-B5AFD7C7B720}.Debug|Win32.Build.0 = Debug|Win32
+		{506F2145-D2D9-4124-BF6A-B5AFD7C7B720}.Release|Win32.ActiveCfg = Release|Win32
+		{506F2145-D2D9-4124-BF6A-B5AFD7C7B720}.Release|Win32.Build.0 = Release|Win32
+		{8A0FB77A-7CB5-4C74-AAF7-CF10CD16BF85}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8A0FB77A-7CB5-4C74-AAF7-CF10CD16BF85}.Debug|Win32.Build.0 = Debug|Win32
+		{8A0FB77A-7CB5-4C74-AAF7-CF10CD16BF85}.Release|Win32.ActiveCfg = Release|Win32
+		{8A0FB77A-7CB5-4C74-AAF7-CF10CD16BF85}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

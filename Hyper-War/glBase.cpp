@@ -386,7 +386,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	window.init.width			= GetSystemMetrics(SM_CXSCREEN);		// Window Width
 	window.init.height			= GetSystemMetrics(SM_CYSCREEN);		// Window Height
 	window.init.bitsPerPixel	= 16;									// Bits Per Pixel
-	window.init.isFullScreen	= FALSE;									// Fullscreen? (Set To TRUE)
+	window.init.isFullScreen	= TRUE;									// Fullscreen? (Set To TRUE)
 
 	ZeroMemory (&keys, sizeof (Keys));									// Zero keys Structure
 
@@ -419,7 +419,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 		{
 			// At This Point We Should Have A Window That Is Setup To Render OpenGL
 			// turn off V-Sync
-			setVSync(0);
+			setVSync(1);
 			if (hyperWarGame.Initialize (&window, &keys) == FALSE)					// Call User Intialization
 			{
 				// Failure
@@ -451,11 +451,11 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 						}
 						else											// If Window Is Visible
 						{
-							// Process Application Loop
-							tickCount = GetTickCount ();				// Get The Tick Count
-							hyperWarGame.Update (tickCount - window.lastTickCount);	// Update The Counter
+							tickCount = GetTickCount();				// Get The Tick Count
+							//hyperWarGame.Update (tickCount - window.lastTickCount);	// Update The Counter
+							hyperWarGame.Update(8);	// Update The Counter
 							window.lastTickCount = tickCount;			// Set Last Count To Current Count
-							hyperWarGame.OuterDraw();									// Draw Our Scene
+							hyperWarGame.OuterDraw();					// Draw Our Scene
 
 							SwapBuffers (window.hDC);					// Swap Buffers (Double Buffering)
 						}
