@@ -286,7 +286,9 @@ LRESULT CALLBACK WindowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 		break;															// Break
 
-		case WM_KEYDOWN:												// Update Keyboard Buffers For Keys Pressed
+		case WM_KEYDOWN:	
+			VK_LEFT;
+				// Update Keyboard Buffers For Keys Pressed
 			if ((wParam >= 0) && (wParam <= 255))						// Is Key (wParam) In A Valid Range?
 			{
 				window->keys->keyDown [wParam] = TRUE;					// Set The Selected Key (wParam) To True
@@ -305,7 +307,7 @@ LRESULT CALLBACK WindowProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_INPUT:
 			hyperWarGame.ProcessRawInput(lParam);
 
-			for(int i=1; i<hyperWarGame.GetNumRawMice(); i++)
+			for(int i=0; i<hyperWarGame.GetNumRawMice(); i++)
 			{
 				//Set lower case characters to down corresponding to mouse buttons
 				for(int j=0; j<3; j++)

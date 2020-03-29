@@ -430,6 +430,8 @@ public:
 	bool IsFiringSingularity();
 	bool IsFiringBeam();
 
+	void setLanded(bool newLanded) { landed = newLanded; }
+
 	void Draw();
 
 private:
@@ -438,6 +440,8 @@ private:
 	float				flameColor[3];
 	int					timeSinceLastFire;
 	int					hitPoints;
+	bool				landed{ false };
+	int					landingCounter{ 0 };
 };
 
 class CBullet : public CGameObject

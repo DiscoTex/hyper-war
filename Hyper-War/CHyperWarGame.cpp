@@ -457,7 +457,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetRotation(0, 0, -84);
 		mb->SetTranslation(10 * cos(6*DEG2RAD) - 12.01f, 10 * sin(6*DEG2RAD), -.001f);
 #ifdef PC_CONTROLS
-		mb->SetLaunchKey(3);
+		mb->SetLaunchKey(1);
 #else 
 		mb->SetLaunchKey(6);
 #endif		
@@ -473,7 +473,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		mb->SetFiredLast(true);
 		
 #ifdef PC_CONTROLS
-		mb->SetLaunchKey(3);		
+		mb->SetLaunchKey(1);		
 #else
 		mb->SetLaunchKey(6);
 #endif
@@ -520,9 +520,9 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetTranslation(10 * cos(0*DEG2RAD) - 12.01f, 10 * sin(0*DEG2RAD), -.001f);
 		cannon->SetCursorPointer(mousePos[0]);
 #ifdef PC_CONTROLS
-		cannon->SetFireKey(4);
-		cannon->SetSingularityKey(5);
-		cannon->SetBeamKey(5);
+		cannon->SetFireKey(0);
+		cannon->SetSingularityKey(1);
+		cannon->SetBeamKey(1);
 #else
 		cannon->SetFireKey(8);
 		cannon->SetSingularityKey(7);
@@ -743,7 +743,8 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 			break;
 		case TYPE_SHIP:
 			hyperModeTimer = 0;
-			switch(gameObjects[collider]->GetSide())
+
+			switch (gameObjects[collider]->GetSide())
 			{
 			case SIDE_BLUE:
 				gameParams.greenPoints += 500 * pointMultiplier;
@@ -756,33 +757,32 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				gameParams.greenRespawnCountdown = 2000;
 				break;
 			}
-			for(int k=0; k<gameParams.debrisAmount*16; k++)
+			for (int k = 0; k < gameParams.debrisAmount * 16; k++)
 			{
 				float  debrisAngle;
-				float  debrisSize;							
+				float  debrisSize;
 
 				debrisAngle = gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] % 360 + gameObjects[collider]->GetRotation()[2];
-				debrisSize = ((gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]%100) / 100.0f) * .2f;
+				debrisSize = ((gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] % 100) / 100.0f) * .2f;
 
 				debris = new CDebris(&gameParams);
 				debris->SetMotionVector(
-					float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize )) + gameObjects[collider]->GetMotionVector()[0] ,
-					float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize )) + gameObjects[collider]->GetMotionVector()[1],
+					float(cos(debrisAngle * DEG2RAD) * (.07f / debrisSize)) + gameObjects[collider]->GetMotionVector()[0],
+					float(sin(debrisAngle * DEG2RAD) * (.07f / debrisSize)) + gameObjects[collider]->GetMotionVector()[1],
 					0);
 				debris->SetTranslation(
 					float(gameObjects[collider]->GetTranslation()[0]),
 					float(gameObjects[collider]->GetTranslation()[1]),
 					float(gameObjects[collider]->GetTranslation()[2]));
 				debris->SetScale(debrisSize, debrisSize, debrisSize);
-				debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]%5000);
+				debris->SetTTL(5000 - gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] % 5000);
 				gameObjects.push_back(debris);
 			}
 
-
-			audioRenderer.PlaySound(SOUND_EXPLOSION, 
+			audioRenderer.PlaySound(SOUND_EXPLOSION,
 				gameObjects[collider]->GetTranslation()[0],
 				gameObjects[collider]->GetTranslation()[1],
-				gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]%100 / 200.0 + .5f);
+				gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] % 100 / 200.0 + .5f);
 			break;
 		case TYPE_DEBRIS:
 			break;
@@ -1059,7 +1059,6 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				gameObjects.push_back(bullet);				
 			}
 
-
 			if (((CShip*)(gameObjects[i]))->IsFiringMissile())
 			{
 				nuke = new CNuke(&gameParams);				
@@ -1079,7 +1078,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 				nuke->SetTranslation(((CShip*)(gameObjects[i]))->GetTranslation()[0] + projVector[0] / 16,
 					((CShip*)(gameObjects[i]))->GetTranslation()[1] + projVector[1] / 16,
-					((CShip*)(gameObjects[i]))->GetTranslation()[2]);
+					((CShip*)(gameObjects[i]))->GetTranslation()[2] + .0001);
 				nuke->SetMotionVector(
 					((CShip*)(gameObjects[i]))->GetMotionVector()[0] + projVector[0] * 32,
 					((CShip*)(gameObjects[i]))->GetMotionVector()[1] + projVector[1] * 32,
@@ -1093,8 +1092,6 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 				gameObjects.push_back(nuke);
 			}
 
-
-		
 		}
 		else if(gameObjects[i]->GetType() == TYPE_MISSILEBASE)
 		{
