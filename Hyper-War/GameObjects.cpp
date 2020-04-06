@@ -3580,22 +3580,6 @@ bool CTheFlag::CanDestroy(int destroyerType)
 		motionVector[0] = 0;
 		motionVector[1] = 0;
 		motionVector[2] = 0;
-
-		//Auto return to starting location
-		/*
-		if (this->mySide == SIDE_GREEN)
-		{
-			translation[0] = -1.9;
-			translation[1] = 0;
-			translation[2] = 0;
-		}
-		else if (mySide == SIDE_BLUE)
-		{
-			translation[0] = 1.9;
-			translation[1] = 0;
-			translation[2] = 0;
-		}
-		*/
 	}
 		
 	return false;

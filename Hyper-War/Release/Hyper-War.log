@@ -1,4 +1,4 @@
-﻿Build started 4/5/2020 6:18:57 PM.
+﻿Build started 4/5/2020 6:25:52 PM.
      1>Project "C:\Users\Aaron\Documents\GitHub\hyper-war\Hyper-War\Hyper-War.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I./ /nologo /W3 /WX- /O2 /Ob2 /Oi /Ot /Oy /D WIN32 /D NDEBUG /D _WINDOWS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CAudioRenderer.cpp CEffects.cpp CHighScoreList.cpp CHyperWarGame.cpp GameObjects.cpp glBase.cpp glfont2.cpp joystick.cpp RawMouse.cpp
@@ -89,17 +89,17 @@
      1>GameObjects.cpp(3047): warning C4101: 'tangent' : unreferenced local variable
      1>GameObjects.cpp(3160): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
      1>GameObjects.cpp(3175): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
-     1>GameObjects.cpp(3336): warning C4305: '=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3344): warning C4305: '=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3346): warning C4305: '=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3354): warning C4305: '=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3356): warning C4305: '=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3364): warning C4305: '=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3366): warning C4305: '=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3374): warning C4305: '=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3376): warning C4305: '=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3617): warning C4305: '=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3623): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3335): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3343): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3345): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3353): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3355): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3363): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3365): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3373): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3375): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3618): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3624): warning C4305: '=' : truncation from 'double' to 'float'
          glBase.cpp
          C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
          glfont2.cpp
@@ -125,4 +125,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:05.21
+Time Elapsed 00:00:05.27
