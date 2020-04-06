@@ -1,9 +1,41 @@
-﻿Build started 3/28/2020 1:17:12 PM.
+﻿Build started 4/5/2020 4:52:24 PM.
      1>Project "C:\Users\Aaron\Documents\GitHub\hyper-war\Hyper-War\Hyper-War.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I./ /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /Gm /EHsc /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt glBase.cpp
-         glBase.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I./ /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /Gm /EHsc /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CHyperWarGame.cpp
+         CHyperWarGame.cpp
          C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+     1>CHyperWarGame.cpp(271): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(272): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(281): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(647): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(699): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(742): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(790): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(797): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(948): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(1115): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+     1>CHyperWarGame.cpp(1132): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1133): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1135): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1136): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1167): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>CHyperWarGame.cpp(1203): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(1223): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1247): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1256): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1293): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1339): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1416): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1469): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1976): warning C4101: 'ysize' : unreferenced local variable
+     1>CHyperWarGame.cpp(1976): warning C4101: 'xsize' : unreferenced local variable
+     1>CHyperWarGame.cpp(2901): warning C4244: '*=' : conversion from 'double' to 'int', possible loss of data
+     1>CHyperWarGame.cpp(2980): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
+     1>CHyperWarGame.cpp(3008): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
+     1>CHyperWarGame.cpp(3013): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Aaron\Documents\GitHub\hyper-war\Debug\Hyper-War.exe" /INCREMENTAL /NOLOGO OpenAL32.lib alut.lib odbc32.lib odbccp32.lib dinput8.lib dxguid.lib glew32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Aaron\Documents\GitHub\hyper-war\Debug\Hyper-War.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Aaron\Documents\GitHub\hyper-war\Debug\Hyper-War.lib" /MACHINE:X86 /SAFESEH Debug\CAudioRenderer.obj
          Debug\CEffects.obj
@@ -19,4 +51,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.10
+Time Elapsed 00:00:01.22

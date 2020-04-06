@@ -23,6 +23,8 @@ const float DEG2RAD = 3.1415f/180;
 
 using namespace std;
 
+class CTheFlag;
+
 enum{
 	SIDE_NONE,
 	SIDE_BLUE,
@@ -43,7 +45,8 @@ enum{
 	TYPE_BLACKHOLE,
 	TYPE_SHIP,
 	TYPE_BULLET,
-	TYPE_BARRIER
+	TYPE_BARRIER,
+	TYPE_FLAG
 };
 
 enum{
@@ -53,6 +56,7 @@ enum{
 	MODE_RACE,
 	MODE_ATTRACT,
 	MODE_GAMEOVER,
+	MODE_MELEE,
 	MODE_HIGHSCORE
 };
 
@@ -98,6 +102,8 @@ struct sGameParams
 	bool blueShip;
 	int  greenRespawnCountdown;
 	int  blueRespawnCountdown;
+	int greenShipLives{ 10 };
+	int blueShipLives{ 10 };
 	bool rotated;
 };
 
@@ -431,6 +437,9 @@ public:
 	bool IsFiringBeam();
 
 	void setLanded(bool newLanded) { landed = newLanded; }
+	void setFlag(CTheFlag* theFlag) { ownedFlag = theFlag; }	
+	bool hasFlag();
+	void dropFlag();
 
 	void Draw();
 
@@ -442,6 +451,8 @@ private:
 	int					hitPoints;
 	bool				landed{ false };
 	int					landingCounter{ 0 };
+	CTheFlag*			ownedFlag{ nullptr };
+
 };
 
 class CBullet : public CGameObject
@@ -482,4 +493,28 @@ private:
 	int TTL;
 	int animVal;
 	sGravityWell *myGravity;
+};
+
+class CTheFlag : public CGameObject
+{
+public:
+	CTheFlag(sGameParams *newGameParams);
+	~CTheFlag(); 
+
+	int	 GetType() { return TYPE_FLAG; }
+	bool CanDestroy(int destroyerType);
+
+	void ProcessMotion(DWORD milliseconds, Keys* keys);
+	void ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells);
+
+	void setResting(bool resting) { atRest = resting; }
+
+	void returnHome();
+
+	void Draw();
+
+private:
+	int animVal{ 0 };
+	bool atRest{ true };
+	bool captured{ false };
 };

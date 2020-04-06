@@ -1,4 +1,5 @@
 /*************************************************************/
+
 /*	GameObjects.cpp: definitions of game objects, including	 */
 /*  the base class, CGameObject and several derived classes	 */					
 /*  Aaron E. Wegner											 */
@@ -177,6 +178,12 @@ void CGameObject::ProcessMotion(DWORD milliseconds, Keys* keys)
 				translation[1] = -3.7f;
 			else if (translation[1] < -3.7f)
 				translation[1] = 3.7f;
+
+			//Loop at edge of screen
+			if (translation[0] > 2.2f)
+				translation[0] = -2.2f;
+			else if (translation[0] < -2.2f)
+				translation[0] = 2.2f;
 		}
 		else
 		{
@@ -424,7 +431,7 @@ void CPlanet::Draw()
 	glScalef(scale[0], scale[1], scale[2]);
 	glColor3f(color[0], color[1], color[2]);
 
-	float depth = 0;
+	float depth = -.00001;
 	float radius = 1;
 	glBegin(GL_TRIANGLES);
 		for (int i=0; i<361; i+=4)
@@ -789,6 +796,12 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 			translation[1] = -3.7f;
 		else if (translation[1] < -3.7f)
 			translation[1] = 3.7f;
+
+		//Loop at edge of screen
+		if (translation[0] > 2.2f)
+			translation[0] = -2.2f;
+		else if (translation[0] < -2.2f)
+			translation[0] = 2.2f;
 	}
 	else
 	{
@@ -1072,6 +1085,12 @@ void CDebris::ProcessMotion(DWORD milliseconds, Keys* keys)
 			translation[1] = -3.7f;
 		else if (translation[1] < -3.7f)
 			translation[1] = 3.7f;
+
+		//Loop at edge of screen
+		if (translation[0] > 2.2f)
+			translation[0] = -2.2f;
+		else if (translation[0] < -2.2f)
+			translation[0] = 2.2f;
 	}
 	else
 	{
@@ -2863,6 +2882,27 @@ void CShip::Draw()
 
 		glPopMatrix();
 	}
+
+#ifdef COLLISION_DEBUG
+	glPushMatrix();
+
+	//Draw collision spheres for debug
+	float radius;
+	for (unsigned int i = 0; i<collisionSpheres.size(); i++)
+	{
+		radius = collisionSpheres[i]->radius * scale[1];
+		glColor3f(1, 1, 0);
+		glBegin(GL_LINE_LOOP);
+		for (int j = 0; j<360; j++)
+		{
+			float degInRad = j * DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0], sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
+		}
+		glEnd();
+	}
+
+	glPopMatrix();
+#endif
 }
 
 bool CShip::CanDestroy(int destroyerType)
@@ -2870,7 +2910,7 @@ bool CShip::CanDestroy(int destroyerType)
 	bool retval = false;
 
 	if(destroyerType == TYPE_NUKE || destroyerType == TYPE_BEAM || destroyerType == TYPE_BLACKHOLE ||
-		destroyerType == TYPE_SHIP)
+		destroyerType == TYPE_SHIP || destroyerType == TYPE_BARRIER)
 	{
 		retval = true;
 	}
@@ -2903,6 +2943,16 @@ bool CShip::CanDestroy(int destroyerType)
 			retval = false;
 		}
 	}
+
+	if (retval && ownedFlag != nullptr)
+	{
+		translation[0] -= 16 * motionVector[0] / 1000;
+		translation[1] -= 16 * motionVector[1] / 1000;
+		translation[2] -= 16 * motionVector[2] / 1000;
+
+		ownedFlag->SetTranslation(translation[0], translation[1], translation[2]);
+	}
+
 
 	return retval;
 }
@@ -2945,6 +2995,12 @@ void CShip::ProcessMotion(DWORD milliseconds, Keys *keys)
 			translation[1] = -3.7f;
 		else if (translation[1] < -3.7f)
 			translation[1] = 3.7f;
+
+		//Loop at edge of screen
+		if (translation[0] > 2.2f)
+			translation[0] = -2.2f;
+		else if (translation[0] < -2.2f)
+			translation[0] = 2.2f;
 	}
 	else
 	{
@@ -2973,10 +3029,14 @@ void CShip::ProcessMotion(DWORD milliseconds, Keys *keys)
 		motionVector[1] *= .99;
 	}
 
-
-
-
 	timeSinceLastFire += milliseconds;
+
+	if (ownedFlag != nullptr)
+	{
+		ownedFlag->SetMotionVector(motionVector[0], motionVector[1], motionVector[2]);
+		ownedFlag->SetAngularVelocity(angularVelocity[0], angularVelocity[1], angularVelocity[2] );
+		ownedFlag->SetTranslation(translation[0], translation[1], translation[2]);
+	}
 }
 
 void CShip::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
@@ -3067,7 +3127,7 @@ bool CShip::IsFiring()
 
 	if(timeSinceLastFire > 100)
 	{
-		if(retval = joystate->rgbButtons[1]) 
+		if(retval = (joystate->rgbButtons[2] && !landed)) 
 			timeSinceLastFire = 0;
 	}
 	else
@@ -3080,9 +3140,9 @@ bool CShip::IsFiringMissile()
 {
 	bool retval;
 
-	if (timeSinceLastFire > 500)
+	if (timeSinceLastFire > 250)
 	{
-		if(retval = joystate->rgbButtons[2] != 0)
+		if(retval = (joystate->rgbButtons[2] != 0 && landed))
 			timeSinceLastFire = 0;
 	}
 	else
@@ -3120,6 +3180,25 @@ bool CShip::IsFiringBeam()
 
 	return retval;
 }
+
+bool CShip::hasFlag()
+{
+	bool retval = false;
+
+	if (ownedFlag != nullptr)
+		retval = true;
+	else
+		retval = false;
+
+	return retval;
+}
+
+void CShip::dropFlag()
+{
+	ownedFlag->returnHome();	
+	ownedFlag = nullptr;
+}
+
 
 
 CBullet::CBullet(sGameParams *newGameParams) : CGameObject(newGameParams)
@@ -3216,11 +3295,13 @@ void CBullet::ProcessMotion(DWORD milliseconds, Keys* keys)
 
 	if (gameParams->gameMode == MODE_RACE)
 	{
+		/*
 		//Loop at edge of screen
 		if (translation[1] > 3.7f)
 			translation[1] = -3.7f;
 		else if (translation[1] < -3.7f)
 			translation[1] = 3.7f;
+			*/
 	}
 	else
 	{
@@ -3246,6 +3327,56 @@ CBarrier::CBarrier(sGameParams * newGameParams) : CGameObject(newGameParams)
 	TTL = -900;
 	animVal = 0;
 	myGravity = NULL;
+
+	sCollisionSphere *cSphere = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = 0;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .3;
+	cSphere->globalPosition[0] = 10;
+	cSphere->globalPosition[1] = 10;
+	cSphere->globalPosition[2] = 10;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = .33;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .3;
+	cSphere->globalPosition[0] = 10;
+	cSphere->globalPosition[1] = 10;
+	cSphere->globalPosition[2] = 10;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = -.33;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .3;
+	cSphere->globalPosition[0] = 10;
+	cSphere->globalPosition[1] = 10;
+	cSphere->globalPosition[2] = 10;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = .67;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .3;
+	cSphere->globalPosition[0] = 10;
+	cSphere->globalPosition[1] = 10;
+	cSphere->globalPosition[2] = 10;
+	collisionSpheres.push_back(cSphere);
+
+	cSphere = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = -.67;
+	cSphere->translation[2] = 0;
+	cSphere->radius = .3;
+	cSphere->globalPosition[0] = 10;
+	cSphere->globalPosition[1] = 10;
+	cSphere->globalPosition[2] = 10;
+	collisionSpheres.push_back(cSphere);
 }
 
 CBarrier::~CBarrier()
@@ -3259,35 +3390,6 @@ bool CBarrier::CanDestroy(int destroyerType)
 
 void CBarrier::SetScale(float x, float y, float z)
 {
-	sCollisionSphere *cSphere = new sCollisionSphere();
-	cSphere->translation[0] = 0;
-	cSphere->translation[1] = 0;
-	cSphere->translation[2] = 0;
-	cSphere->radius = 1;
-	cSphere->globalPosition[0] = 10;
-	cSphere->globalPosition[1] = 10;
-	cSphere->globalPosition[2] = 10;
-	collisionSpheres.push_back(cSphere);
-
-	cSphere = new sCollisionSphere();
-	cSphere->translation[0] = 0;
-	cSphere->translation[1] = 1;
-	cSphere->translation[2] = 0;
-	cSphere->radius = 1;
-	cSphere->globalPosition[0] = 10;
-	cSphere->globalPosition[1] = 10;
-	cSphere->globalPosition[2] = 10;
-	collisionSpheres.push_back(cSphere);
-
-	cSphere = new sCollisionSphere();
-	cSphere->translation[0] = 0;
-	cSphere->translation[1] = 2;
-	cSphere->translation[2] = 0;
-	cSphere->radius = 1;
-	cSphere->globalPosition[0] = 10;
-	cSphere->globalPosition[1] = 10;
-	cSphere->globalPosition[2] = 10;
-	collisionSpheres.push_back(cSphere);
 
 	CGameObject::SetScale(x, y, z);
 }
@@ -3355,4 +3457,178 @@ void CBarrier::Draw()
 
 	glPopMatrix();
 #endif
+}
+
+CTheFlag::CTheFlag(sGameParams *newGameParams) : CGameObject(newGameParams)
+{
+	sCollisionSphere *cSphere = new sCollisionSphere();
+	cSphere->translation[0] = 0;
+	cSphere->translation[1] = 0;
+	cSphere->translation[2] = 0;
+	cSphere->radius = 1;
+	cSphere->globalPosition[0] = -10;
+	cSphere->globalPosition[1] = -10;
+	cSphere->globalPosition[2] = -10;
+	collisionSpheres.push_back(cSphere);
+}
+
+void CTheFlag::Draw()
+{
+	glPushMatrix();
+
+	glTranslatef(translation[0], translation[1], translation[2]);
+	glRotatef(rotation[0], 1, 0, 0);
+	glRotatef(rotation[1], 0, 1, 0);
+	glRotatef(rotation[2], 0, 0, 1);
+	glScalef(scale[0], scale[1], scale[2]);
+	animVal++;
+
+	//Draw a circle
+	glColor3f(color[0], color[1], color[2]);
+	glBegin(GL_TRIANGLES);
+	for (int i = 0; i<360; i += 4)
+	{
+		float degInRad = i*DEG2RAD;
+		float radius = 1.0f;
+
+		glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius, 0);
+
+		degInRad = (i + 4)*DEG2RAD;
+		glVertex3f(cos(degInRad) * radius, sin(degInRad) * radius, 0);
+
+		glVertex3f(0, .1f, -.001f);
+	}
+	glEnd();
+	
+	//Draw some electricity around it
+	glColor3f(color[0], color[1], color[2]);
+	glBegin(GL_LINE_STRIP);
+	for (int i=0; i<=360; i+=20)
+	{
+		float degInRad = i*DEG2RAD;
+		float radius = 2.0f;
+
+		glVertex3f(cos(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 1.0f),
+			sin(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 1.0f), -.001f);
+
+		degInRad = (i + 4)*DEG2RAD;
+
+		glVertex3f(cos(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 1.0f),
+			sin(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 1.0f), -.001f);
+
+
+	}
+	glEnd();
+
+	//Draw some electricity around it
+	//glColor3f(1, 1, 1);
+	glBegin(GL_LINE_STRIP);
+	for (int i = 0; i <= 360; i += 20)
+	{
+		float degInRad = i*DEG2RAD;
+		float radius = 3.0f;
+
+		glVertex3f(cos(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 1.0f),
+			sin(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 1.0f), -.001f);
+
+		degInRad = (i + 4)*DEG2RAD;
+
+		glVertex3f(cos(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 1.0f),
+			sin(degInRad) * (radius + ((gameParams->randoms[gameParams->randIndex++%NUM_PRIMES] / (float)RAND_MAX) - .5f) / 1.0f), -.001f);
+	}
+	glEnd();
+
+	glPopMatrix();
+
+#ifdef COLLISION_DEBUG
+	glPushMatrix();
+
+	//Draw collision spheres for debug
+	float radius;
+	for (unsigned int i = 0; i<collisionSpheres.size(); i++)
+	{
+		radius = collisionSpheres[i]->radius * scale[1];
+		glColor3f(1, 1, 0);
+		glBegin(GL_LINE_LOOP);
+		for (int j = 0; j<360; j++)
+		{
+			float degInRad = j * DEG2RAD;
+			glVertex3f(cos(degInRad)*radius + collisionSpheres[i]->globalPosition[0], sin(degInRad)*radius + collisionSpheres[i]->globalPosition[1], 0 + collisionSpheres[i]->globalPosition[2]);
+		}
+		glEnd();
+	}
+
+	glPopMatrix();
+#endif
+}
+
+void CTheFlag::ProcessMotion(DWORD milliseconds, Keys* keys)
+{
+	CGameObject::ProcessMotion(milliseconds, keys);
+}
+
+bool CTheFlag::CanDestroy(int destroyerType)
+{
+	if (destroyerType == TYPE_PLANET || destroyerType == TYPE_CITY || destroyerType == TYPE_MISSILEBASE || destroyerType == TYPE_FLAKCANNON)
+	{
+		atRest = true;
+
+		translation[0] -= 16 * motionVector[0] / 1000;
+		translation[1] -= 16 * motionVector[1] / 1000;
+		translation[2] -= 16 * motionVector[2] / 1000;
+
+		motionVector[0] = 0;
+		motionVector[1] = 0;
+		motionVector[2] = 0;
+
+		//Auto return to starting location
+		/*
+		if (this->mySide == SIDE_GREEN)
+		{
+			translation[0] = -1.9;
+			translation[1] = 0;
+			translation[2] = 0;
+		}
+		else if (mySide == SIDE_BLUE)
+		{
+			translation[0] = 1.9;
+			translation[1] = 0;
+			translation[2] = 0;
+		}
+		*/
+	}
+		
+	return false;
+}
+
+void CTheFlag::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells)
+{
+	if (atRest)
+		return;
+	else
+		CGameObject::ProcessGravity(milliseconds, gWells);
+}
+
+void CTheFlag::returnHome()
+{
+	setResting(true);
+
+	if (this->mySide == SIDE_GREEN)
+	{
+		translation[0] = -1.9;
+		translation[1] = 0;
+		translation[2] = 0;
+	}
+	else if (mySide == SIDE_BLUE)
+	{
+		translation[0] = 1.9;
+		translation[1] = 0;
+		translation[2] = 0;
+	}
+	else
+	{
+		translation[0] = 0;
+		translation[1] = 0;
+		translation[2] = 0;
+	}
 }

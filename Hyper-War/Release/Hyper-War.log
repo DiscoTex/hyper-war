@@ -1,4 +1,4 @@
-﻿Build started 3/28/2020 6:24:13 PM.
+﻿Build started 4/5/2020 6:18:57 PM.
      1>Project "C:\Users\Aaron\Documents\GitHub\hyper-war\Hyper-War\Hyper-War.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I./ /nologo /W3 /WX- /O2 /Ob2 /Oi /Ot /Oy /D WIN32 /D NDEBUG /D _WINDOWS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CAudioRenderer.cpp CEffects.cpp CHighScoreList.cpp CHyperWarGame.cpp GameObjects.cpp glBase.cpp glfont2.cpp joystick.cpp RawMouse.cpp
@@ -17,70 +17,89 @@
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
          CHyperWarGame.cpp
          C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
-     1>CHyperWarGame.cpp(564): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>CHyperWarGame.cpp(653): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(702): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(742): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(785): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(792): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(1037): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>CHyperWarGame.cpp(1057): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(1081): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(1090): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(1127): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(1170): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(1247): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(1300): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>CHyperWarGame.cpp(1785): warning C4101: 'ysize' : unreferenced local variable
-     1>CHyperWarGame.cpp(1785): warning C4101: 'xsize' : unreferenced local variable
-     1>CHyperWarGame.cpp(2654): warning C4244: '*=' : conversion from 'double' to 'int', possible loss of data
-     1>CHyperWarGame.cpp(2733): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>CHyperWarGame.cpp(406): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(414): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(677): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(729): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(772): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(820): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(827): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(978): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(1145): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+     1>CHyperWarGame.cpp(1162): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1163): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1165): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1166): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1197): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>CHyperWarGame.cpp(1233): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>CHyperWarGame.cpp(1253): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1277): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1286): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1323): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1369): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1446): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(1499): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>CHyperWarGame.cpp(2006): warning C4101: 'ysize' : unreferenced local variable
+     1>CHyperWarGame.cpp(2006): warning C4101: 'xsize' : unreferenced local variable
+     1>CHyperWarGame.cpp(2931): warning C4244: '*=' : conversion from 'double' to 'int', possible loss of data
+     1>CHyperWarGame.cpp(3010): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
-     1>CHyperWarGame.cpp(2761): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>CHyperWarGame.cpp(3038): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
-     1>CHyperWarGame.cpp(2766): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>CHyperWarGame.cpp(3043): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
          GameObjects.cpp
          C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
-     1>GameObjects.cpp(523): warning C4305: 'initializing' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(690): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-     1>GameObjects.cpp(2594): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2601): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2608): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2615): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2623): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2628): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2633): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2638): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2646): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2653): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2660): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2667): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2720): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2722): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2724): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>GameObjects.cpp(2803): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2804): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2805): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2806): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2811): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2812): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2813): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2814): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2847): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2848): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2857): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2858): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
-     1>GameObjects.cpp(2966): warning C4305: '*=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(2967): warning C4305: '*=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(2972): warning C4305: '*=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(2973): warning C4305: '*=' : truncation from 'double' to 'float'
-     1>GameObjects.cpp(3037): warning C4244: '=' : conversion from 'LONG' to 'float', possible loss of data
-     1>GameObjects.cpp(2989): warning C4101: 'vectorLen' : unreferenced local variable
-     1>GameObjects.cpp(2987): warning C4101: 'tangent' : unreferenced local variable
-     1>GameObjects.cpp(3070): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
-     1>GameObjects.cpp(3100): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
-     1>GameObjects.cpp(3115): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
+     1>GameObjects.cpp(434): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(530): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(697): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+     1>GameObjects.cpp(2613): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2620): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2627): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2634): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2642): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2647): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2652): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2657): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2665): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2672): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2679): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2686): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2739): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2741): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2743): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>GameObjects.cpp(2822): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2823): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2824): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2825): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2830): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2831): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2832): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2833): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2866): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2867): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2876): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(2877): warning C4244: 'argument' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>GameObjects.cpp(3022): warning C4305: '*=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3023): warning C4305: '*=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3028): warning C4305: '*=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3029): warning C4305: '*=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3097): warning C4244: '=' : conversion from 'LONG' to 'float', possible loss of data
+     1>GameObjects.cpp(3049): warning C4101: 'vectorLen' : unreferenced local variable
+     1>GameObjects.cpp(3047): warning C4101: 'tangent' : unreferenced local variable
+     1>GameObjects.cpp(3160): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
+     1>GameObjects.cpp(3175): warning C4800: 'BYTE' : forcing value to bool 'true' or 'false' (performance warning)
+     1>GameObjects.cpp(3336): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3344): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3346): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3354): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3356): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3364): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3366): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3374): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3376): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3617): warning C4305: '=' : truncation from 'double' to 'float'
+     1>GameObjects.cpp(3623): warning C4305: '=' : truncation from 'double' to 'float'
          glBase.cpp
          C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
          glfont2.cpp
@@ -106,4 +125,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:05.01
+Time Elapsed 00:00:05.21

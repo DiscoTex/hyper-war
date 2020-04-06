@@ -110,6 +110,7 @@ private:
 	double						currentLetter;
 	bool						listTime;
 	bool						firstAttract;
+	bool						mouseMoved{ false };
 
 	//Shaders
 	GLenum						vertGuassPrg;

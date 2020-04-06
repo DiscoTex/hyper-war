@@ -247,6 +247,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	gameParams.waveTime = 5000;
 	gameParams.greenPoints = 0;
 	gameParams.bluePoints = 0;
+	gameParams.greenShipLives = 10;
+	gameParams.blueShipLives = 10;
 	gameParams.debrisAmount = 5;
 	gameParams.flakDebrisFactor = 6;
 #ifdef PC_CONTROLS
@@ -258,43 +260,13 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 #endif
 	pointMultiplier = 1;
 
-	if(gameParams.gameMode == MODE_VS)
+	if (gameParams.gameMode == MODE_VS || gameParams.gameMode == MODE_MELEE)
 	{
 		audioRenderer.StopAll();
 		audioRenderer.PlaySound(SOUND_SPMUSIC, 0, 0);
 
 		//** Create game objects
-		//Create a green planet
-		CPlanet *planet = new CPlanet(&gameParams);
-		planet->SetSide(SIDE_GREEN);
-		planet->SetColor(0.0f, 0.1f, 0.0f);
-		planet->SetTranslation(-12, 0, 0);
-		planet->SetScale(10, 10, 10);
-		gameObjects.push_back(planet);
 
-		//Create a blue planet
-		planet = new CPlanet(&gameParams);
-		planet->SetSide(SIDE_BLUE);
-		planet->SetColor(0.0f, 0.0f, 0.1f);
-		planet->SetTranslation(12, 0, 0);
-		planet->SetScale(10, 10, 10);
-		gameObjects.push_back(planet);
-
-		//Create a gravity well for the green planet
-		sGravityWell *gw = new sGravityWell();
-		gw->mass = 100;
-		gw->translation[0] = -12;
-		gw->translation[1] = 0;
-		gw->translation[2] = 0;
-		gravityWells.push_back(gw);
-
-		//Gravity well for blue
-		gw = new sGravityWell();
-		gw->mass = 100;
-		gw->translation[0] = 12;
-		gw->translation[1] = 0;
-		gw->translation[2] = 0;
-		gravityWells.push_back(gw);
 
 		//Create missle bases
 		CMissileBase *mb = new CMissileBase(&gameParams);
@@ -427,6 +399,54 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetBeamKey(4);
 		gameObjects.push_back(cannon);
 
+		CTheFlag *flag = new CTheFlag(&gameParams);
+		flag->SetSide(SIDE_GREEN);
+		flag->returnHome();
+		flag->SetColor(.5, 1, .5);
+		flag->SetScale(0.015, .015, .015);
+		flag->SetMotionVector(0, 0, 0);
+		gameObjects.push_back(flag);
+
+		flag = new CTheFlag(&gameParams);
+		flag->SetSide(SIDE_BLUE);
+		flag->returnHome();
+		flag->SetColor(.5, .5, 1);
+		flag->SetScale(0.015, .015, .015);
+		flag->SetMotionVector(0, 0, 0);
+		gameObjects.push_back(flag);
+
+		//Create a green planet
+		CPlanet *planet = new CPlanet(&gameParams);
+		planet->SetSide(SIDE_GREEN);
+		planet->SetColor(0.0f, 0.1f, 0.0f);
+		planet->SetTranslation(-12, 0, 0);
+		planet->SetScale(10, 10, 10);
+		gameObjects.push_back(planet);
+
+		//Create a blue planet
+		planet = new CPlanet(&gameParams);
+		planet->SetSide(SIDE_BLUE);
+		planet->SetColor(0.0f, 0.0f, 0.1f);
+		planet->SetTranslation(12, 0, 0);
+		planet->SetScale(10, 10, 10);
+		gameObjects.push_back(planet);
+
+		//Create a gravity well for the green planet
+		sGravityWell *gw = new sGravityWell();
+		gw->mass = 100;
+		gw->translation[0] = -12;
+		gw->translation[1] = 0;
+		gw->translation[2] = 0;
+		gravityWells.push_back(gw);
+
+		//Gravity well for blue
+		gw = new sGravityWell();
+		gw->mass = 100;
+		gw->translation[0] = 12;
+		gw->translation[1] = 0;
+		gw->translation[2] = 0;
+		gravityWells.push_back(gw);
+
 		SetHyperLevel(1);
 	}
 	else if(gameParams.gameMode == MODE_SINGLE)
@@ -538,35 +558,6 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	{
 		audioRenderer.StopAll();
 		audioRenderer.PlaySound(SOUND_SPMUSIC, 0, 0);
-
-		/*
-		//Create a black hole
-		CBlackHole *bh;
-		bh = new CBlackHole(&gameParams);
-		bh->SetColor(1.0, .5, 0);
-		bh->SetScale(.05, .05, .05);
-		bh->SetTranslation(0, 0, -.0010f);
-		bh->SetMotionVector(0, 0, 0);
-		bh->SetTTL(15000000);
-		sGravityWell *gw;
-		gw = new sGravityWell();
-		gw->mass = 1.0;
-
-		bh->SetMyGravity(gw);
-
-		gravityWells.push_back(gw);
-		gameObjects.push_back(bh);
-		*/
-
-		CBarrier *barrier;
-		barrier = new CBarrier(&gameParams);
-		barrier->SetColor(1, .5, 0);
-		barrier->SetScale(.3, .1, 1);
-		barrier->SetRotation(0, 0, 45);
-		barrier->SetTranslation(0, 0, -.0010f);
-		barrier->SetMotionVector(0, 0, 0);
-
-		gameObjects.push_back(barrier);
 	}
 
 	else if(gameParams.gameMode == MODE_ATTRACT)
@@ -618,6 +609,39 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 	//Store types
 	colliderType = gameObjects[collider]->GetType();
 	collideeType = gameObjects[collidee]->GetType();
+
+	if (colliderType == TYPE_SHIP && collideeType == TYPE_FLAG)
+	{
+		//If flag is not the ship's color
+		if (gameObjects[collider]->GetSide() != gameObjects[collidee]->GetSide())
+		{
+			//Ship picks up the flag
+			((CShip*)(gameObjects[collider]))->setFlag((CTheFlag*)(gameObjects[collidee]));
+			((CTheFlag*)(gameObjects[collidee]))->setResting(false);		
+		}
+		else
+		{
+			//The flag I touched is my color
+			if (((CShip*)(gameObjects[collider]))->hasFlag())
+			{
+				//And I have the other flag.  Points!
+				switch (gameObjects[collider]->GetSide())
+				{
+				case SIDE_BLUE:
+					gameParams.bluePoints += 2500;
+					break;
+				case SIDE_GREEN:
+					gameParams.greenPoints += 2500;
+					break;
+				}
+
+				((CShip*)(gameObjects[collider]))->dropFlag();				
+			}
+
+			//Flag is returned home
+			((CTheFlag*)(gameObjects[collidee]))->returnHome();
+		}
+	}
 	
 	if(gameObjects[collider]->CanDestroy(collideeType))
 	{
@@ -664,16 +688,19 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 		case TYPE_CITY:		
 
 			hyperModeTimer = 0;
-			switch(gameObjects[collider]->GetSide())
+			if (gameParams.gameMode != MODE_MELEE)
 			{
-			case SIDE_BLUE:
-				gameParams.numBlueCities--;
-				gameParams.greenPoints += 500 * pointMultiplier;
-				break;
-			case SIDE_GREEN:
-				gameParams.numGreenCities--;
-				gameParams.bluePoints += 500 * pointMultiplier;
-				break;
+				switch (gameObjects[collider]->GetSide())
+				{
+				case SIDE_BLUE:
+					gameParams.numBlueCities--;
+					gameParams.greenPoints += 500 * pointMultiplier;
+					break;
+				case SIDE_GREEN:
+					gameParams.numGreenCities--;
+					gameParams.bluePoints += 500 * pointMultiplier;
+					break;
+				}
 			}
 			for(int k=0; k<gameParams.debrisAmount*16; k++)
 			{
@@ -705,14 +732,17 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 		case TYPE_FLAKCANNON:
 		case TYPE_MISSILEBASE:
 			hyperModeTimer = 0;
-			switch(gameObjects[collider]->GetSide())
+			if (gameParams.gameMode != MODE_MELEE)
 			{
-			case SIDE_BLUE:
-				gameParams.greenPoints += 500 * pointMultiplier;				
-				break;
-			case SIDE_GREEN:
-				gameParams.bluePoints += 500 * pointMultiplier;
-				break;
+				switch (gameObjects[collider]->GetSide())
+				{
+				case SIDE_BLUE:
+					gameParams.greenPoints += 500 * pointMultiplier;
+					break;
+				case SIDE_GREEN:
+					gameParams.bluePoints += 500 * pointMultiplier;
+					break;
+				}
 			}
 
 			for(int k=0; k<gameParams.debrisAmount*16; k++)
@@ -741,20 +771,25 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				gameObjects[collider]->GetTranslation()[1],
 				gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]%100 / 200.0 + .5f);
 			break;
-		case TYPE_SHIP:
-			hyperModeTimer = 0;
+///		case TYPE_FLAG:
 
+			
+	//		break;
+		case TYPE_SHIP:
+		
 			switch (gameObjects[collider]->GetSide())
 			{
 			case SIDE_BLUE:
 				gameParams.greenPoints += 500 * pointMultiplier;
 				gameParams.blueShip = false;
-				gameParams.blueRespawnCountdown = 2000;
+				gameParams.blueShipLives--;
+				//gameParams.blueRespawnCountdown = 2000;
 				break;
 			case SIDE_GREEN:
 				gameParams.bluePoints += 500 * pointMultiplier;
 				gameParams.greenShip = false;
-				gameParams.greenRespawnCountdown = 2000;
+				gameParams.greenShipLives--;
+				//gameParams.greenRespawnCountdown = 2000;
 				break;
 			}
 			for (int k = 0; k < gameParams.debrisAmount * 16; k++)
@@ -782,7 +817,7 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 			audioRenderer.PlaySound(SOUND_EXPLOSION,
 				gameObjects[collider]->GetTranslation()[0],
 				gameObjects[collider]->GetTranslation()[1],
-				gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] % 100 / 200.0 + .5f);
+				gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] % 100 / 200.0 + .5f);			
 			break;
 		case TYPE_DEBRIS:
 			break;
@@ -805,7 +840,7 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 				gameObjects.push_back(debris);
 			}
 
-			if(collideeType == TYPE_DEBRIS)
+			if(collideeType == TYPE_DEBRIS && gameParams.gameMode == MODE_SINGLE || gameParams.gameMode == MODE_VS)
 			{
 				switch(gameObjects[collider]->GetSide())
 				{
@@ -817,20 +852,24 @@ void CHyperWarGame::TryCollide(unsigned int collider, unsigned int collidee)
 					break;
 				}
 			}
-			break;
-		}
+			else if (gameParams.gameMode == MODE_RACE && collideeType == TYPE_BULLET)
+			{
+				switch (gameObjects[collider]->GetSide())
+				{
+				case SIDE_BLUE:
+					gameParams.greenPoints += 100 * pointMultiplier;
+					break;
+				case SIDE_GREEN:
+					gameParams.bluePoints += 100 * pointMultiplier;
+					break;
+				}
+			}
 
-		//gameObjects.erase(gameObjects.begin() + i);
-		switch(gameObjects[collider]->GetSide())
-		{
-		case SIDE_BLUE:
-			gameParams.greenPoints += 200 * pointMultiplier;
-			break;
-		case SIDE_GREEN:
-			gameParams.bluePoints += 200 * pointMultiplier;
 			break;
 		}
 	}
+
+
 }
 
 void CHyperWarGame::CollideDestroyObjects(unsigned int obj1, unsigned int obj2)
@@ -923,7 +962,68 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		ToggleFullscreen (g_window);							// Toggle Fullscreen Mode
 	}
 
-	if(gameParams.gameMode == MODE_VS)
+	if (gameParams.gameMode == MODE_RACE)
+	{
+		float trans[3];
+		trans[0] = (gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX - .5f) * 4.4f;
+		trans[1] = (gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX - .5f) * 7.4f;
+		trans[2] = 0;		
+
+		if (hyperModeTimer % 8000 == 0)
+		{
+			//Create a black hole
+			CBlackHole *bh;
+			bh = new CBlackHole(&gameParams);
+			bh->SetColor(1.0, .5, 0);
+			bh->SetScale(.05, .05, .05);
+			bh->SetTranslation(trans[0], trans[1], -.0010f);
+			bh->SetMotionVector(0, 0, 0);
+			bh->SetTTL(15000000);
+			sGravityWell *gw;
+			gw = new sGravityWell();
+			gw->mass = .25;
+
+			bh->SetMyGravity(gw);
+
+			gravityWells.push_back(gw);
+			gameObjects.push_back(bh);
+		}
+
+		if (hyperModeTimer % 2400 == 0)
+		{
+			if (hyperModeTimer > 40800)
+				hyperModeTimer = 40800;
+
+			int numNukes = 1 + hyperModeTimer / 600;
+			float nukeSpeed = 1;
+
+			for (int i = 0; i < numNukes; i++)
+			{
+				trans[0] = (gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX - .5f) * 25.0f;
+				trans[1] = (gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX - .5f) * 25.0f;
+				trans[2] = 0;
+
+				CNuke *nuke = new CNuke(&gameParams);
+				nuke->SetScale(.1f, .1f, .1f);
+				nuke->SetTranslation(i % 4 - 2.0f, i / 10.0f - 3.6f, 0);			
+
+				nuke->SetMotionVector(trans[0] * nukeSpeed, trans[1] * nukeSpeed, trans[2]);
+				
+				if (i % 2 == (int)(trans[0] * 10000000.0) % 2)
+				{
+					nuke->SetColor(0, 1, 0);
+					nuke->SetSide(SIDE_GREEN);
+				}
+				else
+				{
+					nuke->SetColor(0, 0, 1);
+					nuke->SetSide(SIDE_BLUE);
+				}
+				gameObjects.push_back(nuke);
+			}
+		}
+	}
+	if (gameParams.gameMode == MODE_VS)
 	{
 /*
 #ifdef PC_CONTROLS
@@ -1012,6 +1112,102 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 //#endif
 	}
 
+	else if (gameParams.gameMode == MODE_MELEE)
+	{
+		/*
+		mousePos[0][0] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
+		if(mousePos[0][0] > 0)
+		mousePos[0][0] = 0;
+		else if(mousePos[0][0] < -1.8f)
+		mousePos[0][0] = -1.8f;
+
+		mousePos[0][1] -= rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
+		if(mousePos[0][1] > 1.6f)
+		mousePos[0][1] = 1.6f;
+		else if(mousePos[0][1] < -1.8f)
+		mousePos[0][1] = -1.8f;
+
+		mousePos[1][0] += rawMouse.get_y_delta(gameParams.mouse2Index) / 500.0f;
+		if(mousePos[1][0] < 0)
+		mousePos[1][0] = 0;
+		else if(mousePos[1][0] > 1.8f)
+		mousePos[1][0] = 1.8f;
+
+		mousePos[1][1] += rawMouse.get_x_delta(gameParams.mouse2Index) / 500.0f;
+		if(mousePos[1][1] > 1.6f)
+		mousePos[1][1] = 1.6f;
+		else if(mousePos[1][1] < -1.8f)
+		mousePos[1][1] = -1.8f;
+			*/
+
+
+		//Fire missiles
+		int interval = gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX * 100.0 + 1;
+
+		if ((hyperModeTimer / interval) % interval == 0)
+		{
+			g_keys->keyDown[6] = 1;
+			g_keys->keyDown[3] = 1;
+
+			mouseMoved = false;
+
+		}
+		else
+		{
+			g_keys->keyDown[6] = 0;
+			g_keys->keyDown[3] = 0;			
+
+			if (!mouseMoved)
+			{
+				mousePos[0][0] = gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX * -1.4;
+				mousePos[0][1] = gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX * 3.6 - 1.8;
+
+				mousePos[1][0] = gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX * 1.4;
+				mousePos[1][1] = gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX * 3.6 - 1.8;
+
+				mouseMoved = true;
+			}
+		}
+
+		//Fire super weapons
+		interval = 400;// gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX * 100 + 100;
+
+		if ((hyperModeTimer / interval) % interval == 0)
+		{
+			g_keys->keyDown[7] = 1;
+		}
+		else
+		{
+			g_keys->keyDown[7] = 0;
+		}
+
+		//Fire super weapons
+		interval = 600;// gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX * 100 + 200;
+
+		if ((hyperModeTimer / interval) % interval == 0)
+		{
+			g_keys->keyDown[4] = 1;
+		}
+		else
+		{
+			g_keys->keyDown[4] = 0;
+		}
+
+		//Fire flak cannons
+		interval = gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX * 50.0 + 1;
+
+		if ((hyperModeTimer / interval) % interval == 0)
+		{
+			g_keys->keyDown[8] = 1;
+			g_keys->keyDown[5] = 1;
+		}
+		else
+		{
+			g_keys->keyDown[8] = 0;
+			g_keys->keyDown[5] = 0;
+		}
+	}
+
 
 	//For every object in the game
 	for(unsigned int i=0; i<gameObjects.size(); i++)
@@ -1095,11 +1291,11 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 		}
 		else if(gameObjects[i]->GetType() == TYPE_MISSILEBASE)
 		{
-			if(g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()] && ((CMissileBase*)(gameObjects[i]))->IsLoaded())
+			if ((g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()]) && ((CMissileBase*)(gameObjects[i]))->IsLoaded())
 			{
 				((CMissileBase*)(gameObjects[i]))->AddCharge(milliseconds);
 			}
-			else if(!g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()] && ((CMissileBase*)(gameObjects[i]))->LaunchReady())
+			else if ((!g_keys->keyDown[((CMissileBase*)(gameObjects[i]))->GetLaunchKey()]) && ((CMissileBase*)(gameObjects[i]))->LaunchReady())
 			{
 				if(!((CMissileBase*)(gameObjects[i]))->GetFiredLast())
 				{
@@ -1128,20 +1324,23 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 
 					((CMissileBase*)(gameObjects[i]))->SetFiredLast(true);
 
-					switch(gameObjects[i]->GetSide())
+					if (gameParams.gameMode != MODE_MELEE)
 					{
-					case SIDE_GREEN:
-						gameParams.greenPoints += 10 * pointMultiplier;
-						if(gameParams.numGreenLaunchers < 2)
-							((CMissileBase*)(gameObjects[i]))->SetFiredLast(false);
+						switch (gameObjects[i]->GetSide())
+						{
+						case SIDE_GREEN:
+							//gameParams.greenPoints += 10 * pointMultiplier;
+							if (gameParams.numGreenLaunchers < 2)
+								((CMissileBase*)(gameObjects[i]))->SetFiredLast(false);
 
-						break;
-					case SIDE_BLUE:
-						gameParams.bluePoints += 10 * pointMultiplier;
-						if(gameParams.numBlueLaunchers < 2)
-							((CMissileBase*)(gameObjects[i]))->SetFiredLast(false);
-						break;
-					}				
+							break;
+						case SIDE_BLUE:
+							//gameParams.bluePoints += 10 * pointMultiplier;
+							if (gameParams.numBlueLaunchers < 2)
+								((CMissileBase*)(gameObjects[i]))->SetFiredLast(false);
+							break;
+						}
+					}
 				}
 				else
 				{
@@ -1234,7 +1433,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 					gameObjects[i]->GetTranslation()[0], 
 					gameObjects[i]->GetTranslation()[1]);
 			}
-			else if(g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetFireKey()] && ((CFlakCannon*)(gameObjects[i]))->IsLoaded())
+			else if((g_keys->keyDown[((CFlakCannon*)(gameObjects[i]))->GetFireKey()]) && ((CFlakCannon*)(gameObjects[i]))->IsLoaded())
 			{
 				//Launch projectile
 				//Set flak cannon to "just launched"
@@ -1400,7 +1599,7 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
 
 	//Check to see if it is time to add super weapon ammo
-	if(gameParams.gameMode == MODE_VS && gameParams.bluePoints > (gameParams.blueSuperAmmo + 1) * 20000)
+	if ((gameParams.gameMode == MODE_VS || gameParams.gameMode == MODE_MELEE) && gameParams.bluePoints > (gameParams.blueSuperAmmo + 1) * 20000)
 	{
 		//gameParams.blueSuperAmmo += 5;
 		gameParams.blueSuperAmmo += 1;
@@ -1456,6 +1655,23 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			audioRenderer.PlaySound(SOUND_EXPLOSION, 0, 0);
 			audioRenderer.PlaySound(SOUND_GAMEOVER, 0, 0);
 		}
+	}
+	else if ((gameParams.gameMode == MODE_RACE || gameParams.gameMode == MODE_MELEE) && (gameParams.blueShipLives <= 0 || gameParams.greenShipLives <= 0))
+	{
+		//Green wins
+		gameObjects.clear();
+
+		if (gameParams.greenPoints > gameParams.bluePoints)
+			greenWins = true;
+		else
+			blueWins = true;
+
+		gameParams.gameMode = MODE_GAMEOVER;
+		hyperModeTimer = 0;
+
+		//play game over sounds
+		audioRenderer.StopAll();
+		audioRenderer.PlaySound(SOUND_GAMEOVER, 0, 0);
 	}
 }
 
@@ -1710,6 +1926,11 @@ void CHyperWarGame::RunAttractMode()
 		gameParams.gameMode = MODE_RACE;
 		Initialize(g_window, g_keys);
 	}
+	if (g_keys->keyDown['4'])
+	{
+		gameParams.gameMode = MODE_MELEE;
+		Initialize(g_window, g_keys);
+	}
 }
 
 void CHyperWarGame::DrawCursors()
@@ -1866,9 +2087,31 @@ void CHyperWarGame::Draw (void)
 
 	switch(gameParams.gameMode)
 	{
+	case MODE_MELEE:
+		if (gameParams.rotated)
+		{
+			//Draw boundary lines
+			glColor3f(0.3f, 0.0f, 0.0f);
+			glBegin(GL_LINES);
+			glVertex3f(5.0f, 3.5, -1.0f);
+			glVertex3f(-5.0f, 3.5, -1.0f);
+			glVertex3f(5.0f, -3.5, -1.0f);
+			glVertex3f(-5.0f, -3.5, -1.0f);
+			glEnd();
+		}
+		firstAttract = true;
+
+		//Draw all objects in the game at their current positions
+		for (unsigned int i = 0; i<gameObjects.size(); i++)
+		{
+			gameObjects[i]->Draw();
+		}
+		DrawCursors();
+		DrawHUD();
+		break;
 	case MODE_SINGLE:
 	case MODE_VS:
-	case MODE_COOP:
+	case MODE_COOP:	
 		if (gameParams.rotated)
 		{
 			//Draw boundary lines
@@ -1891,6 +2134,9 @@ void CHyperWarGame::Draw (void)
 		{
 			gameObjects[i]->Draw();
 		}		
+
+		DrawHUD();
+
 		break;
 
 	case MODE_ATTRACT:
@@ -1931,15 +2177,14 @@ void CHyperWarGame::Draw (void)
 		titleFont->DrawString(tempStr, 0, 0);
 		glPopMatrix();
 
-
 		glPushMatrix();
 		glRotatef(-90, 0, 0, 1);
 		width = 0;
 		height = 0;
-		if(greenWins)
-			sprintf_s(tempStr, 64, "You Win.");
+		if(greenWins) 
+			sprintf_s(tempStr, 64, "Green Wins.");
 		else if(blueWins)
-			sprintf_s(tempStr, 64, "You Lose.");
+			sprintf_s(tempStr, 64, "Blue Wins.");
 		else
 			sprintf_s(tempStr, 64, "");
 		for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
@@ -1961,6 +2206,7 @@ void CHyperWarGame::Draw (void)
 		width = 0;
 		height = 0;
 
+		/*
 		sprintf_s(tempStr, 64, "%d", gameParams.bluePoints);
 
 		for (unsigned int i = 0; i<strnlen(tempStr, 64); i++)
@@ -1974,9 +2220,11 @@ void CHyperWarGame::Draw (void)
 			glTranslatef(-width / 2.0f, -350, 0);
 		titleFont->Begin();
 		titleFont->DrawString(tempStr, 0, 0);
+		*/
 		glPopMatrix();
-		
 
+		
+		DrawHUD();
 
 		glPushMatrix();		
 		glEnable(GL_TEXTURE_2D);
@@ -2003,9 +2251,9 @@ void CHyperWarGame::Draw (void)
 			width = 0;
 			height = 0;
 			if(greenWins)
-				sprintf_s(tempStr, 64, "You Lose.");
+				sprintf_s(tempStr, 64, "Green Wins.");
 			else if(blueWins)
-				sprintf_s(tempStr, 64, "You Win.");
+				sprintf_s(tempStr, 64, "Blue Wins.");
 			else
 				sprintf_s(tempStr, 64, "");
 			for(unsigned int i=0; i<strnlen(tempStr, 64); i++)
@@ -2052,22 +2300,25 @@ void CHyperWarGame::Draw (void)
 	}		
 }
 
+
 void CHyperWarGame::DrawHUD()
 {
 	char pointsString[16];
 	int width = 0;
 	int height = 0;
-	
+		
 	glPushMatrix();
 
 	glColor3f(1, 1, 1);
-	glTranslatef(-2.1f, 0, 0);
+	glTranslatef(-2.1f, 2.0, 0);
+
 	glRotatef(-90, 0, 0, 1);
 
 	glScalef(.001f, .001f, .001f);
 	glEnable(GL_TEXTURE_2D);
 
-	sprintf_s(pointsString, 16, "%d", gameParams.greenPoints);
+
+	sprintf_s(pointsString, 16, "%d", gameParams.greenPoints/100);
 
 	for(unsigned int i=0; i<strnlen(pointsString, 16); i++)
 	{
@@ -2079,17 +2330,19 @@ void CHyperWarGame::DrawHUD()
 	glTranslatef(-width/2.0f, height/2.0f, 0);
 	scoreFont->Begin();
 	glColor3f(1, 1, 1);
+	
+	glColor3f(.5, 1, .5);
+
 	scoreFont->DrawString(pointsString, 0, 0);
 
 	glPopMatrix();
 
-	if(gameParams.gameMode != MODE_SINGLE)
+	if(gameParams.gameMode == MODE_VS)
 	{
 		width = 0;
 		height = 0;
 
 		glPushMatrix();
-
 
 		glTranslatef(2.1f, 0, 0);
 		glRotatef(90, 0, 0, 1);
@@ -2108,6 +2361,36 @@ void CHyperWarGame::DrawHUD()
 		
 		glTranslatef(-width/2.0f, height/2.0f, 0);
 		scoreFont->Begin();
+		scoreFont->DrawString(pointsString, 0, 0);
+
+		glPopMatrix();
+	}
+	else
+	{
+		glPushMatrix();
+
+		glColor3f(1, 1, 1);
+		glTranslatef(-2.1f, -2.0, 0);
+
+		glRotatef(-90, 0, 0, 1);
+
+		glScalef(.001f, .001f, .001f);
+		glEnable(GL_TEXTURE_2D);
+
+		sprintf_s(pointsString, 16, "%d", gameParams.bluePoints/100);
+
+		for (unsigned int i = 0; i<strnlen(pointsString, 16); i++)
+		{
+			width += scoreFont->GetCharWidthA(pointsString[i]);
+		}
+
+		height = scoreFont->GetCharHeight('8');
+
+		glTranslatef(-width / 2.0f, height / 2.0f, 0);
+		scoreFont->Begin();
+		
+		glColor3f(.5, .5, 1);
+
 		scoreFont->DrawString(pointsString, 0, 0);
 
 		glPopMatrix();
@@ -2485,7 +2768,6 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		//gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 60000;
 		if(gameParams.gameMode == MODE_SINGLE)
 		{
@@ -2520,7 +2802,6 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 			gameParams.nukeReloadTime = 200;				//min 150
 			audioRenderer.PlaySound(SOUND_LEVEL1, 0, 0);
 		}
-		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 30000;
 		break;
 	case 2:
@@ -2544,7 +2825,6 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 			gameParams.nukeReloadTime = 200;				//min 150
 			audioRenderer.PlaySound(SOUND_LEVEL2, 0, 0);
 		}
-		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 25000;
 		break;
 	case 3:
@@ -2568,7 +2848,6 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 			gameParams.nukeReloadTime = 200;				//min 150
 			audioRenderer.PlaySound(SOUND_LEVEL3, 0, 0);
 		}
-		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 20000;
 		break;
 	case 4:
@@ -2592,7 +2871,6 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 			gameParams.nukeReloadTime = 200;				//min 150
 			audioRenderer.PlaySound(SOUND_LEVEL4, 0, 0);
 		}
-		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 15000;
 		break;
 	case 5:
@@ -2605,7 +2883,6 @@ void CHyperWarGame::SetHyperLevel(int newLevel)
 		//gameParams.minThrust = 1.0f;
 		gameParams.maxGravityForce = 10.0f;
 		gameParams.nukeGravityImmunityTime = 1000;		//min 200
-		gameParams.flakReloadTime = 10;	
 		gameParams.hyperModeDelay = 60000;
 		if(gameParams.gameMode == MODE_SINGLE)
 		{
