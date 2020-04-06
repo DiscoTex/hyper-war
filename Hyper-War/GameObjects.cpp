@@ -806,17 +806,20 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 	else
 	{
 		//Loop at edge of screen
-		if (translation[1] > 1.70f)
-			translation[1] = -1.70f;
-		else if (translation[1] < -1.70f)
-			translation[1] = 1.70f;
+		if (translation[1] > 3.7f)
+			deleteMe = true;
+		else if (translation[1] < -3.7f)
+			deleteMe = true;
+
+		//Loop at edge of screen
+		if (translation[0] > 2.2f)
+			deleteMe = true;
+		else if (translation[0] < -2.2f)
+			deleteMe = true;
 	}
 
 	if(translation[0] > 7.5f || translation[0] < -2.75f)
 		deleteMe = true;
-//		translation[0] = -2.75f;
-//	else if(translation[0] < -2.75f)
-//		translation[0] = 2.75f;
 
 	if(gravityImmunity > 0)
 		gravityImmunity -= milliseconds;
@@ -3009,6 +3012,24 @@ void CShip::ProcessMotion(DWORD milliseconds, Keys *keys)
 			translation[1] = -1.70f;
 		else if (translation[1] < -1.70f)
 			translation[1] = 1.70f;
+
+		//Turn around at edge
+		if (translation[0] > 2.2f)
+		{
+			motionVector[0] = -motionVector[0];
+			motionVector[1] = -motionVector[1];
+			motionVector[2] = -motionVector[2];
+
+			rotation[2] += 180;
+		}
+		else if (translation[0] < -2.2f)
+		{
+			motionVector[0] = -motionVector[0];
+			motionVector[1] = -motionVector[1];
+			motionVector[2] = -motionVector[2];
+
+			rotation[2] += 180;
+		}
 	}
 
 	//Turn around if way off in no-mans-land
@@ -3596,6 +3617,10 @@ void CTheFlag::ProcessGravity(DWORD milliseconds, vector< sGravityWell* > gWells
 void CTheFlag::returnHome()
 {
 	setResting(true);
+
+	motionVector[0] = 0;
+	motionVector[1] = 0;
+	motionVector[2] = 0;
 
 	if (this->mySide == SIDE_GREEN)
 	{

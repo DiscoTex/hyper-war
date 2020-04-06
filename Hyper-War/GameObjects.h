@@ -204,6 +204,7 @@ private:
 	DWORD				lastLaunch;
 	float				tempVec[3];
 	int					gravityImmunity;
+	int					TTL{ 15000 };
 };
 
 class CDebris : public CGameObject

@@ -1025,34 +1025,6 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	}
 	if (gameParams.gameMode == MODE_VS)
 	{
-/*
-#ifdef PC_CONTROLS
-		mousePos[0][0] -= rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
-		if(mousePos[0][0] > 0)
-			mousePos[0][0] = 0;
-		else if(mousePos[0][0] < -1.8f)
-			mousePos[0][0] = -1.8f;
-
-		mousePos[0][1] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
-		if(mousePos[0][1] > 1.6f)
-			mousePos[0][1] = 1.6f;
-		else if(mousePos[0][1] < -1.6f)
-			mousePos[0][1] = -1.6f;	
-
-		mousePos[1][0] += rawMouse.get_x_delta(gameParams.mouse2Index) / 500.0f;
-		if(mousePos[1][0] < 0)
-			mousePos[1][0] = 0;
-		else if(mousePos[1][0] > 1.8f)
-			mousePos[1][0] = 1.8f;
-
-		mousePos[1][1] -= rawMouse.get_y_delta(gameParams.mouse2Index) / 500.0f;
-		if(mousePos[1][1] > 1.6f)
-			mousePos[1][1] = 1.6f;
-		else if(mousePos[1][1] < -1.6f)
-			mousePos[1][1] = -1.6f;
-#else
-*/
-
 		mousePos[0][0] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
 		if(mousePos[0][0] > 0)
 			mousePos[0][0] = 0;
@@ -1076,27 +1048,9 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			mousePos[1][1] = 1.6f;
 		else if(mousePos[1][1] < -1.8f)
 			mousePos[1][1] = -1.8f;
-
-//#endif
 	}
 	else if(gameParams.gameMode == MODE_SINGLE)
 	{
-/*
-#ifdef PC_CONTROLS
-		mousePos[0][0] += rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
-		if(mousePos[0][0] > 2.2f)
-			mousePos[0][0] = 2.2f;
-		else if(mousePos[0][0] < -1.8f)
-			mousePos[0][0] = -1.8f;
-
-		mousePos[0][1] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
-		if(mousePos[0][1] > 1.6f)
-			mousePos[0][1] = 1.6f;
-		else if(mousePos[0][1] < -1.6f)
-			mousePos[0][1] = -1.6f;	
-
-#else
-*/
 		mousePos[0][0] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
 		if(mousePos[0][0] > 2.2f)
 			mousePos[0][0] = 2.2f;
@@ -1108,39 +1062,10 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 			mousePos[0][1] = 1.70f;
 		else if(mousePos[0][1] < -1.70f)
 			mousePos[0][1] = -1.70f;	
-
-//#endif
 	}
 
 	else if (gameParams.gameMode == MODE_MELEE)
 	{
-		/*
-		mousePos[0][0] -= rawMouse.get_y_delta(gameParams.mouse1Index) / 500.0f;
-		if(mousePos[0][0] > 0)
-		mousePos[0][0] = 0;
-		else if(mousePos[0][0] < -1.8f)
-		mousePos[0][0] = -1.8f;
-
-		mousePos[0][1] -= rawMouse.get_x_delta(gameParams.mouse1Index) / 500.0f;
-		if(mousePos[0][1] > 1.6f)
-		mousePos[0][1] = 1.6f;
-		else if(mousePos[0][1] < -1.8f)
-		mousePos[0][1] = -1.8f;
-
-		mousePos[1][0] += rawMouse.get_y_delta(gameParams.mouse2Index) / 500.0f;
-		if(mousePos[1][0] < 0)
-		mousePos[1][0] = 0;
-		else if(mousePos[1][0] > 1.8f)
-		mousePos[1][0] = 1.8f;
-
-		mousePos[1][1] += rawMouse.get_x_delta(gameParams.mouse2Index) / 500.0f;
-		if(mousePos[1][1] > 1.6f)
-		mousePos[1][1] = 1.6f;
-		else if(mousePos[1][1] < -1.8f)
-		mousePos[1][1] = -1.8f;
-			*/
-
-
 		//Fire missiles
 		int interval = gameParams.randoms[gameParams.randIndex++%NUM_PRIMES] / (float)RAND_MAX * 100.0 + 1;
 
@@ -1927,7 +1852,7 @@ void CHyperWarGame::RunAttractMode()
 		Initialize(g_window, g_keys);
 	}
 	if (g_keys->keyDown['4'])
-	{
+	{	
 		gameParams.gameMode = MODE_MELEE;
 		Initialize(g_window, g_keys);
 	}
@@ -2310,9 +2235,17 @@ void CHyperWarGame::DrawHUD()
 	glPushMatrix();
 
 	glColor3f(1, 1, 1);
-	glTranslatef(-2.1f, 2.0, 0);
+	
 
-	glRotatef(-90, 0, 0, 1);
+	if (gameParams.rotated)
+	{
+		glTranslatef(-2.1f, 2.0, 0);
+		glRotatef(-90, 0, 0, 1);
+	}
+	else
+	{
+		glTranslatef(-1.0f, -1.6, 0);
+	}
 
 	glScalef(.001f, .001f, .001f);
 	glEnable(GL_TEXTURE_2D);
@@ -2345,6 +2278,7 @@ void CHyperWarGame::DrawHUD()
 		glPushMatrix();
 
 		glTranslatef(2.1f, 0, 0);
+
 		glRotatef(90, 0, 0, 1);
 
 		glScalef(.001f, .001f, .001f);
@@ -2370,9 +2304,16 @@ void CHyperWarGame::DrawHUD()
 		glPushMatrix();
 
 		glColor3f(1, 1, 1);
-		glTranslatef(-2.1f, -2.0, 0);
 
-		glRotatef(-90, 0, 0, 1);
+		if (gameParams.rotated)
+		{
+			glTranslatef(-2.1f, 0, 0);
+			glRotatef(-90, 0, 0, 1);
+		}
+		else
+		{
+			glTranslatef(1.0f, -1.6, 0);
+		}
 
 		glScalef(.001f, .001f, .001f);
 		glEnable(GL_TEXTURE_2D);
