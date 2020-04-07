@@ -789,38 +789,67 @@ void CNuke::ProcessMotion(DWORD milliseconds, Keys * keys)
 		collisionSpheres[i]->globalPosition[2] += translation[2];
 	}
 
-	if (gameParams->gameMode == MODE_RACE)
+	if (gameParams->gameMode == MODE_MELEE)
 	{
-		//Loop at edge of screen
+		//Disappear at edge of screen
 		if (translation[1] > 3.7f)
-			translation[1] = -3.7f;
+			deleteMe = true;
 		else if (translation[1] < -3.7f)
-			translation[1] = 3.7f;
+			deleteMe = true;
+
+		//Disappear at edge of screen
+		if (translation[0] > 7.2f)
+			deleteMe = true;
+		else if (translation[0] < -2.2f)
+			deleteMe = true;
+	}
+	else if (gameParams->gameMode == MODE_SINGLE)
+	{
+		float xEdge = 10;
+		float yEdge = 1.7;
+
+		if (gameParams->rotated)
+		{
+			xEdge = 1.7;
+			yEdge = 10;
+		}
 
 		//Loop at edge of screen
-		if (translation[0] > 2.2f)
-			translation[0] = -2.2f;
-		else if (translation[0] < -2.2f)
-			translation[0] = 2.2f;
+		if (translation[1] > xEdge)
+			translation[1] = -xEdge;
+		else if (translation[1] < -xEdge)
+			translation[1] = xEdge;
+
+		//Loop at edge of screen
+		if (translation[0] > yEdge)
+			translation[0] = -yEdge;
+		else if (translation[0] < -yEdge)
+			translation[0] = yEdge;
 	}
 	else
 	{
-		//Loop at edge of screen
-		if (translation[1] > 3.7f)
-			deleteMe = true;
-		else if (translation[1] < -3.7f)
-			deleteMe = true;
+		float xEdge = 2.2;
+		float yEdge = 3.7;
+
+		if (gameParams->rotated)
+		{
+			xEdge = 3.7;
+			yEdge = 2.2;
+		}
 
 		//Loop at edge of screen
-		if (translation[0] > 2.2f)
-			deleteMe = true;
-		else if (translation[0] < -2.2f)
-			deleteMe = true;
+		if (translation[1] > xEdge)
+			translation[1] =  -xEdge;
+		else if (translation[1] < -xEdge)
+			translation[1] = xEdge;
+		
+		//Loop at edge of screen
+		if (translation[0] > yEdge)
+			translation[0] = -yEdge;
+		else if (translation[0] < -yEdge)
+			translation[0] = yEdge;
 	}
-
-	if(translation[0] > 7.5f || translation[0] < -2.75f)
-		deleteMe = true;
-
+	
 	if(gravityImmunity > 0)
 		gravityImmunity -= milliseconds;
 }
@@ -1106,9 +1135,6 @@ void CDebris::ProcessMotion(DWORD milliseconds, Keys* keys)
 
 	if(translation[0] > 14 || translation[0] < -14)
 		deleteMe = true;
-//		translation[0] = -14;
-//	else if(translation[0] < -14)
-//		translation[0] = 14;
 
 	TTL -= milliseconds;
 }

@@ -244,7 +244,7 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 	nukesLaunched2 = false;
 	nukesLaunched3 = false;
 	nukesLaunched4 = false;
-	gameParams.waveTime = 5000;
+	gameParams.waveTime = 2500;
 	gameParams.greenPoints = 0;
 	gameParams.bluePoints = 0;
 	gameParams.greenShipLives = 10;
@@ -541,8 +541,8 @@ BOOL CHyperWarGame::Initialize (GL_Window* window, Keys* keys)					// Any GL Ini
 		cannon->SetCursorPointer(mousePos[0]);
 #ifdef PC_CONTROLS
 		cannon->SetFireKey(0);
-		cannon->SetSingularityKey(1);
-		cannon->SetBeamKey(1);
+		cannon->SetSingularityKey(2);
+		cannon->SetBeamKey(2);
 #else
 		cannon->SetFireKey(8);
 		cannon->SetSingularityKey(7);
@@ -1524,14 +1524,14 @@ void CHyperWarGame::Update (DWORD milliseconds)								// Perform Motion Updates
 	audioRenderer.RenderAudio(milliseconds, gameObjects);
 
 	//Check to see if it is time to add super weapon ammo
-	if ((gameParams.gameMode == MODE_VS || gameParams.gameMode == MODE_MELEE) && gameParams.bluePoints > (gameParams.blueSuperAmmo + 1) * 20000)
+	if ((gameParams.gameMode == MODE_VS || gameParams.gameMode == MODE_MELEE) && gameParams.bluePoints > (gameParams.blueSuperAmmo + 1) * 10000)
 	{
 		//gameParams.blueSuperAmmo += 5;
 		gameParams.blueSuperAmmo += 1;
 		audioRenderer.PlaySound(SOUND_CHARGEUP, 0, 0);
 	}
 
-	if(gameParams.greenPoints > (gameParams.greenSuperAmmo + 1) * 20000)
+	if(gameParams.greenPoints > (gameParams.greenSuperAmmo + 1) * 10000)
 	{
 		gameParams.greenSuperAmmo += 1;
 		audioRenderer.PlaySound(SOUND_CHARGEUP, 0, 0);
@@ -2236,10 +2236,13 @@ void CHyperWarGame::DrawHUD()
 
 	glColor3f(1, 1, 1);
 	
-
 	if (gameParams.rotated)
 	{
-		glTranslatef(-2.1f, 2.0, 0);
+		if (gameParams.gameMode == MODE_SINGLE)
+			glTranslatef(-2.1f, 0, 0);
+		else
+			glTranslatef(-2.1f, 2.0, 0);
+
 		glRotatef(-90, 0, 0, 1);
 	}
 	else
@@ -2250,8 +2253,10 @@ void CHyperWarGame::DrawHUD()
 	glScalef(.001f, .001f, .001f);
 	glEnable(GL_TEXTURE_2D);
 
-
-	sprintf_s(pointsString, 16, "%d", gameParams.greenPoints/100);
+	if (gameParams.gameMode == MODE_SINGLE)
+		sprintf_s(pointsString, 16, "%d", gameParams.greenPoints);
+	else
+		sprintf_s(pointsString, 16, "%d", gameParams.greenPoints / 100);
 
 	for(unsigned int i=0; i<strnlen(pointsString, 16); i++)
 	{
@@ -2259,11 +2264,11 @@ void CHyperWarGame::DrawHUD()
 	}
 
 	height = scoreFont->GetCharHeight('8');
-	
-	glTranslatef(-width/2.0f, height/2.0f, 0);
+
+	glTranslatef(-width / 2.0f, height / 2.0f, 0);
+
 	scoreFont->Begin();
-	glColor3f(1, 1, 1);
-	
+
 	glColor3f(.5, 1, .5);
 
 	scoreFont->DrawString(pointsString, 0, 0);
@@ -2299,7 +2304,7 @@ void CHyperWarGame::DrawHUD()
 
 		glPopMatrix();
 	}
-	else
+	else if (gameParams.gameMode != MODE_SINGLE)
 	{
 		glPushMatrix();
 
@@ -2881,7 +2886,7 @@ void CHyperWarGame::NextWave()
 			nuke->SetColor(0, 0, .8f);
 			nuke->SetScale(.1f, .1f, .1f);
 			nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]/(float)RAND_MAX) * -1.7f, 0);
-			nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]/(float)RAND_MAX * -waveNumber/64.0f, (gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]/(float)RAND_MAX - .5f), 0);
+			nuke->SetMotionVector(3*gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]/(float)RAND_MAX * -waveNumber/64.0f, (gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]/(float)RAND_MAX - .5f), 0);
 			nuke->SetThrust(.025f * waveNumber);
 			nuke->SetSide(SIDE_BLUE);
 			gameObjects.push_back(nuke);
@@ -2890,7 +2895,7 @@ void CHyperWarGame::NextWave()
 			nuke->SetColor(0, 0, .8f);
 			nuke->SetScale(.1f, .1f, .1f);
 			nuke->SetTranslation(2.75f + (i-1)%10 * .5f, (gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]/(float)RAND_MAX) * 1.7f, 0);
-			nuke->SetMotionVector(gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]/(float)RAND_MAX * -waveNumber/64.0f, (gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]/(float)RAND_MAX - .5f), 0);
+			nuke->SetMotionVector(3*gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]/(float)RAND_MAX * -waveNumber/64.0f, (gameParams.randoms[gameParams.randIndex++%NUM_PRIMES]/(float)RAND_MAX - .5f), 0);
 			nuke->SetThrust(.025f * waveNumber);
 			nuke->SetSide(SIDE_BLUE);
 			gameObjects.push_back(nuke);
