@@ -1,4 +1,4 @@
-﻿Build started 4/7/2020 12:06:21 AM.
+﻿Build started 4/11/2020 4:07:02 PM.
      1>Project "C:\Users\Aaron\Documents\GitHub\hyper-war\Hyper-War\Hyper-War.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I./ /nologo /W3 /WX- /O2 /Ob2 /Oi /Ot /Oy /D WIN32 /D NDEBUG /D _WINDOWS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CAudioRenderer.cpp CEffects.cpp CHighScoreList.cpp CHyperWarGame.cpp GameObjects.cpp glBase.cpp glfont2.cpp joystick.cpp RawMouse.cpp
@@ -41,14 +41,14 @@
      1>CHyperWarGame.cpp(1424): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
      1>CHyperWarGame.cpp(1931): warning C4101: 'ysize' : unreferenced local variable
      1>CHyperWarGame.cpp(1931): warning C4101: 'xsize' : unreferenced local variable
-     1>CHyperWarGame.cpp(2250): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>CHyperWarGame.cpp(2320): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-     1>CHyperWarGame.cpp(2877): warning C4244: '*=' : conversion from 'double' to 'int', possible loss of data
-     1>CHyperWarGame.cpp(2956): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>CHyperWarGame.cpp(2249): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>CHyperWarGame.cpp(2319): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
+     1>CHyperWarGame.cpp(2876): warning C4244: '*=' : conversion from 'double' to 'int', possible loss of data
+     1>CHyperWarGame.cpp(2955): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
-     1>CHyperWarGame.cpp(2984): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>CHyperWarGame.cpp(2983): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
-     1>CHyperWarGame.cpp(2989): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>CHyperWarGame.cpp(2988): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
          GameObjects.cpp
          C:\Program Files (x86)\Windows Kits\8.1\Include\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
@@ -133,4 +133,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:05.31
+Time Elapsed 00:00:04.96

@@ -2147,7 +2147,6 @@ void CHyperWarGame::Draw (void)
 		titleFont->DrawString(tempStr, 0, 0);
 		*/
 		glPopMatrix();
-
 		
 		DrawHUD();
 
@@ -2254,7 +2253,7 @@ void CHyperWarGame::DrawHUD()
 	glEnable(GL_TEXTURE_2D);
 
 	if (gameParams.gameMode == MODE_SINGLE)
-		sprintf_s(pointsString, 16, "%d", gameParams.greenPoints);
+		sprintf_s(pointsString, 16, "%d", gameParams.greenPoints / 100);
 	else
 		sprintf_s(pointsString, 16, "%d", gameParams.greenPoints / 100);
 
